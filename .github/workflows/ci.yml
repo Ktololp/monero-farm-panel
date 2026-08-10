@@ -29,6 +29,8 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Syntax checks
         run: npm run check
+      - name: Tests
+        run: npm test
       - name: Build frontend
         run: npm run build:web
 

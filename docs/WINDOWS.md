@@ -1,4 +1,4 @@
-# Monero Farm Panel 1.0.0 — Windows
+# Monero Farm Panel 1.0.1 — Windows
 
 ## 1. Чистая установка
 

@@ -24,7 +24,7 @@ export function compareVersions(a,b) {
 }
 
 async function latest(repo) {
-  const r = await fetch(`https://api.github.com/repos/${repo}/releases/latest`, { headers: { 'Accept':'application/vnd.github+json','User-Agent':'Monero-Farm-Panel/1.0.0' }, signal: AbortSignal.timeout(8000) });
+  const r = await fetch(`https://api.github.com/repos/${repo}/releases/latest`, { headers: { 'Accept':'application/vnd.github+json','User-Agent':'Monero-Farm-Panel/1.0.1' }, signal: AbortSignal.timeout(8000) });
   if (!r.ok) throw new Error(`GitHub ${repo}: HTTP ${r.status}`);
   const j=await r.json();
   return { repo, tag: j.tag_name || '', version: cleanTag(j.tag_name), name: j.name || j.tag_name || '', publishedAt: j.published_at || '', url: j.html_url || '' };

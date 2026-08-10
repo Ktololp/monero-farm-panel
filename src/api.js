@@ -10,6 +10,7 @@ import { applyMiningConfig, restartXmrig, setHugePages, setMsr, getXmrigLog, get
 import { discoverServer, getDiscovery } from './discovery.js';
 import { refreshUpdates, versionStatus } from './updates.js';
 import { createJob, runJob, getJob, listJobs } from './jobs.js';
+import { getFarmHistory } from './history.js';
 
 export const api = express.Router();
 const loginAttempts = new Map();
@@ -42,7 +43,7 @@ api.get('/auth/me',(req,res)=>{const c=parseCookies(req.headers.cookie||'');res.
 api.use(requireAuth);api.use(requireCsrf);
 
 api.get('/overview',(req,res)=>{const servers=db.prepare('SELECT * FROM servers ORDER BY name COLLATE NOCASE').all().map(r=>serverDto(r,{withSpark:true}));const online=servers.filter(s=>['online','starting'].includes(s.live?.status)).length;const totalHash=servers.reduce((n,s)=>n+(Number(s.live?.hash60s)||0),0);const temps=servers.map(s=>s.live?.tempC).filter(Number.isFinite);res.json({servers,live:getAllLiveStates(),summary:{total:servers.length,online,totalHash,maxTemp:temps.length?Math.max(...temps):null},alerts:listActiveAlerts(),market:getMarketState(),jobs:listJobs(5)});});
-api.get('/history/farm',(req,res)=>{const hours=Math.max(1,Math.min(24*30,Number(req.query.hours)||24));const bucket=hours<=6?60000:hours<=48?300000:3600000;const rows=db.prepare(`SELECT CAST(ts/? AS INTEGER)*? AS ts,SUM(hash_60s) AS hash60s,MAX(temp_c) AS maxTemp FROM metrics WHERE ts>=? AND hash_60s IS NOT NULL GROUP BY CAST(ts/? AS INTEGER) ORDER BY ts`).all(bucket,bucket,Date.now()-hours*3600000,bucket);res.json(rows);});
+api.get('/history/farm',(req,res)=>res.json(getFarmHistory(db,{hours:req.query.hours})));
 
 api.get('/servers',(req,res)=>res.json(db.prepare('SELECT * FROM servers ORDER BY name COLLATE NOCASE').all().map(r=>serverDto(r,{withSpark:true}))));
 api.get('/servers/:id',(req,res)=>{const row=db.prepare('SELECT * FROM servers WHERE id=?').get(Number(req.params.id));if(!row)return res.status(404).json({error:'Сервер не найден'});res.json(serverDto(row,{withSpark:true}));});

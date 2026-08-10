@@ -80,7 +80,49 @@ async function renderDashboard(full=true){
    <div class="panel table-wrap"><div class="panel-head"><h2>Майнеры</h2><button id="all-servers" class="ghost">Открыть серверы</button></div><table><thead><tr><th>Сервер</th><th>Статус</th><th>60s</th><th>CPU</th><th>Компоненты</th><th>Базовая норма</th></tr></thead><tbody>${rows||'<tr><td colspan="6" class="empty">Добавьте первый сервер</td></tr>'}</tbody></table></div>
    <div class="panel"><div class="panel-head"><h2>Активные оповещения</h2></div>${alerts}</div>`;
   bindCommonServerActions();$('#all-servers').onclick=()=>navigate('servers');$('#refresh-all').onclick=async()=>{toast('Запрашиваю свежие данные…');await Promise.allSettled((overview.servers||[]).map(x=>api(`/servers/${x.id}/poll`,{method:'POST'})));await loadOverview();renderDashboard();};
-  try{const hist=await api('/history/farm?hours=24');const c=new Chart($('#farm-chart'),{type:'line',data:{labels:hist.map(x=>new Date(x.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})),datasets:[{label:'Ферма, H/s',data:hist.map(x=>x.hash60s),borderWidth:2,pointRadius:0,tension:.25,fill:true}]},options:{responsive:true,maintainAspectRatio:false,interaction:{intersect:false,mode:'index'},plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{maxTicksLimit:10}},y:{beginAtZero:false,ticks:{callback:v=>fmtHash(v)}}}}});charts.push(c);}catch{}
+  try{
+    const hist=await api('/history/farm?hours=24');
+    const values=hist.map(x=>Number(x.hash60s)).filter(Number.isFinite);
+    const minHash=values.length?Math.min(...values):0,maxHash=values.length?Math.max(...values):0;
+    const pad=values.length?Math.max((maxHash-minHash)*.35,maxHash*.01,250):0;
+    const yMin=values.length?Math.max(0,minHash-pad):undefined,yMax=values.length?maxHash+pad:undefined;
+    const c=new Chart($('#farm-chart'),{
+      type:'line',
+      data:{
+        labels:hist.map(x=>new Date(x.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})),
+        datasets:[{
+          label:'Ферма',
+          data:hist.map(x=>x.hash60s),
+          borderColor:'#f59e0b',
+          backgroundColor:'rgba(245,158,11,.18)',
+          pointBackgroundColor:'#f59e0b',
+          pointBorderColor:'#f59e0b',
+          borderWidth:2,
+          pointRadius:hist.length<3?3:0,
+          pointHoverRadius:4,
+          tension:.25,
+          fill:true
+        }]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        interaction:{intersect:false,mode:'index'},
+        plugins:{
+          legend:{display:false},
+          tooltip:{callbacks:{label:ctx=>`Ферма: ${fmtHash(ctx.parsed.y)}`}}
+        },
+        scales:{
+          x:{grid:{display:false},ticks:{maxTicksLimit:10}},
+          y:{
+            beginAtZero:false,
+            suggestedMin:yMin,suggestedMax:yMax,
+            ticks:{maxTicksLimit:6,callback:v=>fmtHash(v)}
+          }
+        }
+      }
+    });
+    charts.push(c);
+  }catch{}
 }
 
 function bindCommonServerActions(){

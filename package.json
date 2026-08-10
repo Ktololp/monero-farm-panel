@@ -1,0 +1,45 @@
+{
+  "name": "monero-farm-panel",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Self-hosted web dashboard for monitoring and managing Monero / XMRig RandomX mining farms over SSH.",
+  "scripts": {
+    "build:web": "node build.mjs",
+    "start": "node src/start.js",
+    "dev": "node --watch src/start.js",
+    "check": "node --check src/start.js && node --check src/server.js && node --check src/api.js && node --check src/ssh.js && node --check src/monitor.js && node --check src/socket.js && node --check src/market.js && node --check src/alerts.js && node --check src/db.js && node --check src/operations.js && node --check src/discovery.js && node --check src/updates.js && node --check src/jobs.js && node --check web/main.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "better-sqlite3": "12.2.0",
+    "compression": "1.8.1",
+    "express": "5.1.0",
+    "helmet": "8.1.0",
+    "socket.io": "4.8.1",
+    "ssh2": "1.17.0"
+  },
+  "devDependencies": {
+    "@xterm/addon-fit": "0.10.0",
+    "@xterm/xterm": "5.5.0",
+    "chart.js": "4.5.0",
+    "esbuild": "0.25.8"
+  },
+  "license": "MIT",
+  "keywords": [
+    "monero",
+    "xmrig",
+    "randomx",
+    "p2pool",
+    "mining",
+    "mining-farm",
+    "dashboard",
+    "ssh",
+    "self-hosted",
+    "raspberry-pi",
+    "docker"
+  ],
+  "author": "Monero Farm Panel contributors"
+}

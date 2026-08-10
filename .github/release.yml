@@ -1,0 +1,19 @@
+changelog:
+  exclude:
+    labels:
+      - ignore-for-release
+  categories:
+    - title: 🚀 Новые возможности
+      labels:
+        - enhancement
+        - feature
+    - title: 🐛 Исправления
+      labels:
+        - bug
+        - fix
+    - title: 📚 Документация
+      labels:
+        - documentation
+    - title: 🔧 Другие изменения
+      labels:
+        - "*"

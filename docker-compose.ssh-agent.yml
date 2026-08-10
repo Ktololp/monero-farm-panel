@@ -1,0 +1,7 @@
+# Дополнение для Linux/WSL2: пробрасывает Unix-сокет центрального ssh-agent в контейнер.
+services:
+  panel:
+    environment:
+      SSH_AUTH_SOCK: /run/ssh-agent.sock
+    volumes:
+      - ${HOST_SSH_AUTH_SOCK:?Укажите HOST_SSH_AUTH_SOCK в .env}:/run/ssh-agent.sock

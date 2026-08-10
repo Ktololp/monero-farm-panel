@@ -1,0 +1,43 @@
+# Dependencies / build
+node_modules/
+public/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# Runtime secrets and state
+.env
+.env.*
+!.env.example
+data/*
+!data/.gitkeep
+certs/*
+!certs/.gitkeep
+*.sqlite
+*.sqlite3
+*.sqlite3-*
+*.db
+*.pem
+*.pfx
+*.key
+*.crt
+
+# SSH / backups / local state
+.ssh/
+*.bak
+*.backup
+*.old
+*.swp
+*.tmp
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Release artifacts
+*.zip
+*.sha256
+release/

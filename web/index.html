@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#090f1d">
+  <title>Monero Farm Panel</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <div id="login" class="login-screen">
+    <form id="login-form" class="panel login-card">
+      <div class="brand">⛏ Monero Farm Panel</div>
+      <h1>Вход</h1><p class="muted">Централизованное управление RandomX / XMRig / p2pool</p>
+      <label>Мастер-пароль<input id="login-password" type="password" autocomplete="current-password" required autofocus></label>
+      <button class="primary" type="submit">Войти</button><div id="login-error" class="error"></div>
+    </form>
+  </div>
+  <div id="app" class="app hidden">
+    <aside class="sidebar">
+      <div class="brand">⛏ MFP</div>
+      <nav>
+        <button data-page="dashboard" class="nav active"><span>◫</span>Дашборд</button>
+        <button data-page="servers" class="nav"><span>▦</span>Серверы</button>
+        <button data-page="operations" class="nav"><span>⚡</span>Операции</button>
+        <button data-page="updates" class="nav"><span>↻</span>Обновления</button>
+        <button data-page="topology" class="nav"><span>⌘</span>Топология</button>
+        <button data-page="settings" class="nav"><span>⚙</span>Настройки</button>
+        <button data-page="audit" class="nav"><span>≡</span>Журнал</button>
+      </nav>
+      <div class="sidebar-bottom"><span id="socket-state" class="pill">нет связи</span><button id="logout" class="ghost">Выйти</button></div>
+    </aside>
+    <main class="content">
+      <header class="topbar"><div><h1 id="page-title">Дашборд</h1><div id="page-subtitle" class="muted">Мониторинг фермы</div></div><div id="top-actions"><button id="add-server" class="primary">+ Сервер</button></div></header>
+      <section id="view"></section>
+    </main>
+  </div>
+  <dialog id="modal"><div id="modal-body"></div></dialog>
+  <script src="/socket.io/socket.io.js"></script><script type="module" src="/app.js"></script>
+</body>
+</html>

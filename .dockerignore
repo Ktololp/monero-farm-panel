@@ -1,0 +1,8 @@
+node_modules
+.git
+.env
+data/*
+!data/.gitkeep
+certs/*
+!certs/.gitkeep
+npm-debug.log

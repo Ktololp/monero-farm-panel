@@ -1,0 +1,58 @@
+name: 🐛 Bug report
+description: Сообщить о воспроизводимой ошибке Monero Farm Panel
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Спасибо за отчёт. **Не вставляйте пароли, private keys, `.env` или токены.**
+  - type: input
+    id: version
+    attributes:
+      label: Версия панели
+      placeholder: "1.0.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Где запущена панель?
+      options:
+        - Windows native
+        - Linux native
+        - Docker x86_64
+        - Docker ARM64 / Raspberry Pi
+        - Другое
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Что произошло?
+      description: Опишите ожидаемое и фактическое поведение.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Шаги воспроизведения
+      placeholder: |
+        1. Открыл ...
+        2. Нажал ...
+        3. Получил ...
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Логи без секретов
+      description: Удалите passwords, wallet seed, private keys, tokens и другие секреты.
+      render: shell
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Проверка
+      options:
+        - label: Я удалил из отчёта пароли, ключи, токены и другие секреты.
+          required: true

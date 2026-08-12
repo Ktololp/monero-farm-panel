@@ -99,6 +99,10 @@ import { decryptSecret } from '../security/crypto.js';
 const lastNetworkCheck = new Map();
 const networkCache = new Map();
 
+export function getCachedNetwork(serverId) {
+  return networkCache.get(Number(serverId)) || {};
+}
+
 ${parseTemp.replace('function parseTemp', 'export function parseTemp')}
 
 ${parseSummary.replace('function parseSummary', 'export function parseSummary')}
@@ -150,13 +154,14 @@ let pollOne = pollOneOriginal
   .replace(/state\.set\(server\.id, live\);/g, 'setLiveState(server.id, live);')
   .replace(/ioRef\?\.emit\('server:update', state\.get\(server\.id\)\);/g, 'emitServerUpdate(getLiveState(server.id));')
   .replace(/return state\.get\(server\.id\);/g, 'return getLiveState(server.id);')
-  .replace(/ioRef\?\.emit\('server:update', live\);/g, 'emitServerUpdate(live);');
+  .replace(/ioRef\?\.emit\('server:update', live\);/g, 'emitServerUpdate(live);')
+  .replace(/networkCache\.get\(server\.id\) \|\| \{\}/g, 'getCachedNetwork(server.id)');
 
 write('src/monitoring/poller.js', `
 import { db, getSetting, cleanupHistory } from '../database/index.js';
 import { ssh, safeServiceName } from '../ssh/index.js';
 import { config } from '../config/index.js';
-import { collectTelemetry, parseTemp, parseSummary } from './telemetry.js';
+import { collectTelemetry, getCachedNetwork, parseTemp, parseSummary } from './telemetry.js';
 import { baselineFor } from './baseline.js';
 import { persistMetric } from './persistence.js';
 import { evaluateAlerts } from './alerts.js';

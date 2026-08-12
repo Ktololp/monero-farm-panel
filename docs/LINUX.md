@@ -20,7 +20,7 @@ sudo apt install -y build-essential python3 openssl
 ## Установка
 
 ```bash
-git clone <URL_ВАШЕГО_РЕПОЗИТОРИЯ>
+git clone https://github.com/Ktololp/monero-farm-panel.git
 cd monero-farm-panel
 cp .env.example .env
 ./scripts/generate-secrets.sh

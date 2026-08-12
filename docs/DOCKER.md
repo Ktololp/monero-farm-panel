@@ -1,4 +1,4 @@
-# Docker / Docker Compose
+# 🐳 Docker / Docker Compose
 
 ## Локальная сборка
 
@@ -30,14 +30,47 @@ docker compose -f docker-compose.yml -f docker-compose.ssh-agent.yml up -d --bui
 
 ## GitHub Container Registry
 
-Workflow `.github/workflows/release.yml` при публикации тега `v*` собирает multi-arch image для `linux/amd64` и `linux/arm64` и отправляет его в GHCR.
-
-После первого релиза имя образа будет иметь вид:
+Релизный workflow при публикации тега `v*` собирает официальный multi-arch image для:
 
 ```text
-ghcr.io/<owner>/monero-farm-panel:1.0.2
+linux/amd64
+linux/arm64
 ```
 
-## Host-side mfp updater
+и отправляет его в GHCR.
 
-For appliance-style installs, install `scripts/mfp` with `./scripts/install-mfp.sh`. The CLI pulls the official GHCR release image, backs up persistent state, health-checks the replacement and rolls back automatically on failure. No beta channel is used.
+Для v1.2.0 образ выглядит так:
+
+```text
+ghcr.io/ktololp/monero-farm-panel:1.2.0
+```
+
+Также публикуются semver alias и `latest`.
+
+> [!NOTE]
+> GitHub Release с ZIP может появиться на несколько минут раньше Docker image. Если сразу после релиза `docker pull` отвечает `manifest unknown`, проверьте, завершился ли job **Publish multi-arch Docker image**, и повторите pull/update после его завершения.
+
+## Host-side `mfp` updater
+
+Для appliance/kiosk-установок рекомендуется host-side CLI `mfp`:
+
+```bash
+chmod +x scripts/install-mfp.sh scripts/mfp
+./scripts/install-mfp.sh
+mfp status
+```
+
+Обновление на конкретную стабильную версию:
+
+```bash
+mfp backup
+mfp update 1.2.0
+```
+
+`mfp` сначала скачивает новый официальный GHCR image, пока текущая панель остаётся online, затем делает согласованный backup persistent state, запускает новый контейнер, проверяет `/healthz` и автоматически возвращает прежний image/data при неудаче.
+
+Подробнее: [UPDATER.md](UPDATER.md).
+
+## Старые Linux-хосты
+
+Если нативный Node.js 20 не запускается из-за старой glibc, **не требуется вручную обновлять системную libc ради панели**. Используйте Docker image: Node.js и native dependencies находятся внутри контейнера и не зависят от host glibc так же, как нативная установка.

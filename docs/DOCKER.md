@@ -35,5 +35,5 @@ Workflow `.github/workflows/release.yml` при публикации тега `v
 После первого релиза имя образа будет иметь вид:
 
 ```text
-ghcr.io/<owner>/monero-farm-panel:1.0.1
+ghcr.io/<owner>/monero-farm-panel:1.0.2
 ```

@@ -4,7 +4,7 @@
 
 **Self-hosted веб-панель для централизованного мониторинга и управления Monero / XMRig / RandomX фермой через SSH.**
 
-![Version](https://img.shields.io/badge/version-1.0.1-2ea043)
+![Version](https://img.shields.io/badge/version-1.0.2-2ea043)
 ![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933?logo=nodedotjs&logoColor=white)
 ![Platforms](https://img.shields.io/badge/Windows%20%7C%20Linux%20%7C%20ARM64-supported-4c8bf5)
 ![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)

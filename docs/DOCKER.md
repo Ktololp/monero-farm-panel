@@ -37,3 +37,7 @@ Workflow `.github/workflows/release.yml` при публикации тега `v
 ```text
 ghcr.io/<owner>/monero-farm-panel:1.0.2
 ```
+
+## Host-side mfp updater
+
+For appliance-style installs, install `scripts/mfp` with `./scripts/install-mfp.sh`. The CLI pulls the official GHCR release image, backs up persistent state, health-checks the replacement and rolls back automatically on failure. No beta channel is used.

@@ -53,3 +53,7 @@ certs/   # если используете собственный сертифи
 ```
 
 Затем обновите исходники, выполните `npm install`, `npm run build:web` и перезапустите панель.
+
+## Обновление через mfp
+
+Для Docker-host можно установить host-side updater: `./scripts/install-mfp.sh`. После этого стабильные релизы обновляются командой `mfp update`; доступны также `mfp backup`, `mfp rollback`, `mfp status` и `mfp logs`. Подробнее: `docs/UPDATER.md`.

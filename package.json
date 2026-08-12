@@ -1,6 +1,6 @@
 {
   "name": "monero-farm-panel",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "description": "Self-hosted web dashboard for monitoring and managing Monero / XMRig RandomX mining farms over SSH.",
@@ -8,7 +8,7 @@
     "build:web": "node build.mjs",
     "start": "node src/start.js",
     "dev": "node --watch src/start.js",
-    "check": "node --check src/start.js && node --check src/server.js && node --check src/api.js && node --check src/ssh.js && node --check src/monitor.js && node --check src/socket.js && node --check src/market.js && node --check src/alerts.js && node --check src/db.js && node --check src/operations.js && node --check src/discovery.js && node --check src/updates.js && node --check src/jobs.js && node --check web/main.js && node --check src/history.js && node --check test/history.test.js && node --check web/chart-scales.js && node --check test/chart-scales.test.js",
+    "check": "node scripts/check-project.mjs",
     "test": "node --test"
   },
   "engines": {

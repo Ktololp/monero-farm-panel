@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import Database from 'better-sqlite3';
-import { getFarmHistory } from '../src/history.js';
+import { getFarmHistory } from '../src/monitoring/history.js';
 
 function makeDb() {
   const db = new Database(':memory:');

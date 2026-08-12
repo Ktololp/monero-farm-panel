@@ -40,3 +40,7 @@ npm start
 ## Стиль
 
 Проект сознательно остаётся лёгким: vanilla JS на frontend и небольшой Node.js backend. Новая зависимость должна давать ощутимую пользу и не усложнять Raspberry Pi / Windows deployment без необходимости.
+
+## Source-structure rule
+
+Read `AGENTS.md` and `docs/DEVELOPER_GUIDE.md` before changing architecture. Prefer explicit subsystem boundaries and small focused files over minimizing file count. New business logic should not be added to application wiring or a universal frontend file when it has a natural domain home.

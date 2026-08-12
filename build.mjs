@@ -3,7 +3,7 @@ import { mkdir, cp, writeFile } from 'node:fs/promises';
 
 await mkdir('public', { recursive: true });
 await build({
-  entryPoints: ['web/main.js'],
+  entryPoints: ['web/app/main.js'],
   bundle: true,
   minify: true,
   sourcemap: false,

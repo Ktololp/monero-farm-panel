@@ -1,0 +1,10 @@
+export const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+export const esc=(v='')=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+export const fmtHash=v=>v==null||!Number.isFinite(Number(v))?'—':Number(v)>=1e6?`${(Number(v)/1e6).toFixed(2)} MH/s`:`${(Number(v)/1e3).toFixed(2)} kH/s`;
+export const fmtTemp=v=>v==null||!Number.isFinite(Number(v))?'—':`${Number(v).toFixed(1)} °C`;
+export const fmtMHz=v=>v==null||!Number.isFinite(Number(v))?'—':Number(v)>=1000?`${(Number(v)/1000).toFixed(2)} GHz`:`${Number(v).toFixed(0)} MHz`;
+export const fmtUptime=s=>{if(!s)return'—';const d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60);return`${d}д ${h}ч ${m}м`;};
+export const fmtDate=ts=>ts?new Date(ts).toLocaleString():'—';
+export const fmtUsd=v=>Number.isFinite(Number(v))?new Intl.NumberFormat('ru-RU',{style:'currency',currency:'USD',maximumFractionDigits:2}).format(Number(v)):'—';
+export const fmtPct=v=>Number.isFinite(Number(v))?`${Number(v)>=0?'+':''}${Number(v).toFixed(2)}%`:'—';
+export const sleep=ms=>new Promise(r=>setTimeout(r,ms));

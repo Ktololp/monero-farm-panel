@@ -86,3 +86,7 @@ Issues and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
 MIT. See [LICENSE](LICENSE).
 
 > Monero, XMRig and p2pool are independent projects. Monero Farm Panel is not an official or affiliated product of those projects.
+
+## 🧩 Developer architecture
+
+Starting with v1.1.0, source code is grouped by subsystem. New contributors and AI coding assistants should start with [AGENTS.md](AGENTS.md) and [Developer Guide](docs/DEVELOPER_GUIDE.md). The canonical REST prefix is `/api/v1`. Linux/Docker hosts can install the host-side `mfp` CLI for backup, update, health-check and rollback; see [UPDATER.md](docs/UPDATER.md).

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { hashrateScale, temperatureScale, percentageScale, latencyScale } from '../web/chart-scales.js';
+import { hashrateScale, temperatureScale, percentageScale, latencyScale } from '../web/components/charts/scales.js';
 
 test('temperature scale does not exaggerate a 47.7 to 48.0 C change', () => {
   const scale = temperatureScale([47.7, 47.8, 47.9, 48.0]);

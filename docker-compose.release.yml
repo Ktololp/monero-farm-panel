@@ -1,0 +1,18 @@
+services:
+  panel:
+    image: ghcr.io/ktololp/monero-farm-panel:${MFP_VERSION:-latest}
+    container_name: monero-farm-panel
+    restart: unless-stopped
+    env_file: .env
+    user: "${PANEL_UID:-1000}:${PANEL_GID:-1000}"
+    ports:
+      - "${PANEL_PORT:-3000}:3000"
+    volumes:
+      - ./data:/app/data
+      - ./certs:/app/certs
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"const m=process.env.HTTPS_ENABLED==='false'?require('http'):require('https');m.get({host:'127.0.0.1',port:3000,path:'/healthz',rejectUnauthorized:false},r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))\""]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s

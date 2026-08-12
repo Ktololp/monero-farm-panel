@@ -190,3 +190,7 @@ XMR: 44ubFsmz6q9MkD5jYgBkDuepKPJeWiYhrJf11w3xN6F7W84goasecMQeRVsr5wf5XvZAE14F4AK
 Monero Farm Panel распространяется по лицензии **MIT**. См. [LICENSE](LICENSE).
 
 > Monero, XMRig и p2pool — отдельные проекты. Monero Farm Panel не является официальным продуктом или аффилированным проектом их разработчиков.
+
+## 🧩 Архитектура для разработчиков
+
+Начиная с v1.1.0 исходники сгруппированы по подсистемам. Новому разработчику или AI-ассистенту рекомендуется начинать с [AGENTS.md](AGENTS.md), затем открыть [Developer Guide](docs/DEVELOPER_GUIDE.md). Канонический REST-префикс — `/api/v1`. Для Linux/Docker добавлен host-side CLI `mfp` с backup, update, health-check и rollback; см. [UPDATER.md](docs/UPDATER.md).

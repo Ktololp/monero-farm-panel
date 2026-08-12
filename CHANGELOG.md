@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.1.0
+
+- Reorganized backend/frontend source by subsystem for fast human/AI comprehension.
+- Added AGENTS.md, Developer Guide, subsystem READMEs, ADRs and OpenAPI documentation.
+- Added canonical /api/v1 with /api compatibility alias.
+- Added shared JSDoc contracts/error model and miner-facing component entry points.
+- Added host-side mfp CLI: status/update/backup/restore/rollback/logs/restart/kiosk.
+- Added automatic update health-check and rollback design for Docker appliance hosts.
+- Added release-image Compose file and recursive project syntax checker.
+- Bumped PWA cache to v1.1.0 so kiosk browsers replace old UI assets.
+
 Все заметные изменения публичных версий Monero Farm Panel будут записываться здесь.
 
 Формат основан на Keep a Changelog, версия проекта следует Semantic Versioning.

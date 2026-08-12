@@ -1,0 +1,69 @@
+openapi: 3.0.3
+info:
+  title: Monero Farm Panel API
+  version: 1.1.0
+  description: Canonical API prefix is /api/v1. /api remains a compatibility alias.
+servers:
+  - url: /api/v1
+paths:
+  /auth/login:
+    post:
+      summary: Authenticate with the panel master password
+      responses: { '200': { description: Authenticated }, '401': { description: Invalid password } }
+  /auth/logout:
+    post:
+      summary: End the current session
+      responses: { '200': { description: Logged out } }
+  /auth/me:
+    get:
+      summary: Return current authentication state
+      responses: { '200': { description: Authentication state } }
+  /overview:
+    get:
+      summary: Farm summary, servers, alerts, market state and recent jobs
+      responses: { '200': { description: Farm overview } }
+  /history/farm:
+    get:
+      summary: Aggregated farm history
+      parameters:
+        - in: query
+          name: hours
+          schema: { type: number, minimum: 1, maximum: 720 }
+      responses: { '200': { description: Time series } }
+  /servers:
+    get:
+      summary: List configured mining servers
+      responses: { '200': { description: Server list } }
+    post:
+      summary: Add a mining server
+      responses: { '200': { description: Server created } }
+  /servers/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: integer }
+    get:
+      summary: Get one server
+      responses: { '200': { description: Server }, '404': { description: Not found } }
+    put:
+      summary: Update one server
+      responses: { '200': { description: Updated } }
+    delete:
+      summary: Delete one server
+      responses: { '200': { description: Deleted } }
+  /updates:
+    get:
+      summary: Upstream XMRig/p2pool/Monero release state
+      responses: { '200': { description: Update state } }
+  /jobs:
+    get:
+      summary: Recent long-running jobs
+      responses: { '200': { description: Job list } }
+  /settings:
+    get:
+      summary: Panel settings with secrets masked
+      responses: { '200': { description: Settings } }
+    put:
+      summary: Update panel settings
+      responses: { '200': { description: Updated settings } }

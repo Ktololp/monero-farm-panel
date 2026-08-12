@@ -1,44 +1,31 @@
-# 📚 Документация Monero Farm Panel
+# 📚 Monero Farm Panel Documentation
 
-Добро пожаловать в документацию **Monero Farm Panel v1.2.0**.
-
-Если вы только установили панель, начните с документа по своей платформе. Если панель уже работает — переходите к справочнику функций и компонентам майнинга.
+Документация сгруппирована по задачам, чтобы не приходилось искать нужный файл по всему репозиторию.
 
 ## 🚀 Установка и запуск
-
 - [Windows](WINDOWS.md)
 - [Linux](LINUX.md)
-- [Raspberry Pi](RASPBERRY_PI.md)
+- [Raspberry Pi / ARM64](RASPBERRY_PI.md)
 - [Docker / Docker Compose](DOCKER.md)
 - [Host-side updater `mfp`](UPDATER.md)
 
-## ⛏ Майнинг и компоненты
-
+## ⛏️ Майнинг и компоненты
 - [Справочник функций v1.2](FEATURES.md)
 - [XMRig Proxy](XMRIG_PROXY.md)
-- [p2pool / monerod](P2POOL.md)
+- [P2Pool / monerod](P2POOL.md)
 - [SSH и ключи](SSH.md)
 
-## 🆕 Основные функции v1.2.0
-
-| Функция | Что даёт |
-|---|---|
-| **⇄ XMRig Proxy** | Мониторинг workers/miners/shares/upstreams, установка из панели и безопасное переключение XMRig с rollback |
-| **🟠 P2Pool Analytics** | 15m/1h/24h hashrate, shares, effort, workers, pool/sidechain данные и one-click enable |
-| **❤️ Fleet Health Score** | Единая оценка здоровья сервера и всей фермы от 0 до 100 |
-| **💰 Предполагаемый доход** | Автоматическая оценка XMR/day и USD/day/30d по текущей сети Monero |
-| **ⓘ Контекстная помощь** | Короткие объяснения прямо рядом со сложными функциями |
-
-## 🛡 Безопасность и диагностика
-
+## 🧰 Эксплуатация
 - [Решение проблем](TROUBLESHOOTING.md)
 - [Security policy](../SECURITY.md)
+- [GitHub releases](../../releases)
 
-## 🧩 Для разработчиков и AI-ассистентов
-
-- [Архитектура](ARCHITECTURE.md)
+## 🧩 Разработка
+- [Architecture](ARCHITECTURE.md)
 - [Developer Guide](DEVELOPER_GUIDE.md)
 - [OpenAPI](openapi.yaml)
 - [AGENTS.md](../AGENTS.md)
+- [Visual / UX direction](DESIGN_DIRECTION.md)
 
-Главный принцип проекта: **простая для человека архитектура, безопасные one-click операции и минимальная необходимость работать через консоль на майнерах**.
+## 🗺️ Ближайшее UX-направление
+Планируется полноценный переключатель **Русский / English** внутри runtime UI и постепенное сближение интерфейса с визуальными референсами проекта. Подробности: [DESIGN_DIRECTION.md](DESIGN_DIRECTION.md).

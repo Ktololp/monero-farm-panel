@@ -2,107 +2,120 @@
 
 # ⛏ Monero Farm Panel
 
-**Self-hosted web dashboard for centralized monitoring and management of Monero / XMRig / RandomX mining farms over SSH.**
+**Self-hosted dashboard for centralized monitoring and management of Monero / XMRig / RandomX mining farms over SSH.**
 
-![Version](https://img.shields.io/badge/version-1.2.0-2ea043)
+[![Release](https://img.shields.io/github/v/release/Ktololp/monero-farm-panel?display_name=tag&sort=semver&color=2ea043)](../../releases)
+[![CI](https://github.com/Ktololp/monero-farm-panel/actions/workflows/ci.yml/badge.svg?branch=main)](../../actions/workflows/ci.yml)
 ![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933?logo=nodedotjs&logoColor=white)
-![Platforms](https://img.shields.io/badge/Windows%20%7C%20Linux%20%7C%20ARM64-supported-4c8bf5)
-![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-amd64%20%7C%20arm64-2496ED?logo=docker&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-yellow)
+[![GitHub stars](https://img.shields.io/github/stars/Ktololp/monero-farm-panel?style=flat&color=58a6ff)](../../stargazers)
 
-**[Русский](README.md) · [English](README.en.md) · [Docs](docs/) · [Releases](../../releases)**
+**[Русский](README.md) · [English](README.en.md) · [Documentation](docs/) · [Releases](../../releases) · [Report a bug](../../issues/new?template=bug_report.yml) · [Request a feature](../../issues/new?template=feature_request.yml)**
 
 </div>
 
----
+<p align="center">
+  <img src="docs/assets/hero.webp" alt="Monero Farm Panel — project overview" width="100%">
+</p>
 
-Monero Farm Panel is a lightweight central dashboard for home and small server mining farms. **No custom agent is required on miners**: the panel connects to Linux hosts over SSH, reads local APIs and system metrics, manages services, and provides an interactive browser SSH terminal.
+> [!NOTE]
+> README artwork is a presentation visual based on the v1.2.0 interface. It communicates the product and design direction; displayed hashrate, temperatures and income values are illustrative.
+
+## Why Monero Farm Panel
+
+Monero Farm Panel is a lightweight central dashboard for home and small server mining farms. **No custom agent is required on miners**: the panel connects to Linux hosts over SSH, reads local APIs and system metrics, manages services and provides an interactive browser SSH terminal.
+
+| | What it gives you |
+|---|---|
+| 🛰️ **Agentless** | One web interface for multiple Linux miners without installing a custom agent on every host |
+| ⚡ **Safer operations** | Preflight checks, backups and rollback for risky one-click actions |
+| 📊 **Deep visibility** | XMRig, XMRig Proxy, P2Pool, monerod, baseline, Fleet Health, history and income estimates |
+| 🧰 **Practical self-hosting** | Windows, Linux, Docker, amd64/arm64, SSH password/key/agent and built-in terminal |
 
 > [!IMPORTANT]
-> Use this software only on systems you own or are authorized to administer. Do not expose the panel directly to the public Internet without a VPN or a properly secured reverse proxy, HTTPS, and a strong master password.
+> Use this software only on systems you own or are authorized to administer. Do not expose the panel directly to the public Internet without a VPN or a properly secured reverse proxy, HTTPS and a strong master password.
 
-## 🆕 What is new in v1.2.0
+## 🖥️ Interface
+
+<p align="center">
+  <img src="docs/assets/dashboard.webp" alt="Monero Farm Panel dashboard overview" width="100%">
+</p>
+
+The dashboard brings the farm into one view: online/offline state, total hashrate, Fleet Health Score, temperature, XMR/USD, estimated income, alerts and history. Each server has dedicated **Overview / Performance / Components / System / Logs / Management** tabs.
+
+## 🆕 v1.2.0
 
 ### ⇄ First-class XMRig Proxy support
 
 - dedicated **XMRig Proxy** page;
-- localhost Proxy API auto-detection;
+- localhost HTTP API auto-detection;
 - workers, miners, accepted/rejected/invalid and upstream connections;
-- worker hashrate windows;
-- one-click installation of the official stable XMRig Proxy release;
-- SHA256 verification of the downloaded release asset;
-- safe XMRig routing to `127.0.0.1:3334` with config backup and automatic rollback;
-- idempotent install/routing actions so already configured systems are not restarted unnecessarily.
+- one-click installation of the official stable XMRig Proxy release with SHA256 verification;
+- safe XMRig routing through Proxy with config backup and automatic rollback;
+- idempotent install/routing actions that avoid unnecessary restarts.
 
-Typical route after switching:
+Typical route:
 
 ```text
-XMRig → XMRig Proxy :3334 → p2pool :3333 → Monero network
+XMRig → 127.0.0.1:3334 → XMRig Proxy → 127.0.0.1:3333 → P2Pool → Monero
 ```
 
 > [!NOTE]
-> XMRig Proxy hashrate is estimated from accepted shares and Proxy time windows. Over short periods it can differ from XMRig's actual 60-second hashrate without indicating a performance loss.
+> XMRig Proxy hashrate is estimated from accepted shares and Proxy time windows. Over short periods it may differ from XMRig's 60-second hashrate without indicating actual performance loss.
 
 ### 🟠 P2Pool Analytics
 
-- automatic detection of the P2Pool Data API;
-- local hashrate for 15m / 1h / 24h;
-- shares found / failed;
-- current / average effort;
-- miner connections and workers;
-- pool hashrate, miners, blocks found and sidechain data;
+- Data API: 15m / 1h / 24h local hashrate;
+- shares found/failed, current/average effort, workers/connections;
+- pool hashrate, miners, blocks and sidechain;
 - one-click persistent enablement with `--data-api` + `--local-api`;
 - startup-file validation, backup and rollback if P2Pool does not return correctly.
 
-### ❤️ Fleet Health Score
+### ❤️ Fleet Health + 💰 Farm Insights
 
-Each server and the whole farm receive a **0–100** health score based on availability, XMRig state, deviation from the learned baseline, temperature, rejected shares, network status, monerod synchronization and recent errors.
+- **0–100** Fleet Health Score for each server and the farm;
+- automatically learned personal hashrate baseline;
+- degradation detector;
+- estimated **XMR/day, USD/day and USD/30 days** using current hashrate, difficulty, block reward and XMR/USD;
+- compact `ⓘ` help and a built-in **Documentation** page.
 
-### 💰 Estimated farm income
+## ✨ Highlights
 
-The dashboard automatically shows estimated:
+| Area | Capabilities |
+|---|---|
+| **Farm** | Live hashrate, 24h history, sparklines, XMR/USD, Fleet Health, estimated income, alerts |
+| **XMRig** | 10s / 60s / 15m, version, uptime, shares, pool, logs, config operations |
+| **XMRig Proxy** | Install, Proxy API, workers/miners/shares/upstreams, safe XMRig routing |
+| **P2Pool** | Process/log status + Data API analytics + one-click persistent enablement |
+| **monerod** | Sync, height/target, peers, difficulty, block reward, logs |
+| **System** | Temperature, CPU MHz/load, Huge Pages, 1 GB Pages, MSR, DNS/Internet |
+| **Automation** | Grace period, auto-recovery, baseline, degradation detector, cooldown |
+| **Management** | Performance profiles, rolling restart/update, Auto Fix |
+| **SSH** | Password, private key, ssh-agent, browser xterm.js terminal |
+| **Security** | AES-256-GCM secrets, host-key pinning, HTTPS, audit log, backup/rollback |
 
-- XMR/day;
-- USD/day;
-- USD/30 days.
+## 🚀 Quick start
 
-The estimate uses the current farm 60s hashrate, Monero network difficulty, the last block reward and XMR/USD. It is a statistical estimate, not a guaranteed payout.
+<details>
+<summary><b>Windows 10/11</b></summary>
 
-### ⓘ Contextual help and Documentation
-
-Important controls now have compact `ⓘ` explanations, and the sidebar includes a dedicated **Documentation** page.
-
-## Highlights
-
-- Farm-wide live hashrate chart, per-server sparklines, Fleet Health Score and estimated XMR/USD income.
-- XMRig 10s / 60s / 15m hashrate, version, uptime, shares, pool and logs.
-- XMRig Proxy monitoring with workers/miners/shares/upstreams, one-click installation and safe XMRig routing with rollback.
-- P2Pool Data API analytics with 15m/1h/24h hashrate, shares, effort and workers; one-click persistent enablement with rollback.
-- Monero node synchronization status, peer counts, network difficulty and block reward telemetry.
-- CPU temperature, MHz, load average, Huge Pages, 1 GB pages and MSR state.
-- Grace period, automatic recovery, personal baseline and degradation detection.
-- Performance profiles, rolling restart and rolling XMRig update.
-- Auto-discovery and Auto Fix for common miner configuration issues.
-- SSH password, private key and ssh-agent authentication.
-- Browser terminal using xterm.js + Socket.IO + ssh2.
-- SQLite storage, encrypted saved secrets, HTTPS and action audit log.
-- Built-in contextual help icons and a Documentation page.
-- Windows, Linux x86_64, Raspberry Pi ARM64 and Docker support.
-
-## Quick start
-
-### Windows
-
-Install Node.js 20+, extract the project, then run:
+Node.js 20+ is required.
 
 ```text
-SETUP_WINDOWS.cmd
-START_WINDOWS.cmd
+1. Extract the release archive.
+2. Run SETUP_WINDOWS.cmd.
+3. Save the generated PANEL MASTER PASSWORD.
+4. Run START_WINDOWS.cmd.
+5. Open https://localhost:3000
 ```
 
-Open `https://localhost:3000` and keep the generated master password safe.
+See [docs/WINDOWS.md](docs/WINDOWS.md).
 
-### Linux / Raspberry Pi
+</details>
+
+<details>
+<summary><b>Linux / Raspberry Pi ARM64</b></summary>
 
 ```bash
 cp .env.example .env
@@ -112,17 +125,27 @@ npm run build:web
 npm start
 ```
 
-### Docker Compose
+See [Linux](docs/LINUX.md) · [Raspberry Pi](docs/RASPBERRY_PI.md).
+
+</details>
+
+<details>
+<summary><b>Docker Compose</b></summary>
 
 ```bash
 cp .env.example .env
 ./scripts/generate-secrets.sh
 docker compose up -d --build
+docker compose logs -f panel
 ```
+
+See [docs/DOCKER.md](docs/DOCKER.md).
+
+</details>
 
 ### Official Docker image and `mfp`
 
-Release builds publish multi-arch `linux/amd64` and `linux/arm64` images to GHCR. For appliance/kiosk-style installs, the host-side `mfp` CLI can back up state, update the container, health-check `/healthz` and automatically roll back on failure.
+The release workflow publishes multi-arch GHCR images for `linux/amd64` and `linux/arm64`. The host-side `mfp` CLI is designed for appliance/kiosk installs: it backs up state, updates the container, checks `/healthz` and automatically restores the previous image/data on failure.
 
 ```bash
 mfp status
@@ -132,41 +155,84 @@ mfp update 1.2.0
 
 See [docs/UPDATER.md](docs/UPDATER.md).
 
-## Mining wallet safety
+## ➕ Add a server
 
-The public release intentionally ships with **no mining wallet configured**. Enter your own address under `Settings → Mining` before applying a configuration, bootstrapping a miner or installing XMRig Proxy. The donation address in the Russian README is never used automatically for mining.
+Minimum inputs:
 
-## Security
+```text
+Name / icon
+IP or hostname
+SSH port
+Linux username
+Password / private key / SSH-agent
+sudo password, when required
+```
 
-XMRig and XMRig Proxy HTTP APIs can remain bound to `127.0.0.1`; the panel reaches them through SSH. Saved SSH credentials are encrypted, host keys are pinned, and runtime secrets/state are excluded from Git. Risky one-click operations use preflight checks, backups and rollback where possible. For Internet access, prefer a VPN or a hardened reverse proxy.
+After SSH connection the panel can auto-detect XMRig, `config.json`, systemd unit, API, P2Pool, monerod, XMRig Proxy and system information.
 
-See [SECURITY.md](SECURITY.md) for reporting security issues.
+Recommended localhost APIs:
 
-## Documentation
+```text
+XMRig API:       127.0.0.1:60050
+XMRig Proxy API: 127.0.0.1:60051
+```
 
-- [v1.2 feature guide](docs/FEATURES.md)
-- [XMRig Proxy](docs/XMRIG_PROXY.md)
-- [p2pool / monerod](docs/P2POOL.md)
-- [Windows](docs/WINDOWS.md)
-- [Linux](docs/LINUX.md)
-- [Raspberry Pi](docs/RASPBERRY_PI.md)
-- [Docker](docs/DOCKER.md)
-- [Host-side updater](docs/UPDATER.md)
-- [SSH](docs/SSH.md)
-- [Architecture](docs/ARCHITECTURE.md)
-- [Developer Guide](docs/DEVELOPER_GUIDE.md)
-- [Troubleshooting](docs/TROUBLESHOOTING.md)
+These HTTP APIs **do not need to be exposed to the LAN/Internet** — the panel reaches them on the host over SSH.
 
-## Contributing
+## 🪙 Wallet and pool safety
 
-Issues and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
+The public release intentionally ships with **no mining wallet configured**. Enter your own address under:
 
-## License
+```text
+Settings → Mining → XMR wallet
+```
 
-MIT. See [LICENSE](LICENSE).
+The default pool `127.0.0.1:3333` is convenient for local P2Pool and can be replaced.
 
-> Monero, XMRig and p2pool are independent projects. Monero Farm Panel is not an official or affiliated product of those projects.
+## 🔐 Security
 
-## 🧩 Developer architecture
+- saved SSH credentials/private keys are encrypted with AES-256-GCM;
+- SSH host-key pinning helps detect host substitution;
+- XMRig and XMRig Proxy HTTP APIs can remain localhost-only;
+- the browser terminal is proxied through the panel's SSH backend;
+- `.env`, SQLite data, certificates and runtime logs are excluded from Git;
+- risky automated operations use preflight, backup and rollback where possible;
+- for external access, prefer a VPN or hardened reverse proxy.
 
-Starting with v1.1.0, source code is grouped by subsystem. New contributors and AI coding assistants should start with [AGENTS.md](AGENTS.md) and [Developer Guide](docs/DEVELOPER_GUIDE.md). The canonical REST prefix is `/api/v1`. Linux/Docker hosts can install the host-side `mfp` CLI for backup, update, health-check and rollback; see [UPDATER.md](docs/UPDATER.md).
+See [SECURITY.md](SECURITY.md) · [docs/SSH.md](docs/SSH.md).
+
+## 📚 Documentation
+
+| Get started | Mining | Operations | Development |
+|---|---|---|---|
+| [Windows](docs/WINDOWS.md) | [XMRig Proxy](docs/XMRIG_PROXY.md) | [Updater `mfp`](docs/UPDATER.md) | [Architecture](docs/ARCHITECTURE.md) |
+| [Linux](docs/LINUX.md) | [P2Pool / monerod](docs/P2POOL.md) | [Troubleshooting](docs/TROUBLESHOOTING.md) | [Developer Guide](docs/DEVELOPER_GUIDE.md) |
+| [Docker](docs/DOCKER.md) | [v1.2 Features](docs/FEATURES.md) | [SSH](docs/SSH.md) | [AGENTS.md](AGENTS.md) |
+
+Full index: **[docs/README.md](docs/README.md)**.
+
+## 🗺️ Roadmap
+
+The next major UX step:
+
+- 🇷🇺 / 🇬🇧 **Russian / English runtime UI switcher**;
+- gradual alignment of the runtime UI with the new visual direction without sacrificing density or speed;
+- continued improvement of onboarding and dummy-proof operations.
+
+The visual direction is documented in [docs/DESIGN_DIRECTION.md](docs/DESIGN_DIRECTION.md).
+
+## 🤝 Contributing
+
+Issues and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) before a PR. Report security issues via [SECURITY.md](SECURITY.md).
+
+If MFP is useful to you, a ⭐ **Star** helps other miners discover the project.
+
+## License and independence
+
+MIT — see [LICENSE](LICENSE).
+
+> Monero, XMRig and P2Pool are independent projects. Monero Farm Panel is not an official or affiliated product of those projects.
+
+## 🧩 Developers and AI coding assistants
+
+Source code is grouped by subsystem. Start with [AGENTS.md](AGENTS.md), then [Developer Guide](docs/DEVELOPER_GUIDE.md). The canonical REST prefix is `/api/v1`.

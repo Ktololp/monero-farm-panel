@@ -21,7 +21,8 @@ if (badCount === 0 && goodCount === 1) {
 }
 if (badCount !== 1) fail(`Expected exactly one duplicate '$, $,' context, found ${badCount}.`);
 
-source = source.replace(bad, good);
+// Use a replacement callback: in a replacement *string* JavaScript interprets $$ as one literal $.
+source = source.replace(bad, () => good);
 if (source.includes(bad)) fail('Duplicate key pattern still remains after replacement.');
 if ((source.split(good).length - 1) !== 1) fail('Expected corrected $, $$ context exactly once.');
 

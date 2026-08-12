@@ -241,7 +241,7 @@ const expected = [
 
 test('monitoring subsystem has explicit responsibility files', () => {
   for (const file of expected) {
-    assert.equal(fs.existsSync(path.join(monitorDir, file)), true, `missing src/monitoring/${file}`);
+    assert.equal(fs.existsSync(path.join(monitorDir, file)), true, 'missing src/monitoring/' + file);
   }
 });
 

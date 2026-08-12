@@ -4,7 +4,7 @@
 
 **Self-hosted веб-панель для централизованного мониторинга и управления Monero / XMRig / RandomX фермой через SSH.**
 
-![Version](https://img.shields.io/badge/version-1.1.0-2ea043)
+![Version](https://img.shields.io/badge/version-1.2.0-2ea043)
 ![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933?logo=nodedotjs&logoColor=white)
 ![Platforms](https://img.shields.io/badge/Windows%20%7C%20Linux%20%7C%20ARM64-supported-4c8bf5)
 ![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)
@@ -25,10 +25,11 @@ Monero Farm Panel — лёгкая центральная панель для д
 
 | Область | Что умеет |
 |---|---|
-| **Ферма** | Общий live-хешрейт, XMR/USD, online/offline, общий график, mini-sparklines |
+| **Ферма** | Общий live-хешрейт, XMR/USD, online/offline, общий график, mini-sparklines, Fleet Health Score, оценка XMR/USD дохода |
 | **XMRig** | 10s / 60s / 15m, версия, uptime, accepted/rejected, pool, логи |
-| **p2pool** | Статус процесса/сервиса, собственный лог, локальный/удалённый pool |
-| **monerod** | Статус, height/target height, прогресс синхронизации, peers, собственный лог |
+| **p2pool** | Статус, лог, Data API аналитика 15m/1h/24h, shares/effort/workers, включение аналитики в один клик с rollback |
+| **XMRig Proxy** | Мониторинг Proxy API, workers/miners/shares/upstreams, установка и безопасное переключение XMRig с rollback |
+| **monerod** | Статус, height/target height, прогресс синхронизации, peers, difficulty/reward, собственный лог |
 | **Система** | Температура, CPU MHz, load average, Huge Pages, 1 GB Pages, MSR, сеть/DNS |
 | **Автоматика** | Grace period, auto-recovery, baseline, детектор деградации, cooldown |
 | **Управление** | Профили производительности, rolling restart, rolling update XMRig, Auto Fix |
@@ -36,7 +37,7 @@ Monero Farm Panel — лёгкая центральная панель для д
 | **Безопасность** | AES-256-GCM для сохранённых секретов, host-key pinning, HTTPS, журнал действий |
 | **Платформы панели** | Windows 10/11, Linux x86_64, Raspberry Pi ARM64, Docker |
 
-Интерфейс разделён на отдельные экраны: **Дашборд, Серверы, Операции, Обновления, Топология, Настройки и Журнал**. На карточке каждого сервера есть быстрый значок терминала **⌨**.
+Интерфейс разделён на отдельные экраны: **Дашборд, Серверы, XMRig Proxy, Операции, Обновления, Топология, Настройки, Журнал и Документация**. На карточке каждого сервера есть быстрый значок терминала **⌨**.
 
 ## 🚀 Быстрый старт
 
@@ -165,6 +166,7 @@ Auto-recovery включено по умолчанию и учитывает:
 - [Docker](docs/DOCKER.md)
 - [SSH и ключи](docs/SSH.md)
 - [p2pool / monerod](docs/P2POOL.md)
+- [Справочник функций v1.2](docs/FEATURES.md)
 - [Архитектура](docs/ARCHITECTURE.md)
 - [Решение проблем](docs/TROUBLESHOOTING.md)
 - [Как опубликовать проект на GitHub](docs/PUBLISH_GITHUB.md)

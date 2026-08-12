@@ -1,6 +1,6 @@
 {
   "name": "monero-farm-panel",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
   "description": "Self-hosted web dashboard for monitoring and managing Monero / XMRig RandomX mining farms over SSH.",
@@ -40,7 +40,10 @@
     "ssh",
     "self-hosted",
     "raspberry-pi",
-    "docker"
+    "docker",
+    "xmrig-proxy",
+    "mining-monitoring",
+    "homelab"
   ],
   "author": "Monero Farm Panel contributors"
 }

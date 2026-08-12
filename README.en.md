@@ -4,7 +4,7 @@
 
 **Self-hosted web dashboard for centralized monitoring and management of Monero / XMRig / RandomX mining farms over SSH.**
 
-![Version](https://img.shields.io/badge/version-1.1.0-2ea043)
+![Version](https://img.shields.io/badge/version-1.2.0-2ea043)
 ![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933?logo=nodedotjs&logoColor=white)
 ![Platforms](https://img.shields.io/badge/Windows%20%7C%20Linux%20%7C%20ARM64-supported-4c8bf5)
 ![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)
@@ -23,10 +23,12 @@ Monero Farm Panel is a lightweight central dashboard for home and small server m
 
 ## Highlights
 
-- Farm-wide live hashrate chart and per-server sparklines.
+- Farm-wide live hashrate chart, per-server sparklines, Fleet Health Score and estimated XMR/USD income.
 - XMRig 10s / 60s / 15m hashrate, version, uptime, shares, pool and logs.
+- XMRig Proxy monitoring with workers/miners/shares/upstreams, one-click installation and safe XMRig routing with rollback.
+- P2Pool Data API analytics with 15m/1h/24h hashrate, shares, effort and workers; one-click persistent enablement with rollback.
 - Separate XMRig / p2pool / monerod health indicators.
-- Monero node synchronization status and peer counts.
+- Monero node synchronization status, peer counts, network difficulty and block reward telemetry.
 - CPU temperature, MHz, load average, Huge Pages, 1 GB pages and MSR state.
 - Grace period, automatic recovery, personal baseline and degradation detection.
 - Performance profiles, rolling restart and rolling XMRig update.
@@ -34,6 +36,7 @@ Monero Farm Panel is a lightweight central dashboard for home and small server m
 - SSH password, private key and ssh-agent authentication.
 - Browser terminal using xterm.js + Socket.IO + ssh2.
 - SQLite storage, encrypted saved secrets, HTTPS and action audit log.
+- Built-in contextual help icons and a Documentation page.
 - Windows, Linux x86_64, Raspberry Pi ARM64 and Docker support.
 
 ## Quick start

@@ -1,14 +1,22 @@
 $ErrorActionPreference = 'Stop'
 
-$payloadPath = Join-Path $PSScriptRoot 'v1.1.0.part1.b64'
 $outPath = Join-Path $PSScriptRoot 'v1.1.0.mjs'
 $expectedSha256 = '7a4a3f6413e1a86d902c876256010bb72ba44f5d9a2b7e8485c426c30dfd225a'
 
-if (-not (Test-Path $payloadPath)) {
-    throw "Migration payload not found: $payloadPath"
+$partPaths = 1..4 | ForEach-Object {
+    Join-Path $PSScriptRoot ("v1.1.0.part{0}.b64" -f $_)
 }
 
-$b64 = (Get-Content -LiteralPath $payloadPath -Raw) -replace '\s',''
+foreach ($partPath in $partPaths) {
+    if (-not (Test-Path -LiteralPath $partPath)) {
+        throw "Migration payload part not found: $partPath"
+    }
+}
+
+$b64 = ($partPaths | ForEach-Object {
+    (Get-Content -LiteralPath $_ -Raw) -replace '\s',''
+}) -join ''
+
 $bytes = [Convert]::FromBase64String($b64)
 $inputStream = New-Object IO.MemoryStream(,$bytes)
 $gzip = New-Object IO.Compression.GZipStream($inputStream, [IO.Compression.CompressionMode]::Decompress)

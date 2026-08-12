@@ -49,11 +49,19 @@ const sections = {
   servers: chunk('async function renderServers', '\nasync function renderOperations'),
   operations: chunk('async function renderOperations', '\nfunction jobsPanel'),
   updates: chunk('async function renderUpdates', '\nasync function renderTopology'),
-  topology: chunk('async function renderTopology', '\nasync function renderServer'),
-  server: chunk('async function renderServer', '\nasync function renderSettings'),
+  topology: chunk('async function renderTopology', '\nasync function renderServer('),
+  server: chunk('async function renderServer(', '\nasync function renderSettings'),
   settings: chunk('async function renderSettings', '\nasync function renderAudit'),
   audit: chunk('async function renderAudit', '\nfunction openServerForm')
 };
+
+// Validate every section before writing anything so a bad marker cannot leave a partial refactor.
+for (const [name, text] of Object.entries(sections)) {
+  if (!text) fail(`Empty page section: ${name}`);
+  const first = source.indexOf(text);
+  const second = source.indexOf(text, first + text.length);
+  if (first < 0 || second >= 0) fail(`Page section is not unique: ${name}`);
+}
 
 function factoryModule(factoryName, body, exportedNames) {
   let code = body;
@@ -66,7 +74,7 @@ function factoryModule(factoryName, body, exportedNames) {
 
   return [
     `export function ${factoryName}(ctx) {`,
-    `  const { $, $$, esc, fmtHash, fmtTemp, fmtMHz, fmtUptime, fmtDate, fmtUsd, fmtPct, sleep, api, toast, setHeader, navigate, openServerForm, openTerminal, bindCommonServerActions, statusBadge, compBadge, serverById, jobsPanel, Chart, hashrateScale, temperatureScale, charts, destroyCharts } = ctx;`,
+    `  const { $, $$, esc, fmtHash, fmtTemp, fmtMHz, fmtUptime, fmtDate, fmtUsd, fmtPct, sleep, api, toast, setHeader, navigate, openServerForm, bootstrapModal, openTerminal, bindCommonServerActions, statusBadge, compBadge, serverById, jobsPanel, Chart, hashrateScale, temperatureScale, charts, destroyCharts } = ctx;`,
     `  let overview = ctx.getOverview();`,
     `  let currentServerId = ctx.getCurrentServerId();`,
     `  let currentServerTab = ctx.getCurrentServerTab();`,
@@ -81,20 +89,23 @@ function factoryModule(factoryName, body, exportedNames) {
   ].join('\n');
 }
 
-write('web/pages/dashboard/index.js', factoryModule('createDashboardPage', sections.dashboard, ['renderDashboard']));
-write('web/pages/servers/index.js', factoryModule('createServersPage', sections.servers, ['renderServers']));
-write('web/pages/operations/index.js', factoryModule('createOperationsPage', sections.operations, ['renderOperations']));
-write('web/pages/updates/index.js', factoryModule('createUpdatesPage', sections.updates, ['renderUpdates']));
-write('web/pages/topology/index.js', factoryModule('createTopologyPage', sections.topology, ['renderTopology']));
-write('web/pages/server/index.js', factoryModule('createServerPage', sections.server, ['renderServer', 'refreshServerHeader']));
-write('web/pages/settings/index.js', factoryModule('createSettingsPage', sections.settings, ['renderSettings']));
-write('web/pages/audit/index.js', factoryModule('createAuditPage', sections.audit, ['renderAudit']));
+const pageFiles = new Map([
+  ['web/pages/dashboard/index.js', factoryModule('createDashboardPage', sections.dashboard, ['renderDashboard'])],
+  ['web/pages/servers/index.js', factoryModule('createServersPage', sections.servers, ['renderServers'])],
+  ['web/pages/operations/index.js', factoryModule('createOperationsPage', sections.operations, ['renderOperations'])],
+  ['web/pages/updates/index.js', factoryModule('createUpdatesPage', sections.updates, ['renderUpdates'])],
+  ['web/pages/topology/index.js', factoryModule('createTopologyPage', sections.topology, ['renderTopology'])],
+  ['web/pages/server/index.js', factoryModule('createServerPage', sections.server, ['renderServer', 'refreshServerHeader'])],
+  ['web/pages/settings/index.js', factoryModule('createSettingsPage', sections.settings, ['renderSettings'])],
+  ['web/pages/audit/index.js', factoryModule('createAuditPage', sections.audit, ['renderAudit'])]
+]);
 
 let main = source;
-for (const text of Object.values(sections)) {
-  if (!main.includes(text)) fail('A page section changed while preparing the refactor.');
+for (const [name, text] of Object.entries(sections)) {
+  if (!main.includes(text)) fail(`Page section changed while preparing the refactor: ${name}`);
   main = main.replace(`${text}\n\n`, '');
-  main = main.replace(`${text}\n`, '');
+  if (main.includes(text)) main = main.replace(`${text}\n`, '');
+  if (main.includes(text)) fail(`Could not remove page section cleanly: ${name}`);
 }
 
 const pageImports = [
@@ -120,7 +131,7 @@ const wrappers = [
   'function pageContext(){',
   '  return {',
   '    $, $$, esc, fmtHash, fmtTemp, fmtMHz, fmtUptime, fmtDate, fmtUsd, fmtPct, sleep,',
-  '    api, toast, setHeader, navigate, openServerForm, openTerminal, bindCommonServerActions,',
+  '    api, toast, setHeader, navigate, openServerForm, bootstrapModal, openTerminal, bindCommonServerActions,',
   '    statusBadge, compBadge, serverById, jobsPanel, Chart, hashrateScale, temperatureScale, charts, destroyCharts,',
   '    getOverview:()=>overview,',
   '    getCurrentServerId:()=>currentServerId,',
@@ -143,9 +154,7 @@ const wrappers = [
 ].join('\n');
 main = main.replace(sharedAnchor, `${sharedAnchor}${wrappers}`);
 
-write(sourcePath, main);
-
-write('web/pages/README.md', [
+const pagesReadme = [
   '# Frontend pages',
   '',
   'Each page owns its renderer and page-local event handlers. `web/app/main.js` remains the composition root: authentication, Socket.IO, navigation, shared modal helpers and page wiring.',
@@ -161,9 +170,9 @@ write('web/pages/README.md', [
   '',
   'Page modules are factories receiving the application context. This keeps shared state and routing in one place without introducing a framework or duplicating global state.',
   ''
-].join('\n'));
+].join('\n');
 
-write('test/frontend-pages-layout.test.js', [
+const layoutTest = [
   "import test from 'node:test';",
   "import assert from 'node:assert/strict';",
   "import fs from 'node:fs';",
@@ -184,7 +193,13 @@ write('test/frontend-pages-layout.test.js', [
   "  assert.match(source, /createServerPage/);",
   "});",
   ''
-].join('\n'));
+].join('\n');
+
+// All preflight and transformation checks are complete. Only now write files.
+for (const [rel, content] of pageFiles) write(rel, content);
+write(sourcePath, main);
+write('web/pages/README.md', pagesReadme);
+write('test/frontend-pages-layout.test.js', layoutTest);
 
 console.log('[phase2/frontend-pages] OK');
 console.log('[phase2/frontend-pages] page renderers moved under web/pages/.');

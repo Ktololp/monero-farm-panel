@@ -7,4 +7,7 @@ export { autoFixServer } from './auto-fix.js';
 export { getXmrigLog, getP2poolLog, getMonerodLog } from './logs.js';
 export { runCommand } from './remote-command.js';
 export { bootstrapServer } from './bootstrap.js';
+export { installXmrigProxy } from './xmrig-proxy.js';
+export { switchXmrigToProxy } from './proxy-routing.js';
+export { enableP2poolAnalytics } from './p2pool-analytics.js';
 export { rollingRestart, rollingUpdateXmrig } from './rolling.js';

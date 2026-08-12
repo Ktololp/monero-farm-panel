@@ -1,4 +1,4 @@
-import { $, $$, esc, fmtHash, fmtTemp, fmtMHz, fmtUptime, fmtDate, fmtUsd, fmtPct, sleep } from './ui.js';
+import { $, $$, esc, fmtHash, fmtTemp, fmtMHz, fmtUptime, fmtDate, fmtUsd, fmtPct, helpIcon, sleep } from './ui.js';
 import { api, configureApi } from '../services/api.js';
 import { charts, destroyCharts } from '../components/charts/registry.js';
 import { createTerminalController } from '../components/terminal/index.js';
@@ -10,6 +10,8 @@ import { createTopologyPage } from '../pages/topology/index.js';
 import { createServerPage } from '../pages/server/index.js';
 import { createSettingsPage } from '../pages/settings/index.js';
 import { createAuditPage } from '../pages/audit/index.js';
+import { createProxiesPage } from '../pages/proxies/index.js';
+import { createDocsPage } from '../pages/docs/index.js';
 import Chart from 'chart.js/auto';
 import { hashrateScale, temperatureScale } from '../components/charts/scales.js';
 import '../styles/app.css';
@@ -44,7 +46,7 @@ function connectSocket(){
   socket.on('terminal:data',({serverId,data})=>terminalController?.handleData(serverId,data));
   socket.on('terminal:close',({serverId})=>terminalController?.handleClose(serverId));
 }
-function recalcSummary(){if(!overview)return;const ss=overview.servers||[],temps=ss.map(s=>s.live?.tempC).filter(Number.isFinite);overview.summary={total:ss.length,online:ss.filter(s=>['online','starting'].includes(s.live?.status)).length,totalHash:ss.reduce((a,s)=>a+(Number(s.live?.hash60s)||0),0),maxTemp:temps.length?Math.max(...temps):null};}
+function recalcSummary(){if(!overview)return;const ss=overview.servers||[],temps=ss.map(s=>s.live?.tempC).filter(Number.isFinite),totalHash=ss.reduce((a,s)=>a+(Number(s.live?.hash60s)||0),0),scores=ss.map(s=>Number(s.live?.healthScore)).filter(Number.isFinite),healthScore=scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):null,network=ss.map(s=>s.live?.monero).find(m=>Number(m?.difficulty)>0&&Number(m?.blockRewardXmr)>0),difficulty=Number(network?.difficulty),reward=Number(network?.blockRewardXmr),xmrDay=totalHash>0&&difficulty>0&&reward>0?totalHash*86400/difficulty*reward:null,usdDay=Number.isFinite(xmrDay)&&Number(overview.market?.price)>0?xmrDay*Number(overview.market.price):null;overview.summary={total:ss.length,online:ss.filter(s=>['online','starting'].includes(s.live?.status)).length,totalHash,maxTemp:temps.length?Math.max(...temps):null,healthScore,economics:{xmrDay,usdDay,usdMonth:Number.isFinite(usdDay)?usdDay*30:null,difficulty:Number.isFinite(difficulty)?difficulty:null,blockRewardXmr:Number.isFinite(reward)?reward:null}};}
 async function loadOverview(){overview=await api('/overview');recalcSummary();}
 
 $$('.nav').forEach(b=>b.onclick=()=>navigate(b.dataset.page));
@@ -55,7 +57,7 @@ function navigate(page,serverId=null,tab='overview'){
   const url=serverId?`/?server=${serverId}&tab=${encodeURIComponent(tab)}`:'/' ;history.replaceState({},'',url);
   void render().catch(err=>{console.error('[ui] render failed',err);toast(`Ошибка интерфейса: ${err.message||err}`,'error');});
 }
-async function render(){destroyCharts();if(currentServerId)return renderServer(currentServerId,currentServerTab);if(currentPage==='servers')return renderServers();if(currentPage==='operations')return renderOperations();if(currentPage==='updates')return renderUpdates();if(currentPage==='topology')return renderTopology();if(currentPage==='settings')return renderSettings();if(currentPage==='audit')return renderAudit();if(!overview)await loadOverview();return renderDashboard();}
+async function render(){destroyCharts();if(currentServerId)return renderServer(currentServerId,currentServerTab);if(currentPage==='servers')return renderServers();if(currentPage==='operations')return renderOperations();if(currentPage==='updates')return renderUpdates();if(currentPage==='topology')return renderTopology();if(currentPage==='settings')return renderSettings();if(currentPage==='audit')return renderAudit();if(currentPage==='proxies')return renderProxies();if(currentPage==='docs')return renderDocs();if(!overview)await loadOverview();return renderDashboard();}
 
 function statusBadge(live){const st=live?.status||'unknown',names={online:'в сети',offline:'не в сети',degraded:'частично',starting:'запуск',unknown:'неизвестно'};return`<span class="status ${esc(st)}"><i></i>${esc(names[st]||st)}</span>`;}
 function compBadge(name,state){const s=state||'unknown',label={active:'OK',starting:'запуск',inactive:'off',unknown:'?'}[s]||s;return`<span class="component ${esc(s)}"><b>${esc(name)}</b>${esc(label)}</span>`;}
@@ -63,7 +65,7 @@ function serverById(id){return overview?.servers?.find(s=>s.id===Number(id));}
 function setHeader(title,subtitle,actions=''){$('#page-title').innerHTML=title;$('#page-subtitle').textContent=subtitle||'';$('#top-actions').innerHTML=actions||'';}
 function pageContext(){
   return {
-    $, $$, esc, fmtHash, fmtTemp, fmtMHz, fmtUptime, fmtDate, fmtUsd, fmtPct, sleep,
+    $, $$, esc, fmtHash, fmtTemp, fmtMHz, fmtUptime, fmtDate, fmtUsd, fmtPct, helpIcon, sleep,
     api, toast, setHeader, navigate, openServerForm, bootstrapModal, openTerminal, bindCommonServerActions,
     statusBadge, compBadge, serverById, jobsPanel, Chart, hashrateScale, temperatureScale, charts, destroyCharts,
     getOverview:()=>overview,
@@ -83,6 +85,8 @@ const renderServer=(...args)=>createServerPage(pageContext()).renderServer(...ar
 const refreshServerHeader=(...args)=>createServerPage(pageContext()).refreshServerHeader(...args);
 const renderSettings=(...args)=>createSettingsPage(pageContext()).renderSettings(...args);
 const renderAudit=(...args)=>createAuditPage(pageContext()).renderAudit(...args);
+const renderProxies=(...args)=>createProxiesPage(pageContext()).renderProxies(...args);
+const renderDocs=(...args)=>createDocsPage(pageContext()).renderDocs(...args);
 
 
 function bindCommonServerActions(){

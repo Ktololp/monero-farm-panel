@@ -6,7 +6,7 @@ import { ssh } from '../ssh/index.js';
 import { getLiveState, getAllLiveStates, pollServerNow } from '../monitoring/index.js';
 import { listActiveAlerts } from '../alerts/index.js';
 import { getMarketState, refreshXmrUsd } from '../market/index.js';
-import { applyMiningConfig, restartXmrig, setHugePages, setMsr, getXmrigLog, getP2poolLog, getMonerodLog, runCommand, bootstrapServer, performanceProfiles, applyPerformanceProfile, autoFixServer, rollingRestart, rollingUpdateXmrig } from '../operations/index.js';
+import { applyMiningConfig, restartXmrig, setHugePages, setMsr, getXmrigLog, getP2poolLog, getMonerodLog, runCommand, bootstrapServer, installXmrigProxy, switchXmrigToProxy, enableP2poolAnalytics, performanceProfiles, applyPerformanceProfile, autoFixServer, rollingRestart, rollingUpdateXmrig } from '../operations/index.js';
 import { discoverServer, getDiscovery } from '../discovery/index.js';
 import { refreshUpdates, versionStatus } from '../updates/index.js';
 import { createJob, runJob, getJob, listJobs } from '../jobs/index.js';
@@ -69,6 +69,9 @@ api.post('/servers/:id/actions/hugepages',async(req,res,next)=>{try{res.json(awa
 api.post('/servers/:id/actions/msr',async(req,res,next)=>{try{res.json(await setMsr(req.params.id,{enabled:asBool(req.body?.enabled),actorIp:ip(req)}));}catch(e){next(e);}});
 api.post('/servers/:id/actions/command',async(req,res,next)=>{try{res.json(await runCommand(req.params.id,req.body?.command,{actorIp:ip(req)}));}catch(e){next(e);}});
 api.post('/servers/:id/actions/bootstrap',async(req,res,next)=>{try{res.json(await bootstrapServer(req.params.id,req.body||{},{actorIp:ip(req)}));}catch(e){next(e);}});
+api.post('/servers/:id/actions/install-xmrig-proxy',async(req,res,next)=>{try{const result=await installXmrigProxy(req.params.id,req.body||{},{actorIp:ip(req)});const live=await pollServerNow(req.params.id).catch(()=>null);res.json({...result,live});}catch(e){next(e);}});
+api.post('/servers/:id/actions/xmrig-to-proxy',async(req,res,next)=>{try{res.json(await switchXmrigToProxy(req.params.id,{actorIp:ip(req)}));}catch(e){next(e);}});
+api.post('/servers/:id/actions/enable-p2pool-analytics',async(req,res,next)=>{try{res.json(await enableP2poolAnalytics(req.params.id,{actorIp:ip(req)}));}catch(e){next(e);}});
 api.get('/profiles',(req,res)=>res.json(Object.values(performanceProfiles)));
 
 api.post('/fleet/actions/rolling-restart',(req,res)=>{const ids=Array.isArray(req.body?.serverIds)?req.body.serverIds:db.prepare('SELECT id FROM servers WHERE enabled=1 ORDER BY id').all().map(x=>x.id);const job=createJob('rolling-restart','Rolling restart XMRig');runJob(job,async update=>rollingRestart(ids,{actorIp:ip(req),progress:update}));audit({ip:ip(req),action:'rolling-restart-start',details:{ids}});res.status(202).json(job);});

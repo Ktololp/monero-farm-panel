@@ -7,4 +7,5 @@ export const fmtUptime=s=>{if(!s)return'—';const d=Math.floor(s/86400),h=Math.
 export const fmtDate=ts=>ts?new Date(ts).toLocaleString():'—';
 export const fmtUsd=v=>Number.isFinite(Number(v))?new Intl.NumberFormat('ru-RU',{style:'currency',currency:'USD',maximumFractionDigits:2}).format(Number(v)):'—';
 export const fmtPct=v=>Number.isFinite(Number(v))?`${Number(v)>=0?'+':''}${Number(v).toFixed(2)}%`:'—';
+export const helpIcon=(text,icon='ⓘ')=>`<span class="help-icon" tabindex="0" data-tip="${esc(text)}" aria-label="${esc(text)}">${esc(icon)}</span>`;
 export const sleep=ms=>new Promise(r=>setTimeout(r,ms));

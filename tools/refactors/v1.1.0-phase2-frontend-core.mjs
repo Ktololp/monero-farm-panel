@@ -10,6 +10,7 @@ const write = (rel, content) => {
   fs.writeFileSync(p(rel), `${content.replace(/\r\n/g, '\n').trimEnd()}\n`, 'utf8');
   console.log(`[phase2/frontend-core] wrote ${rel}`);
 };
+const decode = value => Buffer.from(value, 'base64').toString('utf8');
 const fail = msg => { console.error(`[phase2/frontend-core] ERROR: ${msg}`); process.exit(1); };
 
 const sourcePath = 'web/app/main.js';
@@ -48,7 +49,6 @@ for (const name of helperNames) {
   helperLines.push(line);
 }
 
-// The first helper line declares both $ and $$.
 const uiLines = [...new Set(helperLines)].map(line => line.replace(/^const /, 'export const '));
 write('web/app/ui.js', `${uiLines.join('\n')}\n`);
 
@@ -57,6 +57,7 @@ let apiModule = apiChunk
   .replace('async function api(path,options={})', 'export async function api(path,options={})')
   .replace("headers['x-csrf-token']=csrf;", "headers['x-csrf-token']=getCsrf();")
   .replace('showLogin();throw new Error', 'onUnauthorized();throw new Error');
+
 write('web/services/api.js', `
 let getCsrf = () => '';
 let onUnauthorized = () => {};
@@ -80,69 +81,7 @@ export function destroyCharts() {
 }
 `);
 
-write('web/components/terminal/index.js', `
-import { Terminal } from '@xterm/xterm';
-import { FitAddon } from '@xterm/addon-fit';
-import '@xterm/xterm/css/xterm.css';
-
-export function createTerminalController({ $, esc, modal, closeModal, getSocket }) {
-  let terminal = null;
-  let fitAddon = null;
-  let terminalServerId = null;
-
-  function fitTerminal() {
-    try { fitAddon?.fit(); } catch {}
-  }
-
-  function close() {
-    if (terminalServerId) getSocket()?.emit('terminal:close', { serverId: terminalServerId });
-    window.removeEventListener('resize', fitTerminal);
-    try { terminal?.dispose(); } catch {}
-    terminal = null;
-    fitAddon = null;
-    terminalServerId = null;
-  }
-
-  async function open(server) {
-    if (terminal) close();
-    terminalServerId = Number(server.id);
-    modal(`<div class="modal-head"><div><h2>⌨ SSH · ${esc(server.name)}</h2><div class="muted small">${esc(server.username)}@${esc(server.host)}:${server.port}</div></div><button id="close-terminal" class="ghost">✕</button></div><div id="terminal-box"></div>`);
-    $('#close-terminal').onclick = closeModal;
-
-    terminal = new Terminal({ cursorBlink: true, fontFamily: 'Consolas,Menlo,monospace', fontSize: 14, theme: { background: '#070b14' } });
-    fitAddon = new FitAddon();
-    terminal.loadAddon(fitAddon);
-    terminal.open($('#terminal-box'));
-    fitAddon.fit();
-    terminal.focus();
-
-    terminal.onData(data => getSocket()?.emit('terminal:input', { serverId: server.id, data }));
-    terminal.onResize(({ cols, rows }) => getSocket()?.emit('terminal:resize', { serverId: server.id, cols, rows }));
-    getSocket()?.emit('terminal:open', { serverId: server.id, cols: terminal.cols, rows: terminal.rows }, ack => {
-      if (!ack?.ok) terminal.write(`\\r\\n\\x1b[31m${ack?.error || 'SSH error'}\\x1b[0m\\r\\n`);
-    });
-
-    setTimeout(() => fitAddon?.fit(), 100);
-    window.addEventListener('resize', fitTerminal);
-  }
-
-  function handleData(serverId, data) {
-    if (terminal && terminalServerId === Number(serverId)) terminal.write(data);
-  }
-
-  function handleClose(serverId) {
-    if (terminal && terminalServerId === Number(serverId)) terminal.write('\\r\\n\\x1b[33m[SSH-сессия закрыта]\\x1b[0m\\r\\n');
-  }
-
-  return {
-    open,
-    close,
-    isOpen: () => Boolean(terminal),
-    handleData,
-    handleClose
-  };
-}
-`);
+write('web/components/terminal/index.js', decode('aW1wb3J0IHsgVGVybWluYWwgfSBmcm9tICdAeHRlcm0veHRlcm0nOwppbXBvcnQgeyBGaXRBZGRvbiB9IGZyb20gJ0B4dGVybS9hZGRvbi1maXQnOwppbXBvcnQgJ0B4dGVybS94dGVybS9jc3MveHRlcm0uY3NzJzsKCmV4cG9ydCBmdW5jdGlvbiBjcmVhdGVUZXJtaW5hbENvbnRyb2xsZXIoeyAkLCBlc2MsIG1vZGFsLCBjbG9zZU1vZGFsLCBnZXRTb2NrZXQgfSkgewogIGxldCB0ZXJtaW5hbCA9IG51bGw7CiAgbGV0IGZpdEFkZG9uID0gbnVsbDsKICBsZXQgdGVybWluYWxTZXJ2ZXJJZCA9IG51bGw7CgogIGZ1bmN0aW9uIGZpdFRlcm1pbmFsKCkgewogICAgdHJ5IHsgZml0QWRkb24/LmZpdCgpOyB9IGNhdGNoIHt9CiAgfQoKICBmdW5jdGlvbiBjbG9zZSgpIHsKICAgIGlmICh0ZXJtaW5hbFNlcnZlcklkKSBnZXRTb2NrZXQoKT8uZW1pdCgndGVybWluYWw6Y2xvc2UnLCB7IHNlcnZlcklkOiB0ZXJtaW5hbFNlcnZlcklkIH0pOwogICAgd2luZG93LnJlbW92ZUV2ZW50TGlzdGVuZXIoJ3Jlc2l6ZScsIGZpdFRlcm1pbmFsKTsKICAgIHRyeSB7IHRlcm1pbmFsPy5kaXNwb3NlKCk7IH0gY2F0Y2gge30KICAgIHRlcm1pbmFsID0gbnVsbDsKICAgIGZpdEFkZG9uID0gbnVsbDsKICAgIHRlcm1pbmFsU2VydmVySWQgPSBudWxsOwogIH0KCiAgYXN5bmMgZnVuY3Rpb24gb3BlbihzZXJ2ZXIpIHsKICAgIGlmICh0ZXJtaW5hbCkgY2xvc2UoKTsKICAgIHRlcm1pbmFsU2VydmVySWQgPSBOdW1iZXIoc2VydmVyLmlkKTsKICAgIG1vZGFsKGA8ZGl2IGNsYXNzPSJtb2RhbC1oZWFkIj48ZGl2PjxoMj7ijKggU1NIIMK3ICR7ZXNjKHNlcnZlci5uYW1lKX08L2gyPjxkaXYgY2xhc3M9Im11dGVkIHNtYWxsIj4ke2VzYyhzZXJ2ZXIudXNlcm5hbWUpfUAke2VzYyhzZXJ2ZXIuaG9zdCl9OiR7c2VydmVyLnBvcnR9PC9kaXY+PC9kaXY+PGJ1dHRvbiBpZD0iY2xvc2UtdGVybWluYWwiIGNsYXNzPSJnaG9zdCI+4pyVPC9idXR0b24+PC9kaXY+PGRpdiBpZD0idGVybWluYWwtYm94Ij48L2Rpdj5gKTsKICAgICQoJyNjbG9zZS10ZXJtaW5hbCcpLm9uY2xpY2sgPSBjbG9zZU1vZGFsOwoKICAgIHRlcm1pbmFsID0gbmV3IFRlcm1pbmFsKHsgY3Vyc29yQmxpbms6IHRydWUsIGZvbnRGYW1pbHk6ICdDb25zb2xhcyxNZW5sbyxtb25vc3BhY2UnLCBmb250U2l6ZTogMTQsIHRoZW1lOiB7IGJhY2tncm91bmQ6ICcjMDcwYjE0JyB9IH0pOwogICAgZml0QWRkb24gPSBuZXcgRml0QWRkb24oKTsKICAgIHRlcm1pbmFsLmxvYWRBZGRvbihmaXRBZGRvbik7CiAgICB0ZXJtaW5hbC5vcGVuKCQoJyN0ZXJtaW5hbC1ib3gnKSk7CiAgICBmaXRBZGRvbi5maXQoKTsKICAgIHRlcm1pbmFsLmZvY3VzKCk7CgogICAgdGVybWluYWwub25EYXRhKGRhdGEgPT4gZ2V0U29ja2V0KCk/LmVtaXQoJ3Rlcm1pbmFsOmlucHV0JywgeyBzZXJ2ZXJJZDogc2VydmVyLmlkLCBkYXRhIH0pKTsKICAgIHRlcm1pbmFsLm9uUmVzaXplKCh7IGNvbHMsIHJvd3MgfSkgPT4gZ2V0U29ja2V0KCk/LmVtaXQoJ3Rlcm1pbmFsOnJlc2l6ZScsIHsgc2VydmVySWQ6IHNlcnZlci5pZCwgY29scywgcm93cyB9KSk7CiAgICBnZXRTb2NrZXQoKT8uZW1pdCgndGVybWluYWw6b3BlbicsIHsgc2VydmVySWQ6IHNlcnZlci5pZCwgY29sczogdGVybWluYWwuY29scywgcm93czogdGVybWluYWwucm93cyB9LCBhY2sgPT4gewogICAgICBpZiAoIWFjaz8ub2spIHRlcm1pbmFsLndyaXRlKGBcclxuXHgxYlszMW0ke2Fjaz8uZXJyb3IgfHwgJ1NTSCBlcnJvcid9XHgxYlswbVxyXG5gKTsKICAgIH0pOwoKICAgIHNldFRpbWVvdXQoKCkgPT4gZml0QWRkb24/LmZpdCgpLCAxMDApOwogICAgd2luZG93LmFkZEV2ZW50TGlzdGVuZXIoJ3Jlc2l6ZScsIGZpdFRlcm1pbmFsKTsKICB9CgogIGZ1bmN0aW9uIGhhbmRsZURhdGEoc2VydmVySWQsIGRhdGEpIHsKICAgIGlmICh0ZXJtaW5hbCAmJiB0ZXJtaW5hbFNlcnZlcklkID09PSBOdW1iZXIoc2VydmVySWQpKSB0ZXJtaW5hbC53cml0ZShkYXRhKTsKICB9CgogIGZ1bmN0aW9uIGhhbmRsZUNsb3NlKHNlcnZlcklkKSB7CiAgICBpZiAodGVybWluYWwgJiYgdGVybWluYWxTZXJ2ZXJJZCA9PT0gTnVtYmVyKHNlcnZlcklkKSkgdGVybWluYWwud3JpdGUoJ1xyXG5ceDFiWzMzbVtTU0gt0YHQtdGB0YHQuNGPINC30LDQutGA0YvRgtCwXVx4MWJbMG1cclxuJyk7CiAgfQoKICByZXR1cm4gewogICAgb3BlbiwKICAgIGNsb3NlLAogICAgaXNPcGVuOiAoKSA9PiBCb29sZWFuKHRlcm1pbmFsKSwKICAgIGhhbmRsZURhdGEsCiAgICBoYW5kbGVDbG9zZQogIH07Cn0K'));
 
 let main = source;
 main = main.replace(/^import \{ Terminal \} from '@xterm\/xterm';\n/m, '');
@@ -186,49 +125,8 @@ if (!main.includes(configureMarker)) fail('Cannot find showApp function.');
 main = main.replace(configureMarker, `${configureMarker}\nconfigureApi({getCsrf:()=>csrf,onUnauthorized:showLogin});`);
 
 write(sourcePath, main);
-
-write('web/app/README.md', `# Frontend application core
-
-The browser UI is intentionally framework-free. \`main.js\` is the composition root and router while reusable infrastructure is split by responsibility.
-
-- \`ui.js\` — DOM selectors, escaping and display formatting.
-- \`../services/api.js\` — versioned HTTP API client and CSRF handling.
-- \`../components/charts/registry.js\` — Chart.js instance lifecycle.
-- \`../components/charts/scales.js\` — stable visual scaling rules.
-- \`../components/terminal/index.js\` — xterm.js SSH terminal lifecycle.
-- \`main.js\` — login, Socket.IO orchestration, navigation and page composition.
-
-Phase 2b moves page renderers from \`main.js\` into \`web/pages/\` without changing the visual design.
-`);
-
-write('test/frontend-layout.test.js', `
-import test from 'node:test';
-import assert from 'node:assert/strict';
-import fs from 'node:fs';
-import path from 'node:path';
-
-const root = path.resolve(import.meta.dirname, '..');
-
-const expected = [
-  'web/app/ui.js',
-  'web/services/api.js',
-  'web/components/charts/registry.js',
-  'web/components/terminal/index.js'
-];
-
-test('frontend core has explicit infrastructure modules', () => {
-  for (const rel of expected) assert.equal(fs.existsSync(path.join(root, rel)), true, `missing ${rel}`);
-});
-
-test('frontend main delegates API, chart lifecycle and terminal implementation', () => {
-  const source = fs.readFileSync(path.join(root, 'web', 'app', 'main.js'), 'utf8');
-  assert.doesNotMatch(source, /async function api\(/);
-  assert.doesNotMatch(source, /new Terminal\(/);
-  assert.match(source, /configureApi/);
-  assert.match(source, /createTerminalController/);
-  assert.match(source, /destroyCharts/);
-});
-`);
+write('web/app/README.md', decode('IyBGcm9udGVuZCBhcHBsaWNhdGlvbiBjb3JlCgpUaGUgYnJvd3NlciBVSSBpcyBpbnRlbnRpb25hbGx5IGZyYW1ld29yay1mcmVlLiBgbWFpbi5qc2AgaXMgdGhlIGNvbXBvc2l0aW9uIHJvb3QgYW5kIHJvdXRlciB3aGlsZSByZXVzYWJsZSBpbmZyYXN0cnVjdHVyZSBpcyBzcGxpdCBieSByZXNwb25zaWJpbGl0eS4KCi0gYHVpLmpzYCDigJQgRE9NIHNlbGVjdG9ycywgZXNjYXBpbmcgYW5kIGRpc3BsYXkgZm9ybWF0dGluZy4KLSBgLi4vc2VydmljZXMvYXBpLmpzYCDigJQgdmVyc2lvbmVkIEhUVFAgQVBJIGNsaWVudCBhbmQgQ1NSRiBoYW5kbGluZy4KLSBgLi4vY29tcG9uZW50cy9jaGFydHMvcmVnaXN0cnkuanNgIOKAlCBDaGFydC5qcyBpbnN0YW5jZSBsaWZlY3ljbGUuCi0gYC4uL2NvbXBvbmVudHMvY2hhcnRzL3NjYWxlcy5qc2Ag4oCUIHN0YWJsZSB2aXN1YWwgc2NhbGluZyBydWxlcy4KLSBgLi4vY29tcG9uZW50cy90ZXJtaW5hbC9pbmRleC5qc2Ag4oCUIHh0ZXJtLmpzIFNTSCB0ZXJtaW5hbCBsaWZlY3ljbGUuCi0gYG1haW4uanNgIOKAlCBsb2dpbiwgU29ja2V0LklPIG9yY2hlc3RyYXRpb24sIG5hdmlnYXRpb24gYW5kIHBhZ2UgY29tcG9zaXRpb24uCgpQaGFzZSAyYiBtb3ZlcyBwYWdlIHJlbmRlcmVycyBmcm9tIGBtYWluLmpzYCBpbnRvIGB3ZWIvcGFnZXMvYCB3aXRob3V0IGNoYW5naW5nIHRoZSB2aXN1YWwgZGVzaWduLgo='));
+write('test/frontend-layout.test.js', decode('aW1wb3J0IHRlc3QgZnJvbSAnbm9kZTp0ZXN0JzsKaW1wb3J0IGFzc2VydCBmcm9tICdub2RlOmFzc2VydC9zdHJpY3QnOwppbXBvcnQgZnMgZnJvbSAnbm9kZTpmcyc7CmltcG9ydCBwYXRoIGZyb20gJ25vZGU6cGF0aCc7Cgpjb25zdCByb290ID0gcGF0aC5yZXNvbHZlKGltcG9ydC5tZXRhLmRpcm5hbWUsICcuLicpOwoKY29uc3QgZXhwZWN0ZWQgPSBbCiAgJ3dlYi9hcHAvdWkuanMnLAogICd3ZWIvc2VydmljZXMvYXBpLmpzJywKICAnd2ViL2NvbXBvbmVudHMvY2hhcnRzL3JlZ2lzdHJ5LmpzJywKICAnd2ViL2NvbXBvbmVudHMvdGVybWluYWwvaW5kZXguanMnCl07Cgp0ZXN0KCdmcm9udGVuZCBjb3JlIGhhcyBleHBsaWNpdCBpbmZyYXN0cnVjdHVyZSBtb2R1bGVzJywgKCkgPT4gewogIGZvciAoY29uc3QgcmVsIG9mIGV4cGVjdGVkKSBhc3NlcnQuZXF1YWwoZnMuZXhpc3RzU3luYyhwYXRoLmpvaW4ocm9vdCwgcmVsKSksIHRydWUsIGBtaXNzaW5nICR7cmVsfWApOwp9KTsKCnRlc3QoJ2Zyb250ZW5kIG1haW4gZGVsZWdhdGVzIEFQSSwgY2hhcnQgbGlmZWN5Y2xlIGFuZCB0ZXJtaW5hbCBpbXBsZW1lbnRhdGlvbicsICgpID0+IHsKICBjb25zdCBzb3VyY2UgPSBmcy5yZWFkRmlsZVN5bmMocGF0aC5qb2luKHJvb3QsICd3ZWInLCAnYXBwJywgJ21haW4uanMnKSwgJ3V0ZjgnKTsKICBhc3NlcnQuZG9lc05vdE1hdGNoKHNvdXJjZSwgL2FzeW5jIGZ1bmN0aW9uIGFwaVwoLyk7CiAgYXNzZXJ0LmRvZXNOb3RNYXRjaChzb3VyY2UsIC9uZXcgVGVybWluYWxcKC8pOwogIGFzc2VydC5tYXRjaChzb3VyY2UsIC9jb25maWd1cmVBcGkvKTsKICBhc3NlcnQubWF0Y2goc291cmNlLCAvY3JlYXRlVGVybWluYWxDb250cm9sbGVyLyk7CiAgYXNzZXJ0Lm1hdGNoKHNvdXJjZSwgL2Rlc3Ryb3lDaGFydHMvKTsKfSk7Cg=='));
 
 console.log('[phase2/frontend-core] OK');
 console.log('[phase2/frontend-core] API, UI helpers, chart registry and terminal were extracted.');

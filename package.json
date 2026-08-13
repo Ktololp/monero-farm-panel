@@ -1,20 +1,24 @@
 {
   "name": "monero-farm-panel",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": true,
   "type": "module",
   "description": "Self-hosted web dashboard for monitoring and managing Monero / XMRig RandomX mining farms over SSH.",
   "scripts": {
-    "build:web": "node build.mjs",
+    "build:web": "npm run i18n:compile && node build.mjs",
     "start": "node src/start.js",
     "dev": "node --watch src/start.js",
-    "check": "node scripts/check-project.mjs",
-    "test": "node --test"
+    "check": "node scripts/check-project.mjs && node scripts/check-i18n.mjs",
+    "test": "node --test",
+    "i18n:extract": "lingui extract --clean --overwrite --workers 1",
+    "i18n:compile": "lingui compile --strict --workers 1",
+    "i18n:check": "node scripts/check-i18n.mjs"
   },
   "engines": {
     "node": ">=20"
   },
   "dependencies": {
+    "@lingui/core": "6.6.0",
     "better-sqlite3": "12.2.0",
     "compression": "1.8.1",
     "express": "5.1.0",
@@ -23,10 +27,17 @@
     "ssh2": "1.17.0"
   },
   "devDependencies": {
+    "@babel/core": "7.29.7",
+    "@babel/generator": "7.29.7",
+    "@babel/parser": "7.29.7",
+    "@babel/traverse": "7.29.7",
+    "@lingui/babel-plugin-lingui-macro": "6.6.0",
+    "@lingui/cli": "6.6.0",
+    "@lingui/format-po": "6.6.0",
     "@xterm/addon-fit": "0.10.0",
     "@xterm/xterm": "5.5.0",
     "chart.js": "4.5.0",
-    "esbuild": "0.25.8"
+    "esbuild": "0.28.1"
   },
   "license": "MIT",
   "keywords": [

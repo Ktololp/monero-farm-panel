@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const read=f=>fs.readFileSync(path.join(root,f),'utf8');
+const poIds=file=>new Set([...read(file).matchAll(/^msgid "([^"]+)"$/gm)].map(m=>m[1]).filter(Boolean));
+test('Lingui RU and EN catalogs contain the same stable IDs',()=>{const en=poIds('web/locales/en/messages.po'),ru=poIds('web/locales/ru/messages.po');assert.deepEqual([...ru].sort(),[...en].sort());assert.ok(en.size>100);});
+test('compiled Lingui catalogs are native ESM',async()=>{for(const l of ['en','ru']){const rel=`web/locales/${l}/messages.mjs`,file=path.join(root,rel),src=read(rel),mod=await import(pathToFileURL(file).href);assert.ok(mod.messages&&typeof mod.messages==='object');assert.equal(src.includes('module.exports'),false);}});
+test('legacy custom JS dictionaries are gone',()=>{assert.equal(fs.existsSync(path.join(root,'web/i18n/ru.js')),false);assert.equal(fs.existsSync(path.join(root,'web/i18n/en.js')),false);});

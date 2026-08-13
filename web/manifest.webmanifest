@@ -1,5 +1,5 @@
 {
-  "name": "Панель управления Monero-фермой",
+  "name": "Monero Farm Panel",
   "short_name": "MFP",
   "start_url": "/",
   "display": "standalone",

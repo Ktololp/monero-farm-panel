@@ -1,0 +1,2000 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: monero-farm-panel\\n"
+"Language: ru\\n"
+"MIME-Version: 1.0\\n"
+"Content-Type: text/plain; charset=UTF-8\\n"
+"Content-Transfer-Encoding: 8bit\\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.graceRemaining"
+msgstr " ещё ~{seconds} сек."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/terminal.js
+msgid "terminal.closed"
+msgstr "[SSH-сессия закрыта]"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.performance.cpuThreads"
+msgstr "{count} CPU threads"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.samples"
+msgstr "{count} образцов"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.usdIncome"
+msgstr "{day}/сут · {month}/30д"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.backServers"
+msgstr "← Серверы"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.installProxy"
+msgstr "⇄ Установить XMRig Proxy"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/action.js
+msgid "action.addServer"
+msgstr "+ Сервер"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.xmrDay"
+msgstr "≈ {value} XMR/сут"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.config.openTerminal"
+msgstr "⌨ Открыть SSH-терминал"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.terminal"
+msgstr "⌨ Терминал"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.monerodSync"
+msgstr "◉ Синхронизация monerod"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.switchProxy"
+msgstr "⚡ Перевести XMRig на XMRig Proxy"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.proxyRouted"
+msgstr "✓ XMRig уже через Proxy"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.enableP2pool"
+msgstr "🟠 Включить P2Pool аналитику"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.p2poolAnalytics"
+msgstr "🟠 P2Pool аналитика"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.section.health.text"
+msgstr "Оценка 0–100 по каждому серверу и всей ферме: online/offline, деградация хешрейта, температура, rejected shares, сеть, monerod и свежие ошибки."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.system.pages1g"
+msgstr "Количество 1 GB pages"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.pages1gCount"
+msgstr "Количество 1 GB Pages"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.section.xmrig.text"
+msgstr "Хешрейт 10s/60s/15m, uptime, accepted/rejected, pool, версия, логи и управление."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.system.pages2mApplied"
+msgstr "2 MB Huge Pages применены"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.system.hugePagesHint"
+msgstr "2 MB pages применяются через sysctl. 1 GB pages меняют GRUB и требуют перезагрузки."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.system.pages2m"
+msgstr "Количество 2 MB pages"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.market24h"
+msgstr "24ч: {change} · CoinGecko"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.subtitle"
+msgstr "Коротко и понятно о функциях Monero Farm Panel"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.p2poolRollback"
+msgstr "Перед изменением startup-файла создаётся backup; при неудачном перезапуске изменение откатывается."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/profile.js
+msgid "profile.eco.description"
+msgstr "Около 65% потоков. Меньше нагрев и энергопотребление, ниже хешрейт."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/profile.js
+msgid "profile.balanced.description"
+msgstr "Около 85% автоматически доступных потоков, нормальная отзывчивость SSH и системных служб."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/audit.js
+msgid "audit.action"
+msgstr "Действие"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.activeAlerts"
+msgstr "Активные оповещения"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.alertsHelp"
+msgstr "Активные предупреждения, которые требуют внимания."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/audit.js
+msgid "audit.title"
+msgstr "Журнал действий"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.section.audit.title"
+msgstr "Журнал"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/nav.js
+msgid "nav.audit"
+msgstr "Журнал"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.add"
+msgstr "Добавить"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/proxy.js
+msgid "proxy.addServerFirst"
+msgstr "Сначала добавьте сервер."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.addTitle"
+msgstr "Добавить сервер"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.addFirstServer"
+msgstr "Добавьте первый сервер"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.address"
+msgstr "Адрес"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.advanced"
+msgstr "Дополнительно · обычно определяется автоматически"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.afterAdd"
+msgstr "После добавления панель автоматически попробует определить реальный XMRig binary, config.json, systemd service, p2pool и monerod."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.section.recovery.text"
+msgstr "После grace period может автоматически восстановить XMRig при устойчивом сбое и соблюдает cooldown, чтобы не создать restart-loop."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.alertCooldown"
+msgstr "Cooldown алертов, секунд"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.alerts"
+msgstr "Алерты"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/bootstrap.js
+msgid "bootstrap.installP2pool"
+msgstr "Также установить p2pool"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.apiUnavailable"
+msgstr "API недоступен"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.performance.applied"
+msgstr "Применён"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.performance.apply"
+msgstr "Применить"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.config.applyGlobal"
+msgstr "Применить глобальный XMRig config"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.system.applyNow"
+msgstr "Применить сейчас"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.applyAll"
+msgstr "Сразу применить глобальный XMRig config ко всем серверам"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.performance.confirm"
+msgstr "Применить профиль и перезапустить майнинг?"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/operations.js
+msgid "operations.applySelected"
+msgstr "Применить к выбранным"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.healthAttention"
+msgstr "Внимание"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.section.audit.text"
+msgstr "Audit log действий: кто и когда менял настройки, запускал операции и управлял серверами."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.auth"
+msgstr "Авторизация"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.system.autoFix"
+msgstr "Исправить автоматически"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.section.recovery.title"
+msgstr "Auto Recovery"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.discover"
+msgstr "Автоопределить"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.system.discover"
+msgstr "Автоопределить"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.system.discoveryTitle"
+msgstr "Автоопределение и исправление"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.proxyAuto"
+msgstr "Автоопределение localhost API"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.system.discoveryDone"
+msgstr "Автоопределение завершено"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.system.discoveryEmpty"
+msgstr "Автоопределение ещё не выполнялось"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.section.income.text"
+msgstr "Автоматическая оценка XMR/сутки и USD/сутки/30 дней по текущему хешрейту, сложности сети, награде блока и курсу XMR. Это оценка, а не гарантия дохода."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.autoApplyPool"
+msgstr "Автоприменение кошелька/пула"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.autoCheckUpdates"
+msgstr "Автопроверка обновлений"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.section.proxy.text"
+msgstr "Автоматически обнаруживает и устанавливает XMRig Proxy. Безопасное переключение делает backup config, меняет pool и автоматически откатывается, если хешрейт не восстановится."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.tab.automation"
+msgstr "Автоматика"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.system.available"
+msgstr "доступен"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/jobs.js
+msgid "jobs.title"
+msgstr "Фоновые задачи"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/profile.js
+msgid "profile.balanced.name"
+msgstr "Баланс"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.baseline"
+msgstr "Базовая норма"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.section.baseline.title"
+msgstr "Базовая норма"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.baseline"
+msgstr "Базовая норма"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/servers.js
+msgid "servers.baseline"
+msgstr "Базовая норма"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.performance.detectorText"
+msgstr "Базовая норма — автоматически изученный обычный хешрейт именно этого сервера. По умолчанию панель берёт успешные 60s-замеры за последние 24 часа, отбрасывает нижнюю нестабильную четверть и после минимум 12 замеров вычисляет устойчивое значение. Пока данных мало, показывается «обучение». Алерт создаётся, когда текущий 60s-хешрейт падает ниже нормы на заданный в настройках процент."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.p2poolBasic"
+msgstr "Базовый статус доступен; Data API не обнаружен"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.config.bootstrap"
+msgstr "Bootstrap / переустановка"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/bootstrap.js
+msgid "bootstrap.completed"
+msgstr "Bootstrap завершён"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/proxy.js
+msgid "proxy.defaultPorts"
+msgstr "По умолчанию Proxy слушает 0.0.0.0:3334, а HTTP API — только 127.0.0.1:60051. После установки майнер можно безопасно переключить отдельной кнопкой."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/login.js
+msgid "login.subtitle"
+msgstr "Централизованное управление RandomX / XMRig / p2pool"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.checkNetwork"
+msgstr "Проверять сеть"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/updates.js
+msgid "updates.checkNow"
+msgstr "Проверить сейчас"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/updates.js
+msgid "updates.checking"
+msgstr "Проверяю официальные релизы…"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.section.updates.text"
+msgstr "Проверка версий компонентов и фоновые rolling-операции. Linux/Docker host может использовать mfp update/backup/rollback."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.components"
+msgstr "Компоненты"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.tab.components"
+msgstr "Компоненты"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.config.configApplied"
+msgstr "Конфиг применён"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.configPath"
+msgstr "Путь config.json"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.system.pages1gConfirm"
+msgstr "Настроить {count} × 1 GB Huge Pages в GRUB? Изменение вступит в силу после перезагрузки."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.system.configureBoot"
+msgstr "Настроить при загрузке"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/socket.js
+msgid "socket.connected"
+msgstr "подключено"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.connecting"
+msgstr "Подключение…"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/audit.js
+msgid "audit.subtitle"
+msgstr "Подключения, автоматика, изменения и ошибки"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.cooldownSeconds"
+msgstr "Cooldown, секунд"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.cpuTemperature"
+msgstr "Температура CPU"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.healthCritical"
+msgstr "Критично"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.tempCritical"
+msgstr "Критическая температура, °C"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/updates.js
+msgid "updates.status.current"
+msgstr "актуально"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.xmrUsdHelp"
+msgstr "Текущий ориентировочный курс Monero по данным CoinGecko."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.performance.currentVsBaseline"
+msgstr "Сейчас: {current} · базовая норма: {baseline}"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.performance.current"
+msgstr "Текущий: {profile}. Перед изменением XMRig config автоматически резервируется."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.config.sshCommand"
+msgstr "Произвольная SSH-команда"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/time.js
+msgid "time.dayShort"
+msgstr "д"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.title"
+msgstr "Дашборд"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.section.dashboard.title"
+msgstr "Дашборд"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/header.js
+msgid "header.dashboard"
+msgstr "Дашборд"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/nav.js
+msgid "nav.dashboard"
+msgstr "Дашборд"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.p2poolHelp"
+msgstr "Децентрализованный пул Monero. Расширенная аналитика появляется при запуске p2pool с --data-api и --local-api."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.defaultProfile"
+msgstr "Профиль по умолчанию"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.degradation"
+msgstr "Деградация"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.performance.detector"
+msgstr "Детектор деградации"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/status.js
+msgid "status.degraded"
+msgstr "частично"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.delete"
+msgstr "Удалить"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.deleteConfirm"
+msgstr "Удалить {name}?"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/audit.js
+msgid "audit.details"
+msgstr "Детали"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/proxy.js
+msgid "proxy.direct"
+msgstr "напрямую"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.system.msrOffConfirm"
+msgstr "Отключить MSR для XMRig и перезапустить сервис?"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/socket.js
+msgid "socket.disconnected"
+msgstr "нет связи"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.dnsHost"
+msgstr "DNS host для проверки"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.agentHelp"
+msgstr "Ключ в форму не вставляется. Он должен быть загружен в ssh-agent центральной ноды."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.title"
+msgstr "Документация"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/nav.js
+msgid "nav.docs"
+msgstr "Документация"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/bootstrap.js
+msgid "bootstrap.done"
+msgstr "Готово"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/operations.js
+msgid "operations.doneErrors"
+msgstr "Готово, ошибок: {count}"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.hashDrop"
+msgstr "Падение от базовой нормы, %"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/profile.js
+msgid "profile.eco.name"
+msgstr "Эко"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.editTitle"
+msgstr "Редактировать сервер"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.config.editServer"
+msgstr "Редактировать сервер"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.sudoEmpty"
+msgstr "пусто = sudo -n"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.p2poolTitle"
+msgstr "Как включить расширенную P2Pool-аналитику"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.enableP2poolConfirm"
+msgstr "Включить расширенную P2Pool аналитику автоматически?\n"
+"\n"
+"Панель добавит --data-api и --local-api в автозапуск P2Pool, сделает backup и перезапустит сервис. Майнинг может прерваться примерно на 1–2 минуты. При неудаче startup-файл будет восстановлен."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.telegramEnable"
+msgstr "Включить Telegram-уведомления"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.proxyTitle"
+msgstr "Как включить XMRig Proxy API"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.proxyText"
+msgstr "В config.json xmrig-proxy включи HTTP API на 127.0.0.1. Панель пытается определить порт и access-token из локального config.json на сервере и обращается к API через SSH."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.autoRecoveryText"
+msgstr "По умолчанию включено. После grace period панель ждёт несколько последовательных сбоев XMRig/нулевого хешрейта и только затем перезапускает указанный XMRig/mining systemd service. Между попытками действует cooldown, поэтому restart-loop не создаётся."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.enabling"
+msgstr "Включение…"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.error"
+msgstr "ОШИБКА"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.income"
+msgstr "Оценка дохода"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.section.income.title"
+msgstr "Оценка дохода"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.incomeHelp"
+msgstr "Предполагаемый доход по текущему хешрейту, сложности сети и награде последнего блока. Это оценка, а не гарантия выплаты."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.healthExcellent"
+msgstr "Отлично"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.config.execute"
+msgstr "Выполнить"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.p2poolUnavailable"
+msgstr "Расширенная аналитика P2Pool пока недоступна. Панель может включить официальный Data API автоматически, сохранить изменение в автозапуске и перезапустить mining/p2pool service."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.failuresBeforeRestart"
+msgstr "Неудачных проверок до restart"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.chartFarm"
+msgstr "Ферма"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.farm"
+msgstr "Ферма"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.chartTitle"
+msgstr "Хешрейт всей фермы"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/header.js
+msgid "header.monitoring"
+msgstr "Мониторинг фермы"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.section.dashboard.text"
+msgstr "Главное состояние фермы: общий хешрейт, предполагаемый доход, Fleet Health Score, курс XMR/USD и активные алерты."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.chartTooltip"
+msgstr "Ферма: {hash}"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.fleetHealth"
+msgstr "Состояние фермы"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.section.health.title"
+msgstr "Fleet Health Score"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.healthHelp"
+msgstr "Сводная оценка здоровья фермы 0–100: доступность, хешрейт относительно базовой нормы, температура, rejected shares, сеть и синхронизация monerod."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.graceRecommendation"
+msgstr "Для цепочки mining.service → monerod → sleep → p2pool → XMRig рекомендуемый grace period — не меньше 60–90 секунд."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.found"
+msgstr "Найдено: {value}"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.globalXmrig"
+msgstr "Глобальный XMRig"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.graceSeconds"
+msgstr "Grace period после старта, секунд"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.grace"
+msgstr "Grace period: сервис запускается, алерты и автовосстановление временно подавлены{remaining}."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/time.js
+msgid "time.hourShort"
+msgstr "ч"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.hashrate"
+msgstr "Хешрейт"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.maxCpuHelp"
+msgstr "Самая высокая текущая температура CPU среди серверов."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.historyDays"
+msgstr "Хранить историю, дней"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.host"
+msgstr "Хост/IP"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.howToText"
+msgstr "Наведи курсор на маленький значок рядом с функцией — появится короткое объяснение. Здесь собраны те же функции чуть подробнее."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.serversHelp"
+msgstr "Сколько серверов сейчас в сети из общего количества."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.howTo"
+msgstr "Как пользоваться"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.system.pagesConfigured"
+msgstr "Huge Pages настроены"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.system.pagesReboot"
+msgstr "Huge Pages настроены. Требуется перезагрузка."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.hugePagesXmrig"
+msgstr "Huge Pages в XMRig"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.icon"
+msgstr "Иконка"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/proxy.js
+msgid "proxy.install"
+msgstr "Установить"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.installProxyConfirm"
+msgstr "Установить последний стабильный официальный XMRig Proxy?\n"
+"\n"
+"Stratum: 0.0.0.0:3334\n"
+"HTTP API: 127.0.0.1:60051\n"
+"Upstream: из Настройки → Майнинг\n"
+"\n"
+"Существующий XMRig автоматически переключён НЕ будет."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/proxy.js
+msgid "proxy.installConfirm"
+msgstr "Установить официальный XMRig Proxy на этот сервер?\n"
+"\n"
+"Stratum: 0.0.0.0:3334\n"
+"HTTP API: 127.0.0.1:60051\n"
+"Upstream: из Настройки → Майнинг\n"
+"\n"
+"Текущий XMRig автоматически переключён НЕ будет."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/proxy.js
+msgid "proxy.installTitle"
+msgstr "Установить XMRig Proxy"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/proxy.js
+msgid "proxy.installNote"
+msgstr "Установка не меняет существующий XMRig и не открывает firewall автоматически."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/bootstrap.js
+msgid "bootstrap.running"
+msgstr "Установка выполняется…"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/proxy.js
+msgid "proxy.subtitle"
+msgstr "Установка, безопасное переключение XMRig, workers, hashrate и upstream-соединения"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/updates.js
+msgid "updates.installed"
+msgstr "Установлено"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/proxy.js
+msgid "proxy.installing"
+msgstr "Установка…"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.installing"
+msgstr "Установка…"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/bootstrap.js
+msgid "bootstrap.description"
+msgstr "Устанавливает зависимости, собирает XMRig, создаёт systemd service и включает localhost API. Используйте для нового Ubuntu-сервера; для существующего майнера обычно достаточно «Исправить автоматически»."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.section.terminal.text"
+msgstr "Интерактивный терминал в браузере через SSH-соединение панели."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/app.js
+msgid "app.language"
+msgstr "Язык интерфейса"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.securityText"
+msgstr "XMRig/XMRig Proxy API рекомендуется оставлять на localhost. Не выставляй панель напрямую в Интернет без VPN или защищённого reverse proxy."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.keySaved"
+msgstr "ключ сохранён"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/updates.js
+msgid "updates.lastCheck"
+msgstr "Последняя проверка"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.training"
+msgstr "обучение {current}/{required}"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.training"
+msgstr "обучение {current}/{required}"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.baselineWindow"
+msgstr "Окно обучения, часов"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.system.loaded"
+msgstr "загружен"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.logs.loading"
+msgstr "Загрузка…"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.monerodHelp"
+msgstr "Локальный monerod: синхронизация, peers, сложность сети и награда блока."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.p2poolAnalyticsHelp"
+msgstr "Локальный хешрейт P2Pool, shares, effort, miners и глобальные данные sidechain из встроенного Data API."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/proxy.js
+msgid "proxy.workersHelp"
+msgstr "Логические workers, которые Proxy видит по подключениям."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/api.js
+msgid "api.loginRequired"
+msgstr "Требуется вход"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.tab.logs"
+msgstr "Логи"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/api.js
+msgid "api.backendUnavailable"
+msgstr "Потеряна связь с backend панели. Проверьте окно START_WINDOWS и data/panel-crash.log."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/time.js
+msgid "time.minuteShort"
+msgstr "м"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.tab.config"
+msgstr "Управление"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/login.js
+msgid "login.masterPassword"
+msgstr "Мастер-пароль"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.maxCpu"
+msgstr "Макс. CPU"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/profile.js
+msgid "profile.maximum.name"
+msgstr "Максимум"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/profile.js
+msgid "profile.maximum.description"
+msgstr "Максимальный RandomX-хешрейт. XMRig получает до 100% автоматически доступных потоков; отзывчивость системы ниже."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.section.servers.text"
+msgstr "Список майнеров. Панель подключается по SSH, поэтому отдельный агент на майнерах не нужен."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/nav.js
+msgid "nav.topologyTip"
+msgstr "Схема связей майнеров, пулов и узлов"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.miners"
+msgstr "Майнеры"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/servers.js
+msgid "servers.subtitle"
+msgstr "Майнеры, sparklines и быстрый SSH"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.baselineSamples"
+msgstr "Минимум замеров для обучения"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.tab.mining"
+msgstr "Майнинг"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.autoRecovery"
+msgstr "Автовосстановление майнинга"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/topology.js
+msgid "topology.subtitle"
+msgstr "Путь майнинга и состояние каждого звена"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.subtitle"
+msgstr "Майнинг, автоматика, сеть и оповещения"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.section.monerod.title"
+msgstr "monerod"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.monerodRpc"
+msgstr "RPC monerod"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.monerodService"
+msgstr "Сервис monerod"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.system.msrNetwork"
+msgstr "MSR и сеть"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.system.msrOff"
+msgstr "MSR отключён"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.system.msrOn"
+msgstr "MSR включён"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.name"
+msgstr "Название"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/updates.js
+msgid "updates.status.newer"
+msgstr "новее latest"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.system.no"
+msgstr "нет"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.noAlerts"
+msgstr "Активных оповещений нет"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.system.noFixes"
+msgstr "Исправления не требуются"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/jobs.js
+msgid "jobs.empty"
+msgstr "Задач нет"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/servers.js
+msgid "servers.empty"
+msgstr "Серверов пока нет"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/proxy.js
+msgid "proxy.noWorkers"
+msgstr "Workers пока нет"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/updates.js
+msgid "updates.notDetected"
+msgstr "не определено"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.notFound"
+msgstr "не найден"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.system.notLoaded"
+msgstr "не загружен"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.notSet"
+msgstr "не задан"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.section.alerts.title"
+msgstr "Оповещения"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.tab.notifications"
+msgstr "Оповещения"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/updates.js
+msgid "updates.subtitle"
+msgstr "Проверка официальных релизов и rolling update"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/status.js
+msgid "status.offline"
+msgstr "не в сети"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.offlineSeconds"
+msgstr "Offline alert после, секунд"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/status.js
+msgid "status.online"
+msgstr "в сети"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/proxy.js
+msgid "proxy.openServer"
+msgstr "Открыть сервер"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.openServers"
+msgstr "Открыть серверы"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/servers.js
+msgid "servers.openSsh"
+msgstr "Открыть SSH"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.privateKeyLabel"
+msgstr "Приватный ключ OpenSSH/PEM"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.section.operations.title"
+msgstr "Операции"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/nav.js
+msgid "nav.operations"
+msgstr "Операции"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/operations.js
+msgid "operations.title"
+msgstr "Операции"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.tab.overview"
+msgstr "Обзор"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.section.p2pool.title"
+msgstr "P2Pool аналитика"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.p2poolEnabled"
+msgstr "P2Pool аналитика включена"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.p2poolAlready"
+msgstr "P2Pool аналитика уже включена"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.p2poolService"
+msgstr "Сервис p2pool"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/nav.js
+msgid "nav.auditTip"
+msgstr "Журнал действий панели"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.passphrase"
+msgstr "Парольная фраза"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.password"
+msgstr "Пароль"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.tab.performance"
+msgstr "Производительность"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.performance.title"
+msgstr "Профиль производительности"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/operations.js
+msgid "operations.profiles"
+msgstr "Профили производительности"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.section.operations.text"
+msgstr "Профили производительности, rolling restart, rolling update XMRig, Huge Pages, MSR, Auto Fix и удалённые команды."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.pool"
+msgstr "Пул"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.poolUnknown"
+msgstr "пул не определён"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.poolPassword"
+msgstr "Пароль пула"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.poolTls"
+msgstr "TLS пула"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.xmrigHelp"
+msgstr "Основной майнер. Показываются хешрейт, версия, shares и текущий pool."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.privateKey"
+msgstr "Приватный ключ"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.healthProblems"
+msgstr "Проблемы"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/servers.js
+msgid "servers.profile"
+msgstr "Профиль"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/operations.js
+msgid "operations.profileApplied"
+msgstr "Профиль применён"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.performance.done"
+msgstr "Профиль применён"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/proxy.js
+msgid "proxy.apiBlocked"
+msgstr "API Proxy недоступен — переключение заблокировано"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.config.quickActions"
+msgstr "Быстрые действия"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/nav.js
+msgid "nav.docsTip"
+msgstr "Краткое описание всех функций панели"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.subtitle"
+msgstr "Состояние фермы в реальном времени"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.refresh"
+msgstr "Обновить"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/proxy.js
+msgid "proxy.refresh"
+msgstr "Обновить"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.refreshing"
+msgstr "Запрашиваю свежие данные…"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.resetHostKey"
+msgstr "Сбросить сохранённый SSH host key"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.config.restart"
+msgstr "Перезапустить майнинг"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.config.restartStarted"
+msgstr "Перезапуск запущен; действует grace period"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/operations.js
+msgid "operations.restartHint"
+msgstr "Последовательно перезапускает указанный XMRig/mining service и ждёт окончания grace period и появления хешрейта."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/operations.js
+msgid "operations.rollingHint"
+msgstr "Rolling-операции выполняются строго по одному серверу: следующий начинается только после возврата предыдущего в online."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/operations.js
+msgid "operations.restartStarted"
+msgstr "Rolling restart запущен"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/updates.js
+msgid "updates.started"
+msgstr "Rolling update запущен"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/updates.js
+msgid "updates.rollingTo"
+msgstr "Rolling update до {version}"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/proxy.js
+msgid "proxy.switch"
+msgstr "Перевести XMRig на XMRig Proxy"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/proxy.js
+msgid "proxy.switchConfirm"
+msgstr "Перевести XMRig на XMRig Proxy?\n"
+"\n"
+"Панель сделает backup config.json, заменит pool на 127.0.0.1:3334 и перезапустит майнинг. Если хешрейт не восстановится, исходный config будет возвращён автоматически.\n"
+"\n"
+"Операция может занять 1–4 минуты."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.switchProxyConfirm"
+msgstr "Перевести XMRig на XMRig Proxy?\n"
+"\n"
+"Панель сделает backup config.json, переключит pool на 127.0.0.1:3334 и перезапустит майнинг. Если хешрейт не восстановится, исходный config будет возвращён автоматически.\n"
+"\n"
+"Операция может занять 1–4 минуты."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.rpcUnavailable"
+msgstr "Статус RPC недоступен"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/operations.js
+msgid "operations.subtitle"
+msgstr "Безопасные массовые действия и профили производительности"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.save"
+msgstr "Сохранить"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.save"
+msgstr "Сохранить"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.saved"
+msgstr "сохранён"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.savedErrors"
+msgstr "Сохранено, ошибок применения: {count}"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.system.searching"
+msgstr "Ищу компоненты…"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.securityTitle"
+msgstr "Безопасность"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/operations.js
+msgid "operations.selectAtLeastOne"
+msgstr "Выберите хотя бы один сервер"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/operations.js
+msgid "operations.selectServersError"
+msgstr "Выберите серверы"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/updates.js
+msgid "updates.selectServers"
+msgstr "Выберите серверы"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/audit.js
+msgid "audit.server"
+msgstr "Сервер"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.server"
+msgstr "Сервер"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/updates.js
+msgid "updates.server"
+msgstr "Сервер"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/operations.js
+msgid "operations.selectServers"
+msgstr "Выбор серверов"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.servers"
+msgstr "Серверы"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.section.servers.title"
+msgstr "Серверы"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/nav.js
+msgid "nav.servers"
+msgstr "Серверы"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/servers.js
+msgid "servers.title"
+msgstr "Серверы"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/nav.js
+msgid "nav.settings"
+msgstr "Настройки"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.title"
+msgstr "Настройки"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.saved"
+msgstr "Настройки сохранены"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.section.p2pool.text"
+msgstr "Показывает local 15m/1h/24h hashrate, shares found/failed, effort, workers и статистику sidechain. Data API можно включить автоматически с backup и безопасным restart."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/login.js
+msgid "login.submit"
+msgstr "Войти"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/login.js
+msgid "login.title"
+msgstr "Вход"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/auth.js
+msgid "auth.logout"
+msgstr "Выйти"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.system.size"
+msgstr "Размер"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.agent"
+msgstr "SSH-агент"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.sshPassword"
+msgstr "SSH-пароль"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.sshPasswordPlaceholder"
+msgstr "пароль SSH"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.sshPort"
+msgstr "SSH-порт"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.sshTerminal"
+msgstr "SSH-терминал"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.section.terminal.title"
+msgstr "SSH-терминал"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.terminalTitle"
+msgstr "SSH-терминал"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/bootstrap.js
+msgid "bootstrap.start"
+msgstr "Запустить"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.p2poolText"
+msgstr "Запускай P2Pool с параметрами --data-api /путь/к/api --local-api. Панель найдёт путь в аргументах процесса и прочитает JSON локально через SSH. Публиковать эти файлы в Интернет не нужно."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/operations.js
+msgid "operations.startRestart"
+msgstr "Запустить rolling restart"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/operations.js
+msgid "operations.restartConfirm"
+msgstr "Запустить последовательный перезапуск выбранных серверов?"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/component.js
+msgid "component.starting"
+msgstr "запуск"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/status.js
+msgid "status.starting"
+msgstr "запуск"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.proxyStatsHelp"
+msgstr "Статистика берётся из локального HTTP API xmrig-proxy: summary и workers."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/audit.js
+msgid "audit.status"
+msgstr "Статус"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.status"
+msgstr "Статус"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.status"
+msgstr "Статус"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/updates.js
+msgid "updates.status"
+msgstr "Статус"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.sudoPassword"
+msgstr "Пароль sudo"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.total60sHelp"
+msgstr "Сумма 60-секундного хешрейта всех серверов."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/proxy.js
+msgid "proxy.switching"
+msgstr "Переключение…"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.switching"
+msgstr "Переключение…"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/topology.js
+msgid "topology.syncUnknown"
+msgstr "sync ?"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.section.monerod.text"
+msgstr "Синхронизация, height, peers, network difficulty и награда последнего блока."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.synced"
+msgstr "Синхронизировано"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.tab.system"
+msgstr "Система"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.tab.system"
+msgstr "Система"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.testSsh"
+msgstr "Проверить SSH"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.monerodSyncHelp"
+msgstr "Для оценки дохода панель также использует текущую network difficulty и награду последнего блока."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.system.discoveryHint"
+msgstr "Панель сама ищет запущенный XMRig, config.json, systemd unit, p2pool и monerod. «Исправить автоматически» делает backup перед изменениями."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/proxy.js
+msgid "proxy.installHelp"
+msgstr "Панель скачает последний стабильный официальный linux-static-x64 релиз, проверит SHA256, создаст config.json и systemd service. Повторная установка уже запущенного Proxy блокируется и в интерфейсе, и на сервере."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.section.baseline.text"
+msgstr "Панель изучает обычный 60s-хешрейт сервера и использует его для детектора деградации."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.system.autoFixConfirm"
+msgstr "Панель проверит API XMRig, lm-sensors, Huge Pages/MSR в config и применит безопасные исправления с backup. Продолжить?"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/operations.js
+msgid "operations.profilesHint"
+msgstr "Профиль применяется к выбранным серверам с backup config.json и рестартом."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.proxyHelp"
+msgstr "Прокси объединяет подключения майнеров и показывает отдельную статистику по workers и upstream-соединениям."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.config.sshHint"
+msgstr "Для ручной настройки удобнее терминал. Это поле оставлено для одноразовых команд без интерактивного ввода."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/proxy.js
+msgid "proxy.processNoApi"
+msgstr "Процесс XMRig Proxy найден, но HTTP API недоступен. Переключение XMRig заблокировано, пока API не станет доступен."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/audit.js
+msgid "audit.time"
+msgstr "Время"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.section.topology.title"
+msgstr "Топология"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/nav.js
+msgid "nav.topology"
+msgstr "Топология"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/topology.js
+msgid "topology.title"
+msgstr "Топология"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.total60s"
+msgstr "Общий 60s"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.chartSubtitle"
+msgstr "Сумма 60s, последние 24 часа"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/proxy.js
+msgid "proxy.hashrateHelp"
+msgstr "Суммарный хешрейт через XMRig Proxy."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/ui.js
+msgid "ui.renderError"
+msgstr "Ошибка интерфейса: {error}"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/status.js
+msgid "status.unknown"
+msgstr "неизвестно"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/updates.js
+msgid "updates.status.unknown"
+msgstr "неизвестно"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/updates.js
+msgid "updates.status.update"
+msgstr "есть обновление"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/updates.js
+msgid "updates.title"
+msgstr "Центр обновлений"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.updateInterval"
+msgstr "Интервал обновлений, часов"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/updates.js
+msgid "updates.confirm"
+msgstr "Последовательно обновить XMRig до {version}? Сборка на каждом сервере может занять несколько минут."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.section.updates.title"
+msgstr "Обновления"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/nav.js
+msgid "nav.updates"
+msgstr "Обновления"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.username"
+msgstr "Логин"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/proxy.js
+msgid "proxy.viaProxy"
+msgstr "через Proxy"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.section.topology.text"
+msgstr "Наглядно показывает цепочку майнер → pool/P2Pool → monerod и состояния компонентов."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/dashboard.js
+msgid "dashboard.waitMonerod"
+msgstr "ожидание данных monerod"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.tempWarning"
+msgstr "Температура предупреждения, °C"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.section.alerts.text"
+msgstr "Предупреждения о температуре, offline, деградации хешрейта и других проблемах. Поддерживается Telegram."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.wallet"
+msgstr "XMR-кошелёк"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.section.xmrig.title"
+msgstr "XMRig"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/proxy.js
+msgid "proxy.alreadyRouted"
+msgstr "XMRig уже использует XMRig Proxy"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/proxy.js
+msgid "proxy.alreadyUses"
+msgstr "XMRig уже использует XMRig Proxy"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.proxyAlready"
+msgstr "XMRig уже использует XMRig Proxy"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.xmrigApi"
+msgstr "Порт API XMRig"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.xmrigNotFound"
+msgstr "XMRig не найден"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/updates.js
+msgid "updates.xmrigServers"
+msgstr "XMRig на серверах"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/docs.js
+msgid "docs.section.proxy.title"
+msgstr "XMRig Proxy"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.proxyInstalled"
+msgstr "XMRig Proxy {version} установлен"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/proxy.js
+msgid "proxy.installed"
+msgstr "XMRig Proxy {version} установлен · порт {port}"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/proxy.js
+msgid "proxy.upstreamsHelp"
+msgstr "Соединения XMRig Proxy с upstream pool/P2Pool."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/proxy.js
+msgid "proxy.alreadyInstalled"
+msgstr "XMRig Proxy уже установлен"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/proxy.js
+msgid "proxy.serverHelp"
+msgstr "XMRig Proxy на этом сервере. Повторная установка не предлагается. Для перевода майнера используется отдельная операция с backup и автоматическим rollback."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/nav.js
+msgid "nav.proxyTip"
+msgstr "XMRig Proxy: воркеры, хешрейт, shares и upstream"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/updates.js
+msgid "updates.rollingHint"
+msgstr "Rolling update XMRig собирает официальный исходный код выбранной версии на каждом майнере, сохраняет backup текущего бинарника и переходит дальше только после health-check хешрейта. Если новая версия не поднимается, панель пытается автоматически вернуть предыдущий бинарник."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/proxy.js
+msgid "proxy.routed"
+msgstr "XMRig переведён на XMRig Proxy"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.proxySwitched"
+msgstr "XMRig переведён на XMRig Proxy"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/settings.js
+msgid "settings.bootstrapVersion"
+msgstr "Версия XMRig для bootstrap"
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.proxyDetectedNoApi"
+msgstr "xmrig-proxy найден, но localhost HTTP API недоступен."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server.js
+msgid "server.components.proxyAbsent"
+msgstr "xmrig-proxy на сервере не обнаружен."
+
+#. js-lingui-explicit-id
+#: web/i18n/messages/server-form.js
+msgid "serverForm.xmrigService"
+msgstr "Сервис XMRig/mining"

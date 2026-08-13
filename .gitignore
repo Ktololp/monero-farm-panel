@@ -41,3 +41,8 @@ Thumbs.db
 *.zip
 *.sha256
 release/
+
+# Lingui compiled catalogs
+
+# Lingui compiled ESM catalogs (compileNamespace: es)
+web/locales/*/messages.mjs

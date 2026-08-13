@@ -33,14 +33,19 @@ test('P2Pool analytics has one-click persistent enablement and rollback', () => 
 });
 
 test('API and frontend expose dummy-proof safety actions', () => {
-  const api = read('src/api/router.js');
-  const server = read('web/pages/server/index.js');
-  const proxy = read('web/pages/proxies/index.js');
+  const api = read('src/api/router.js'),
+    server = read('web/pages/server/index.js'),
+    proxy = read('web/pages/proxies/index.js'),
+    messages = read('web/i18n/messages/server.js');
   assert.match(api, /actions\/xmrig-to-proxy/);
   assert.match(api, /actions\/enable-p2pool-analytics/);
-  assert.match(server, /Включить P2Pool аналитику/);
-  assert.match(proxy, /Перевести XMRig на XMRig Proxy/);
-  assert.match(proxy, /XMRig Proxy уже установлен/);
+  assert.match(server, /actions\/enable-p2pool-analytics/);
+  assert.match(server, /server\.components\.enableP2pool/);
+  assert.match(messages, /server\.components\.enableP2pool/);
+  assert.match(proxy, /actions\/xmrig-to-proxy/);
+  assert.match(proxy, /proxy-switch/);
+  assert.match(proxy, /r\.alreadyConfigured/);
+  assert.match(proxy, /r\.alreadyInstalled/);
 });
 
 test('P2Pool one-click editor does not patch pgrep checks', () => {

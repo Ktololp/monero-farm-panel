@@ -12,29 +12,29 @@
   <div id="login" class="login-screen">
     <form id="login-form" class="panel login-card">
       <div class="brand">⛏ Monero Farm Panel</div>
-      <h1>Вход</h1><p class="muted">Централизованное управление RandomX / XMRig / p2pool</p>
-      <label>Мастер-пароль<input id="login-password" type="password" autocomplete="current-password" required autofocus></label>
-      <button class="primary" type="submit">Войти</button><div id="login-error" class="error"></div>
+      <h1 data-i18n="login.title">Вход</h1><p class="muted" data-i18n="login.subtitle">Централизованное управление RandomX / XMRig / p2pool</p>
+      <label><span data-i18n="login.masterPassword">Мастер-пароль</span><input id="login-password" type="password" autocomplete="current-password" required autofocus></label>
+      <button class="primary" type="submit" data-i18n="login.submit">Войти</button><div class="login-language language-switch" role="group" data-i18n-title="app.language" title="Язык интерфейса"><button type="button" data-locale="ru">RU</button><button type="button" data-locale="en">EN</button></div><div id="login-error" class="error"></div>
     </form>
   </div>
   <div id="app" class="app hidden">
     <aside class="sidebar">
       <div class="brand">⛏ MFP</div>
       <nav>
-        <button data-page="dashboard" class="nav active"><span>◫</span>Дашборд</button>
-        <button data-page="servers" class="nav"><span>▦</span>Серверы</button>
-        <button data-page="operations" class="nav"><span>⚡</span>Операции</button>
-        <button data-page="updates" class="nav"><span>↻</span>Обновления</button>
-        <button data-page="topology" class="nav" title="Схема связей майнеров, пулов и узлов"><span>⌘</span>Топология</button>
-        <button data-page="proxies" class="nav" title="XMRig Proxy: воркеры, хешрейт, shares и upstream"><span>⇄</span>XMRig Proxy</button>
-        <button data-page="settings" class="nav"><span>⚙</span>Настройки</button>
-        <button data-page="audit" class="nav" title="Журнал действий панели"><span>≡</span>Журнал</button>
-        <button data-page="docs" class="nav" title="Краткое описание всех функций панели"><span>?</span>Документация</button>
+        <button data-page="dashboard" class="nav active"><span>◫</span><b data-i18n="nav.dashboard">Дашборд</b></button>
+        <button data-page="servers" class="nav"><span>▦</span><b data-i18n="nav.servers">Серверы</b></button>
+        <button data-page="operations" class="nav"><span>⚡</span><b data-i18n="nav.operations">Операции</b></button>
+        <button data-page="updates" class="nav"><span>↻</span><b data-i18n="nav.updates">Обновления</b></button>
+        <button data-page="topology" class="nav" data-i18n-title="nav.topologyTip" title="Схема связей майнеров, пулов и узлов"><span>⌘</span><b data-i18n="nav.topology">Топология</b></button>
+        <button data-page="proxies" class="nav" data-i18n-title="nav.proxyTip" title="XMRig Proxy: воркеры, хешрейт, shares и upstream"><span>⇄</span><b>XMRig Proxy</b></button>
+        <button data-page="settings" class="nav"><span>⚙</span><b data-i18n="nav.settings">Настройки</b></button>
+        <button data-page="audit" class="nav" data-i18n-title="nav.auditTip" title="Журнал действий панели"><span>≡</span><b data-i18n="nav.audit">Журнал</b></button>
+        <button data-page="docs" class="nav" data-i18n-title="nav.docsTip" title="Краткое описание всех функций панели"><span>?</span><b data-i18n="nav.docs">Документация</b></button>
       </nav>
-      <div class="sidebar-bottom"><span id="socket-state" class="pill">нет связи</span><button id="logout" class="ghost">Выйти</button></div>
+      <div class="sidebar-bottom"><div class="language-switch sidebar-language" role="group" data-i18n-title="app.language" title="Язык интерфейса"><button type="button" data-locale="ru">RU</button><button type="button" data-locale="en">EN</button></div><span id="socket-state" class="pill">нет связи</span><button id="logout" class="ghost" data-i18n="auth.logout">Выйти</button></div>
     </aside>
     <main class="content">
-      <header class="topbar"><div><h1 id="page-title">Дашборд</h1><div id="page-subtitle" class="muted">Мониторинг фермы</div></div><div id="top-actions"><button id="add-server" class="primary">+ Сервер</button></div></header>
+      <header class="topbar"><div><h1 id="page-title" data-i18n="header.dashboard">Дашборд</h1><div id="page-subtitle" class="muted" data-i18n="header.monitoring">Мониторинг фермы</div></div><div id="top-actions"><button id="add-server" class="primary" data-i18n="action.addServer">+ Сервер</button></div></header>
       <section id="view"></section>
     </main>
   </div>

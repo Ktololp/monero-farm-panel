@@ -20,7 +20,12 @@ test('xmrig-proxy installer uses official stable release and verifies SHA256', (
 });
 
 test('API and frontend expose XMRig Proxy installation', () => {
-  assert.match(read('src/api/router.js'), /actions\/install-xmrig-proxy/);
-  assert.match(read('web/pages/proxies/index.js'), /Установить XMRig Proxy|Установить/);
+  const api = read('src/api/router.js'),
+    proxy = read('web/pages/proxies/index.js'),
+    messages = read('web/i18n/messages/proxy.js');
+  assert.match(api, /actions\/install-xmrig-proxy/);
+  assert.match(proxy, /actions\/install-xmrig-proxy/);
+  assert.match(proxy, /proxy\.install/);
+  assert.match(messages, /proxy\.install/);
   assert.match(read('web/pages/server/index.js'), /install-xmrig-proxy/);
 });

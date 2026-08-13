@@ -1,3 +1,4 @@
+import { t } from '../../i18n/index.js';
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import '@xterm/xterm/css/xterm.css';
@@ -48,7 +49,7 @@ export function createTerminalController({ $, esc, modal, closeModal, getSocket 
   }
 
   function handleClose(serverId) {
-    if (terminal && terminalServerId === Number(serverId)) terminal.write('\r\n\x1b[33m[SSH-сессия закрыта]\x1b[0m\r\n');
+    if (terminal && terminalServerId === Number(serverId)) terminal.write(`\r\n\x1b[33m${t('terminal.closed')}\x1b[0m\r\n`);
   }
 
   return {

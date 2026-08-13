@@ -23,10 +23,12 @@ test('telemetry includes proxy, p2pool analytics and monero network economics in
 });
 
 test('frontend exposes proxies, docs, fleet health and estimated income', () => {
-  const app = read('web/app/main.js');
-  const dash = read('web/pages/dashboard/index.js');
+  const app = read('web/app/main.js'),
+    dash = read('web/pages/dashboard/index.js'),
+    messages = read('web/i18n/messages/dashboard.js');
   assert.match(app, /createProxiesPage/);
   assert.match(app, /createDocsPage/);
-  assert.match(dash, /Fleet Health/);
-  assert.match(dash, /Оценка дохода/);
+  assert.match(dash, /dashboard\.fleetHealth/);
+  assert.match(dash, /dashboard\.income/);
+  assert.match(messages, /dashboard\.income/);
 });

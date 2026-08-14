@@ -15,7 +15,7 @@
     "i18n:check": "node scripts/check-i18n.mjs"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22.19.0"
   },
   "dependencies": {
     "@lingui/core": "6.6.0",

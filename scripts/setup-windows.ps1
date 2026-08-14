@@ -101,9 +101,9 @@ if ((Test-Path $pfxPath) -and -not $Force) {
 }
 
 if ($Mode -eq 'Native') {
-  if (-not (Command-Exists 'node')) { throw 'Node.js 20 or newer was not found.' }
-  $nodeMajor = [int]((& node -p "process.versions.node.split('.')[0]").Trim())
-  if ($nodeMajor -lt 20) { throw "Node.js 20 or newer is required. Detected: $(& node -v)" }
+  if (-not (Command-Exists 'node')) { throw 'Node.js 22.19.0 or newer was not found.' }
+  $nodeVersion = [Version]((& node -p "process.versions.node").Trim())
+  if ($nodeVersion -lt [Version]'22.19.0') { throw "Node.js 22.19.0 or newer is required. Detected: $(& node -v)" }
   $runner = Find-NpmRunner
   Write-Host "Using npm runner: $($runner.Kind) -> $($runner.Path)"
   Write-Host 'Terminal packages: @xterm/xterm 5.5.0 + @xterm/addon-fit 0.10.0'

@@ -6,7 +6,7 @@
 
 [![Release](https://img.shields.io/github/v/release/Ktololp/monero-farm-panel?display_name=tag&sort=semver&color=2ea043)](../../releases)
 [![CI](https://github.com/Ktololp/monero-farm-panel/actions/workflows/ci.yml/badge.svg?branch=main)](../../actions/workflows/ci.yml)
-![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933?logo=nodedotjs&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-22.19%2B-339933?logo=nodedotjs&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-amd64%20%7C%20arm64-2496ED?logo=docker&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-yellow)
 [![GitHub stars](https://img.shields.io/github/stars/Ktololp/monero-farm-panel?style=flat&color=58a6ff)](../../stargazers)
@@ -100,7 +100,7 @@ XMRig → 127.0.0.1:3334 → XMRig Proxy → 127.0.0.1:3333 → P2Pool → Moner
 <details>
 <summary><b>Windows 10/11</b></summary>
 
-Node.js 20+ is required.
+Node.js 22.19.0+ is required.
 
 ```text
 1. Extract the release archive.

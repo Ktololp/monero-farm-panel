@@ -1,8 +1,8 @@
-# Monero Farm Panel 1.0.2 — Windows
+# Monero Farm Panel 1.2.1 — Windows
 
 ## 1. Чистая установка
 
-1. Установите Node.js 20+.
+1. Установите Node.js 22.19.0+.
 2. Распакуйте единственный архив `monero-farm-panel.zip`.
 3. Запустите `SETUP_WINDOWS.cmd`.
 4. Сохраните `PANEL MASTER PASSWORD`.

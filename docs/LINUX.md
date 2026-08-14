@@ -3,7 +3,7 @@
 ## Требования
 
 - 64-bit Linux;
-- Node.js 20+;
+- Node.js 22.19.0+;
 - npm;
 - build toolchain для `better-sqlite3`;
 - сеть до управляемых Linux-серверов по SSH.
@@ -15,7 +15,7 @@ sudo apt update
 sudo apt install -y build-essential python3 openssl
 ```
 
-Установите Node.js 20+ удобным для вашей системы способом.
+Установите Node.js 22.19.0+ удобным для вашей системы способом.
 
 ## Установка
 

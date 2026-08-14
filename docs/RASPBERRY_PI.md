@@ -14,7 +14,7 @@ docker compose up -d --build
 
 ## Нативный Node.js
 
-Установите Node.js 20+, `build-essential`, `python3` и `openssl`, затем:
+Установите Node.js 22.19.0+, `build-essential`, `python3` и `openssl`, затем:
 
 ```bash
 npm install

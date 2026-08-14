@@ -13,6 +13,9 @@ test('v1.2.2 KPI cards use standalone semantic SVG icons',()=>{
 
   assert.match(iconCss,/^@import '\.\/design-kpi-icons\.css';/);
   assert.doesNotMatch(kpiCss,/data:image\/svg\+xml/);
+  assert.match(kpiCss,/flex:0 0 19px/);
+  assert.match(kpiCss,/width:17px/);
+  assert.match(kpiCss,/margin-right:7px/);
 
   for(const name of icons){
     const asset=`web/assets/icons/kpi/${name}.svg`;

@@ -1,23 +1,23 @@
-/* Monero Farm Panel v1.2.2 — Patch 2C.2
-   Semantic KPI icon system. Standalone SVG assets, no embedded data-URI masks. */
+/* Monero Farm Panel v1.2.2 — Patch 2C.2 / 2D.2
+   Semantic KPI icon system. Standalone SVG assets, sized closer to the public reference. */
 
 .farm-overview-stats .kpi-icon{
   display:inline-grid;
   place-items:center;
-  flex:0 0 16px;
-  width:16px;
-  height:16px;
-  margin-right:6px;
+  flex:0 0 19px;
+  width:19px;
+  height:19px;
+  margin-right:7px;
   background:transparent!important;
   color:#8aa7cf;
-  vertical-align:-3px;
+  vertical-align:-4px;
 }
 
 .farm-overview-stats .kpi-icon::before{
   content:"";
   display:block;
-  width:14px;
-  height:14px;
+  width:17px;
+  height:17px;
   background:currentColor!important;
   mask-repeat:no-repeat!important;
   -webkit-mask-repeat:no-repeat!important;
@@ -42,3 +42,8 @@
 .farm-overview-stats .kpi-cpu::before{mask-image:url('../assets/icons/kpi/cpu.svg')!important;-webkit-mask-image:url('../assets/icons/kpi/cpu.svg')!important}
 .farm-overview-stats .kpi-price::before{mask-image:url('../assets/icons/kpi/price.svg')!important;-webkit-mask-image:url('../assets/icons/kpi/price.svg')!important}
 .farm-overview-stats .kpi-alerts::before{mask-image:url('../assets/icons/kpi/alerts.svg')!important;-webkit-mask-image:url('../assets/icons/kpi/alerts.svg')!important}
+
+@media(max-width:1500px){
+  .farm-overview-stats .kpi-icon{flex-basis:18px;width:18px;height:18px;margin-right:6px}
+  .farm-overview-stats .kpi-icon::before{width:16px;height:16px}
+}

@@ -20,6 +20,7 @@ import '../styles/app.css';
 import '../styles/design-system.css';
 import '../styles/design-pass2.css';
 import '../styles/design-tooltips.css';
+import '../styles/design-kpi.css';
 import '../components/tooltip/index.js';
 
 

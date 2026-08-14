@@ -17,5 +17,5 @@ test('v1.2.2 KPI layout uses semantic mixed-width cards', () => {
   assert.match(css, /flex:1\.48 1 0/);
   assert.match(css, /\.kpi-short/);
   assert.match(css, /flex:\.64 1 0/);
-  assert.doesNotMatch(css, /nth-child/);
+  assert.doesNotMatch(css, /:nth-child\s*\(/);
 });

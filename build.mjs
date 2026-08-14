@@ -10,6 +10,6 @@ const linguiBabel={name:'lingui-babel-macros',setup(ctx){ctx.onLoad({filter:/\.j
   return{contents:result?.code??source,loader:'js'};
 });}};
 await mkdir('public',{recursive:true});
-await build({entryPoints:['web/app/main.js'],bundle:true,minify:true,sourcemap:false,target:['es2020'],outfile:'public/app.js',loader:{'.css':'css'},plugins:[linguiBabel]});
+await build({entryPoints:['web/app/main.js'],bundle:true,minify:true,sourcemap:false,target:['es2020'],outfile:'public/app.js',loader:{'.css':'css','.svg':'dataurl'},plugins:[linguiBabel]});
 await cp('web/index.html','public/index.html');await cp('web/manifest.webmanifest','public/manifest.webmanifest');await cp('web/sw.js','public/sw.js');
 await writeFile('public/version.txt',new Date().toISOString());

@@ -1,4 +1,4 @@
-const CACHE='mfp-v1.2.1';
+const CACHE='mfp-v1.2.2';
 const CORE=['/','/app.js','/app.css','/manifest.webmanifest'];
 self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)));});
 self.addEventListener('activate',e=>e.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))),self.clients.claim()])));

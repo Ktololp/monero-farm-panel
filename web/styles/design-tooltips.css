@@ -1,0 +1,107 @@
+/* v1.2.2 Patch 2A — viewport-safe tooltip component */
+
+.mfp-tooltip{
+  --mfp-tooltip-arrow-left:50%;
+  position:fixed;
+  left:0;
+  top:0;
+  z-index:2000;
+  width:max-content;
+  max-width:min(300px,calc(100vw - 20px));
+  padding:9px 11px;
+  border:1px solid #315b8d;
+  border-radius:9px;
+  background:linear-gradient(180deg,#10223a 0%,#0a1728 100%);
+  color:#e8f2ff;
+  box-shadow:0 14px 34px rgba(0,0,0,.38),0 0 18px rgba(54,126,215,.08);
+  font:500 11px/1.4 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  text-align:left;
+  overflow-wrap:anywhere;
+  pointer-events:none;
+  opacity:0;
+  visibility:hidden;
+  transform:translateY(2px);
+  transition:opacity .1s ease,transform .1s ease,visibility .1s;
+}
+.mfp-tooltip.is-visible{
+  opacity:1;
+  visibility:visible;
+  transform:translateY(0);
+}
+.mfp-tooltip::after{
+  content:"";
+  position:absolute;
+  left:var(--mfp-tooltip-arrow-left);
+  width:8px;
+  height:8px;
+  background:#0c1b2e;
+  border:1px solid #315b8d;
+  transform:translateX(-50%) rotate(45deg);
+}
+.mfp-tooltip[data-placement="top"]::after{
+  bottom:-5px;
+  border-left:0;
+  border-top:0;
+}
+.mfp-tooltip[data-placement="bottom"]::after{
+  top:-5px;
+  border-right:0;
+  border-bottom:0;
+}
+.mfp-tooltip__text{position:relative;z-index:1}
+
+/* Disable the old pass2 CSS pseudo-tooltip implementation completely. */
+.has-tooltip:hover::after,
+.has-tooltip:focus-visible::after,
+.has-tooltip:hover::before,
+.has-tooltip:focus-visible::before{
+  content:none!important;
+  display:none!important;
+}
+
+/* The actual application helper is span.help-icon[data-tip]. */
+.help-icon{
+  position:relative;
+  display:inline-grid!important;
+  place-items:center;
+  flex:0 0 15px;
+  width:15px!important;
+  height:15px!important;
+  min-width:15px;
+  margin-left:4px;
+  padding:0!important;
+  border:0!important;
+  border-radius:50%;
+  background:transparent!important;
+  color:#7796bd!important;
+  font-size:0!important;
+  line-height:1;
+  cursor:help;
+  vertical-align:-2px;
+  outline:none;
+}
+.help-icon::before,
+.help-icon.has-tooltip:hover::before,
+.help-icon.has-tooltip:focus-visible::before{
+  content:""!important;
+  position:static!important;
+  display:block!important;
+  width:15px!important;
+  height:15px!important;
+  border:0!important;
+  transform:none!important;
+  background:currentColor!important;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16Zm-1 6h2v7h-2v-7Zm0-3h2v2h-2V7Z'/%3E%3C/svg%3E") center/contain no-repeat!important;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16Zm-1 6h2v7h-2v-7Zm0-3h2v2h-2V7Z'/%3E%3C/svg%3E") center/contain no-repeat!important;
+}
+.help-icon:hover,
+.help-icon:focus-visible{
+  color:#b9dcff!important;
+  filter:drop-shadow(0 0 5px rgba(61,145,255,.32));
+}
+.help-icon:focus-visible{outline:1px solid #5796d7;outline-offset:2px}
+
+@media(max-width:700px){
+  .mfp-tooltip{max-width:min(250px,calc(100vw - 16px));font-size:10.5px}
+}
+

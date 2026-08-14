@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#090f1d">
+  <meta name="theme-color" content="#050b16">
   <title>Monero Farm Panel</title>
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="stylesheet" href="/app.css">
@@ -11,7 +11,7 @@
 <body>
   <div id="login" class="login-screen">
     <form id="login-form" class="panel login-card">
-      <div class="brand">⛏ Monero Farm Panel</div>
+      <div class="brand brand-full"><span class="brand-mark brand-mark-image" aria-hidden="true"></span><span class="brand-copy"><strong>Monero Farm Panel</strong><small>MONERO MINING CONTROL</small></span></div>
       <h1 data-i18n="login.title">Вход</h1><p class="muted" data-i18n="login.subtitle">Централизованное управление RandomX / XMRig / p2pool</p>
       <label><span data-i18n="login.masterPassword">Мастер-пароль</span><input id="login-password" type="password" autocomplete="current-password" required autofocus></label>
       <button class="primary" type="submit" data-i18n="login.submit">Войти</button><div class="login-language language-switch" role="group" data-i18n-title="app.language" title="Язык интерфейса"><button type="button" data-locale="ru">RU</button><button type="button" data-locale="en">EN</button></div><div id="login-error" class="error"></div>
@@ -19,7 +19,7 @@
   </div>
   <div id="app" class="app hidden">
     <aside class="sidebar">
-      <div class="brand">⛏ MFP</div>
+      <div class="brand brand-compact"><span class="brand-mark brand-mark-image" aria-hidden="true"></span><span class="brand-copy"><strong>MFP</strong><small>MONERO FARM PANEL</small></span></div>
       <nav>
         <button data-page="dashboard" class="nav active"><span>◫</span><b data-i18n="nav.dashboard">Дашборд</b></button>
         <button data-page="servers" class="nav"><span>▦</span><b data-i18n="nav.servers">Серверы</b></button>

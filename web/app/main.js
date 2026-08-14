@@ -17,6 +17,10 @@ import Chart from 'chart.js/auto';
 import { hashrateScale, temperatureScale } from '../components/charts/scales.js';
 import { t, getLocale, initI18n, onLocaleChange } from '../i18n/index.js';
 import '../styles/app.css';
+import '../styles/design-system.css';
+import '../styles/design-pass2.css';
+import '../styles/design-tooltips.css';
+import '../components/tooltip/index.js';
 
 
 let csrf=decodeURIComponent((document.cookie.match(/(?:^|; )panel_csrf=([^;]*)/)||[])[1]||'');

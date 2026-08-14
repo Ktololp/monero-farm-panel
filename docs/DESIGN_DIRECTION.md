@@ -50,3 +50,33 @@ Do not rewrite the whole frontend just to match artwork. Move incrementally:
 - then per-page polish.
 
 Every visual refactor must preserve tests, monitoring accuracy and existing safe-operation behavior.
+
+
+## v1.2.2 implementation
+
+The v1.2.2 design release starts by layering a shared design system over the existing functional UI. The first implementation pass covers:
+
+- dark navy visual tokens and restrained ambient texture;
+- compact sidebar / navigation hierarchy;
+- unified button, badge, form and focus states;
+- login presentation;
+- dashboard KPI hierarchy, chart container, miners table and alert state;
+- kiosk-friendly density and responsive breakpoints.
+
+The functional DOM contracts, runtime i18n, telemetry, server actions and safety behavior remain unchanged. Per-page polish follows after the shared foundation is visually approved.
+
+
+### v1.2.2 pass 2
+
+The second design pass improves reference fidelity without replacing the functional architecture:
+
+- brand mark and sidebar identity are closer to the public reference imagery;
+- navigation and KPI iconography moves from simple glyphs/emoji to a unified SVG-mask language;
+- hover help is restored through an explicit tooltip layer that upgrades existing title / aria-label metadata;
+- dashboard KPI sizing now follows the reference hierarchy: income is wider, alerts are narrower, the remaining cards stay visually balanced;
+- shared card and panel styling is further tightened for server / proxy surfaces.
+
+
+### v1.2.2 Patch 2A — tooltips
+
+Tooltip behavior is implemented as a small shared component under `web/components/tooltip/` instead of CSS-generated content. Existing `helpIcon(data-tip)` metadata remains the source of truth. The component uses delegated pointer/focus events, positions one fixed tooltip portal inside the viewport, and reads the current localized text only when the tooltip is opened.

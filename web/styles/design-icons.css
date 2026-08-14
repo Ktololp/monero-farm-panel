@@ -1,0 +1,59 @@
+/* Monero Farm Panel v1.2.2 — Patch 2C
+   Semantic sidebar icon system. Each icon is a standalone SVG asset. */
+
+.sidebar .nav .nav-icon{
+  position:relative;
+  display:grid;
+  place-items:center;
+  flex:0 0 24px;
+  width:24px;
+  height:24px;
+  min-width:24px;
+  padding:0;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  color:#7798c0!important;
+  font-size:0!important;
+  overflow:visible;
+  transition:color .16s ease,filter .16s ease,transform .16s ease;
+}
+
+.sidebar .nav .nav-icon::before{
+  content:"";
+  display:block;
+  width:16px;
+  height:16px;
+  background:currentColor!important;
+  mask-repeat:no-repeat!important;
+  -webkit-mask-repeat:no-repeat!important;
+  mask-position:center!important;
+  -webkit-mask-position:center!important;
+  mask-size:contain!important;
+  -webkit-mask-size:contain!important;
+}
+
+.sidebar .nav:hover .nav-icon{
+  color:#a9c9ed!important;
+  transform:translateX(1px);
+}
+
+.sidebar .nav.active .nav-icon{
+  color:#77b9ff!important;
+  filter:drop-shadow(0 0 5px rgba(61,145,255,.24));
+}
+
+.sidebar .nav .nav-icon-dashboard::before{mask-image:url('../assets/icons/dashboard.svg')!important;-webkit-mask-image:url('../assets/icons/dashboard.svg')!important}
+.sidebar .nav .nav-icon-servers::before{mask-image:url('../assets/icons/servers.svg')!important;-webkit-mask-image:url('../assets/icons/servers.svg')!important}
+.sidebar .nav .nav-icon-operations::before{mask-image:url('../assets/icons/operations.svg')!important;-webkit-mask-image:url('../assets/icons/operations.svg')!important}
+.sidebar .nav .nav-icon-updates::before{mask-image:url('../assets/icons/updates.svg')!important;-webkit-mask-image:url('../assets/icons/updates.svg')!important}
+.sidebar .nav .nav-icon-topology::before{mask-image:url('../assets/icons/topology.svg')!important;-webkit-mask-image:url('../assets/icons/topology.svg')!important}
+.sidebar .nav .nav-icon-proxy::before{mask-image:url('../assets/icons/proxy.svg')!important;-webkit-mask-image:url('../assets/icons/proxy.svg')!important}
+.sidebar .nav .nav-icon-settings::before{mask-image:url('../assets/icons/settings.svg')!important;-webkit-mask-image:url('../assets/icons/settings.svg')!important}
+.sidebar .nav .nav-icon-audit::before{mask-image:url('../assets/icons/audit.svg')!important;-webkit-mask-image:url('../assets/icons/audit.svg')!important}
+.sidebar .nav .nav-icon-docs::before{mask-image:url('../assets/icons/docs.svg')!important;-webkit-mask-image:url('../assets/icons/docs.svg')!important}
+
+@media(max-height:760px) and (min-width:701px){
+  .sidebar .nav .nav-icon{width:22px;height:22px;min-width:22px}
+  .sidebar .nav .nav-icon::before{width:15px;height:15px}
+}

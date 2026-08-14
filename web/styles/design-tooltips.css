@@ -1,3 +1,5 @@
+@import './design-icons.css';
+
 /* v1.2.2 Patch 2A — viewport-safe tooltip component */
 
 .mfp-tooltip{
@@ -104,4 +106,3 @@
 @media(max-width:700px){
   .mfp-tooltip{max-width:min(250px,calc(100vw - 16px));font-size:10.5px}
 }
-

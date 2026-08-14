@@ -1,0 +1,76 @@
+/* Monero Farm Panel v1.2.2 — Patch 2D.1
+   Reference-aligned brand: Monero hex mark + permanent mining mark. */
+
+.brand-mark,
+.brand-mark-image{
+  flex:0 0 38px!important;
+  width:38px!important;
+  height:38px!important;
+  border:0!important;
+  border-radius:0!important;
+  padding:0!important;
+  background-color:transparent!important;
+  background-image:url('../assets/brand-mark.svg')!important;
+  background-repeat:no-repeat!important;
+  background-position:center!important;
+  background-size:contain!important;
+  box-shadow:none!important;
+  overflow:visible!important;
+}
+
+.sidebar .brand-compact{
+  display:flex!important;
+  align-items:center!important;
+  gap:9px!important;
+  min-width:0;
+}
+
+.sidebar .brand-compact .brand-copy{
+  flex:0 1 auto;
+  min-width:0;
+}
+
+.sidebar .brand-compact::after{
+  content:"";
+  display:block;
+  flex:0 0 25px;
+  width:25px;
+  height:25px;
+  margin-left:1px;
+  background:#F4F8FD;
+  mask:url('../assets/mining-pick.svg') center/contain no-repeat;
+  -webkit-mask:url('../assets/mining-pick.svg') center/contain no-repeat;
+  opacity:.94;
+  filter:drop-shadow(0 0 5px rgba(89,158,230,.12));
+  transform:rotate(-3deg);
+}
+
+.sidebar .brand-compact .brand-copy strong{
+  font-size:16px;
+  font-weight:820;
+  letter-spacing:.015em;
+}
+
+.sidebar .brand-compact .brand-copy small{
+  color:#748BA9;
+  font-size:7px;
+  letter-spacing:.18em;
+}
+
+.login-card .brand-full .brand-mark{
+  flex-basis:44px!important;
+  width:44px!important;
+  height:44px!important;
+}
+
+@media(max-width:1180px){
+  .sidebar .brand-compact{gap:7px!important}
+  .sidebar .brand-compact .brand-mark{flex-basis:34px!important;width:34px!important;height:34px!important}
+  .sidebar .brand-compact::after{flex-basis:22px;width:22px;height:22px;margin-left:0}
+  .sidebar .brand-compact .brand-copy small{display:none!important}
+}
+
+@media(max-height:760px) and (min-width:701px){
+  .sidebar .brand-compact .brand-mark{flex-basis:32px!important;width:32px!important;height:32px!important}
+  .sidebar .brand-compact::after{flex-basis:20px;width:20px;height:20px}
+}

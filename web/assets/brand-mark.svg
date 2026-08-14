@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="bg" x1="10" y1="7" x2="55" y2="56" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#173A66"/>
-      <stop offset="1" stop-color="#0B1E38"/>
+    <linearGradient id="frame" x1="12" y1="8" x2="53" y2="56" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F7FBFF"/>
+      <stop offset="0.45" stop-color="#BBD8F7"/>
+      <stop offset="1" stop-color="#6FA7DD"/>
     </linearGradient>
-    <linearGradient id="glow" x1="14" y1="15" x2="50" y2="49" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#49A1FF" stop-opacity="0.95"/>
-      <stop offset="1" stop-color="#205FA9" stop-opacity="0.65"/>
-    </linearGradient>
+    <radialGradient id="halo" cx="0" cy="0" r="1" gradientTransform="translate(32 30) rotate(90) scale(29)">
+      <stop stop-color="#14365D" stop-opacity="0.72"/>
+      <stop offset="1" stop-color="#06101E" stop-opacity="0"/>
+    </radialGradient>
   </defs>
-  <rect x="4.5" y="4.5" width="55" height="55" rx="17" fill="url(#bg)" stroke="#3972B6"/>
-  <path d="M19 46V20L25.5 20L32 31.5L38.5 20H45V46H39.6V29.6L33 40.4H30.8L24.4 29.7V46H19Z" fill="white"/>
-  <circle cx="46.5" cy="17.5" r="4.6" fill="#FFAA17" stroke="#FFD173" stroke-width="1.2"/>
-  <path d="M11 39.5C11 24.7 19.4 14 32 14C44.6 14 53 24.7 53 39.5" stroke="url(#glow)" stroke-opacity="0.45" stroke-width="1.8"/>
+  <circle cx="32" cy="32" r="30" fill="url(#halo)"/>
+  <path d="M32 3.8 56.3 17.9v28.2L32 60.2 7.7 46.1V17.9L32 3.8Z" fill="#071321" stroke="url(#frame)" stroke-width="2.6" stroke-linejoin="round"/>
+  <circle cx="32" cy="31.6" r="16.2" fill="#FF6B1A"/>
+  <path d="M15.8 32.7a16.2 16.2 0 0 0 32.4 0L40.8 40V30.8L32 39.5l-8.8-8.7V40l-7.4-7.3Z" fill="#1D2A3B"/>
+  <path d="M20.2 40.4V24.7L32 36.3l11.8-11.6v15.7h-5.1v-7.5L32 39.5l-6.7-6.6v7.5h-5.1Z" fill="#F7FAFE"/>
 </svg>

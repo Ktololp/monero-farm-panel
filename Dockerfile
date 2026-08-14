@@ -3,7 +3,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends python3 make g++ && rm -rf /var/lib/apt/lists/*
 COPY package*.json ./
 RUN npm install --no-audit --no-fund
-COPY build.mjs ./
+COPY build.mjs lingui.config.js babel.config.json ./
 COPY web ./web
 RUN npm run build:web && npm prune --omit=dev
 

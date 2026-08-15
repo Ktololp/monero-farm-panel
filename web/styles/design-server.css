@@ -1,0 +1,217 @@
+/* Monero Farm Panel v1.2.2 — Patch 2F.1
+   Server page header, tabs and overview summary only. No server data or SSH logic changes. */
+
+/* The title-icon markup is emitted only by the server page. */
+.topbar .title-icon{
+  display:inline-grid;
+  place-items:center;
+  width:27px;
+  height:27px;
+  margin-right:8px;
+  border:1px solid #294b72;
+  border-radius:7px;
+  background:#0d1e33;
+  color:#cfe2f8;
+  font-size:15px!important;
+  line-height:1;
+  vertical-align:-4px;
+  box-shadow:inset 0 1px 0 rgba(142,194,255,.045);
+}
+
+#header-terminal,
+#back-servers{
+  min-height:37px!important;
+  padding:8px 12px!important;
+  border-radius:8px!important;
+  font-size:12px!important;
+  font-weight:720!important;
+  line-height:1!important;
+}
+
+#header-terminal{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:7px!important;
+  border:1px solid #745313!important;
+  background:linear-gradient(180deg,#281c08,#1c1407)!important;
+  color:#ffd16e!important;
+  box-shadow:inset 0 1px 0 rgba(255,205,105,.07);
+}
+
+#header-terminal::before{
+  content:"";
+  width:14px;
+  height:14px;
+  background:currentColor;
+  mask:url('../assets/icons/terminal.svg') center/contain no-repeat;
+  -webkit-mask:url('../assets/icons/terminal.svg') center/contain no-repeat;
+}
+
+#header-terminal:hover{
+  border-color:#a77817!important;
+  background:linear-gradient(180deg,#332309,#231807)!important;
+  color:#ffe09b!important;
+}
+
+#back-servers{
+  border-color:#294667!important;
+  background:#0b192b!important;
+  color:#dce9f8!important;
+}
+
+#back-servers:hover{
+  border-color:#4774a6!important;
+  background:#10223a!important;
+}
+
+.server-tabs{
+  display:flex!important;
+  align-items:center;
+  gap:7px!important;
+  margin:14px 0 14px!important;
+  padding:0!important;
+  overflow-x:auto;
+  scrollbar-width:thin;
+}
+
+.server-tab{
+  flex:0 0 auto;
+  min-height:37px!important;
+  padding:8px 13px!important;
+  border:1px solid #233b5a!important;
+  border-radius:8px!important;
+  background:#091525!important;
+  color:#8fa8c5!important;
+  font-size:12px!important;
+  font-weight:650!important;
+  line-height:1!important;
+  transition:color .14s ease,border-color .14s ease,background-color .14s ease,box-shadow .14s ease;
+}
+
+.server-tab:hover{
+  border-color:#365b86!important;
+  background:#0d1d31!important;
+  color:#d9e8f8!important;
+}
+
+.server-tab.active{
+  border-color:#4d78aa!important;
+  background:linear-gradient(180deg,#132a47,#10233c)!important;
+  color:#fff!important;
+  box-shadow:inset 0 1px 0 rgba(148,198,255,.08),0 0 0 1px rgba(61,145,255,.035);
+}
+
+#server-tab-view > .stats.stats-5{
+  display:grid!important;
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  gap:12px!important;
+  margin:0 0 14px!important;
+}
+
+#server-tab-view > .stats.stats-5 > .stat{
+  position:relative;
+  min-width:0;
+  min-height:98px!important;
+  padding:14px 15px!important;
+  overflow:hidden;
+  border:1px solid #1e3859!important;
+  border-radius:11px!important;
+  background:linear-gradient(180deg,#0d1c31 0%,#0a1728 100%)!important;
+  box-shadow:inset 0 1px 0 rgba(125,181,239,.025)!important;
+}
+
+#server-tab-view > .stats.stats-5 > .stat::before{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  top:0;
+  height:2px;
+  background:linear-gradient(90deg,#3d91ff,#64b5ff);
+  opacity:.9;
+}
+
+#server-tab-view > .stats.stats-5 > .stat::after{
+  content:"";
+  position:absolute;
+  width:74px;
+  height:74px;
+  right:-24px;
+  top:-30px;
+  border-radius:50%;
+  background:rgba(61,145,255,.055);
+  pointer-events:none;
+}
+
+#server-tab-view > .stats.stats-5 > .stat > span{
+  position:relative;
+  z-index:1;
+  margin-bottom:10px!important;
+  color:#7895b8!important;
+  font-size:10.5px!important;
+  font-weight:560!important;
+}
+
+#server-tab-view > .stats.stats-5 > .stat > b{
+  position:relative;
+  z-index:1;
+  color:#f2f7ff!important;
+  font-size:18px!important;
+  font-weight:780!important;
+  line-height:1.18!important;
+  font-variant-numeric:tabular-nums;
+}
+
+#server-tab-view > .stats.stats-5 > .stat > small{
+  position:relative;
+  z-index:1;
+  margin-top:5px!important;
+  color:#7890ae!important;
+  font-size:10.5px!important;
+  line-height:1.25!important;
+}
+
+#server-tab-view #server-live-status{
+  display:block;
+  font-size:12px!important;
+}
+
+#server-tab-view #server-live-status .status{
+  min-height:22px;
+  color:#8ff0b2;
+  font-size:11px!important;
+  font-weight:680!important;
+}
+
+#server-tab-view > .grid2 > .chart-panel{
+  min-height:300px!important;
+  padding:15px 16px 12px!important;
+  border-color:#1e3859!important;
+  background:linear-gradient(180deg,#0c1b2f 0%,#091626 100%)!important;
+  box-shadow:inset 0 1px 0 rgba(120,176,235,.025)!important;
+}
+
+#server-tab-view > .grid2 > .chart-panel h2{
+  margin:0 0 10px!important;
+  font-size:15px!important;
+  line-height:1.2!important;
+}
+
+#server-tab-view > .grid2 > .chart-panel canvas{
+  height:245px!important;
+  max-height:245px!important;
+}
+
+@media(max-width:1320px){
+  #server-tab-view > .stats.stats-5{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
+
+@media(max-width:900px){
+  #server-tab-view > .stats.stats-5{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #server-tab-view > .grid2{grid-template-columns:1fr!important}
+}
+
+@media(max-width:560px){
+  #server-tab-view > .stats.stats-5{grid-template-columns:1fr!important}
+  .server-tabs{margin-top:10px!important}
+}

@@ -1,0 +1,87 @@
+/* Monero Farm Panel v1.2.2 — Patch 2H.2
+   XMRig Proxy page only. Installation/routing/API logic is untouched. */
+
+#view > .panel:has(.proxy-install-grid),
+#view > .proxy-panel{
+  padding:15px 16px!important;
+  border-color:#1f3a5c!important;
+  background:linear-gradient(180deg,#0c1b2f,#091626)!important;
+}
+#view .proxy-install-grid{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:10px!important;
+  margin:12px 0!important;
+}
+#view .proxy-install-card{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+  min-width:0;
+  padding:11px 12px!important;
+  border:1px solid #203b5c!important;
+  border-radius:9px!important;
+  background:#081624!important;
+}
+#view .proxy-install-card > div{min-width:0}
+#view .proxy-install-card b{display:block;color:#eaf3ff!important;font-size:11.5px!important;font-weight:730!important}
+#view .proxy-install-card small{display:block;margin-top:4px;color:#7790ae!important;font-size:9.5px!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#view .proxy-install-card button{min-height:34px!important;padding:7px 10px!important;border-radius:8px!important;font-size:10px!important;font-weight:700!important;white-space:nowrap}
+
+#view .proxy-panel{margin-bottom:14px!important}
+#view .proxy-panel .panel-head{align-items:flex-start!important;gap:14px!important}
+#view .proxy-panel .panel-head h2{margin:0 0 5px!important;color:#eef6ff!important;font-size:14px!important;font-weight:760!important}
+#view .proxy-panel .panel-head .muted{color:#738eac!important;font-size:10px!important;line-height:1.35!important}
+#view .proxy-panel .button-row{margin:0!important}
+#view .proxy-panel .button-row button,
+#view .proxy-routing-actions button{
+  min-height:34px!important;
+  padding:7px 10px!important;
+  border-radius:8px!important;
+  font-size:10px!important;
+  font-weight:690!important;
+}
+#view .proxy-routing-actions{margin:8px 0 12px!important}
+
+#view .proxy-panel .farm-overview-stats{
+  display:grid!important;
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  gap:10px!important;
+  margin:0 0 12px!important;
+}
+#view .proxy-panel .farm-overview-stats .stat{
+  min-width:0;
+  min-height:90px!important;
+  padding:12px 13px!important;
+  border:1px solid #203b5d!important;
+  border-radius:9px!important;
+  background:linear-gradient(180deg,#0d1c31,#091727)!important;
+}
+#view .proxy-panel .farm-overview-stats .stat span{color:#7793b2!important;font-size:9.5px!important;line-height:1.3!important}
+#view .proxy-panel .farm-overview-stats .stat b{color:#eef6ff!important;font-size:17px!important;font-weight:790!important;font-variant-numeric:tabular-nums}
+#view .proxy-panel .farm-overview-stats .stat small{color:#7189a6!important;font-size:9px!important;line-height:1.3!important}
+
+#view .proxy-panel .table-wrap{
+  overflow-x:auto;
+  border:1px solid #1e3959;
+  border-radius:9px;
+}
+#view .proxy-panel table{width:100%;min-width:880px;border-collapse:collapse}
+#view .proxy-panel th{height:32px!important;padding:7px 8px!important;color:#6e89a8!important;font-size:8.5px!important;font-weight:760!important;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+#view .proxy-panel td{padding:8px!important;border-top:1px solid rgba(31,57,89,.65)!important;color:#cbd8e8!important;font-size:10px!important;font-variant-numeric:tabular-nums;white-space:nowrap}
+#view .proxy-panel tbody tr:hover{background:rgba(61,145,255,.035)}
+
+@media(max-width:1200px){
+  #view .proxy-panel .farm-overview-stats{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  #view .proxy-install-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:760px){
+  #view .proxy-panel .panel-head{flex-direction:column!important}
+  #view .proxy-panel .farm-overview-stats{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #view .proxy-install-grid{grid-template-columns:1fr!important}
+}
+@media(max-width:520px){
+  #view .proxy-panel .farm-overview-stats{grid-template-columns:1fr!important}
+  #view .proxy-install-card{align-items:flex-start!important;flex-direction:column!important}
+}

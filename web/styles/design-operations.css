@@ -72,7 +72,7 @@
   background:linear-gradient(180deg,#0d1c31,#091727)!important;
 }
 .operations-page .profile-card b{display:block;color:#edf5ff!important;font-size:13px!important;font-weight:760!important}
-.operations-page .profile-card strong{display:block;margin:8px 0;color:#6fb6ff!important;font-size:24px!important;font-weight:800!important;line-height:1!important;font-variant-numeric:tabular-nums}
+.operations-page .profile-card strong{display:block;margin:8px 0;color:#ffd17c!important;font-size:24px!important;font-weight:800!important;line-height:1!important;font-variant-numeric:tabular-nums}
 .operations-page .profile-card p{min-height:42px;margin:0 0 12px!important;color:#7d96b4!important;font-size:10.5px!important;line-height:1.4!important}
 .operations-page .profile-card button{width:100%;min-height:34px!important;border-radius:8px!important;font-size:10.5px!important;font-weight:690!important}
 

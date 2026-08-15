@@ -1,0 +1,28 @@
+/* Monero Farm Panel v1.2.2 — Patch 2H.3 */
+.settings-tabs{gap:7px!important;margin-bottom:12px!important;overflow-x:auto;flex-wrap:nowrap!important}
+.settings-tab{flex:0 0 auto;min-height:36px!important;padding:8px 12px!important;border-color:#233e60!important;border-radius:8px!important;background:#091626!important;color:#839dbb!important;font-size:10.5px!important;font-weight:690!important}
+.settings-tab:hover{border-color:#3a628d!important;background:#0d1e32!important;color:#e1edf9!important}
+.settings-tab.active{border-color:#4c7eaf!important;background:linear-gradient(180deg,#132b49,#10233c)!important;color:#fff!important;box-shadow:inset 0 1px 0 rgba(143,197,255,.07)}
+.settings.panel{max-width:1100px!important;padding:17px 18px!important;border-color:#1f3a5c!important;background:linear-gradient(180deg,#0c1b2f,#091626)!important}
+.settings section h2{margin:18px 0 11px!important;color:#eef5ff!important;font-size:14px!important;font-weight:760!important}
+.settings section h2:first-child{margin-top:0!important}
+.settings label{gap:6px!important;margin-bottom:10px!important;color:#8ba2bd!important;font-size:10.5px!important;font-weight:600!important}
+.settings input,.settings select{min-height:37px!important;padding:8px 10px!important;border:1px solid #284665!important;border-radius:8px!important;background:#071321!important;color:#eaf2fd!important;font-size:11px!important}
+.settings input:focus,.settings select:focus{border-color:#4a7eb4!important;box-shadow:0 0 0 2px rgba(61,145,255,.08)!important}
+.settings .form-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px 12px!important}
+.settings .checks{gap:8px 14px!important;margin:9px 0 13px!important}
+.settings .checks label{min-height:29px;margin:0!important;padding:5px 8px!important;border:1px solid #203a59;border-radius:7px;background:#081624;color:#a6b9cf!important}
+.settings input[type=checkbox]{accent-color:#f59e0b}
+.setting-feature{align-items:center!important;gap:16px!important;padding:12px 13px!important;border:1px solid #203b5d;border-radius:9px;background:#081624}
+.setting-feature h2{margin:0 0 5px!important}
+.setting-feature p{margin:0!important;color:#7891ad!important;font-size:10.5px!important;line-height:1.45!important}
+.settings .switch{min-width:44px!important}
+.settings .switch span{width:44px!important;height:24px!important;background:#253852!important}
+.settings .switch span:after{width:18px!important;height:18px!important}
+.settings .switch input:checked+span{background:#8a5b0c!important}
+.settings .switch input:checked+span:after{left:23px!important;background:#ffc454!important}
+.settings .notice{border-radius:8px!important;font-size:10.5px!important}
+.settings .save-row{position:sticky;bottom:10px;z-index:2;margin-top:16px!important;padding:10px 11px!important;border:1px solid #274460;border-radius:9px;background:rgba(8,20,35,.96);backdrop-filter:blur(8px)}
+.settings .save-row label{margin:0!important;flex-direction:row!important;align-items:center!important}
+.settings .save-row button{min-height:36px!important;padding:8px 15px!important;border-radius:8px!important;font-size:10.5px!important;font-weight:720!important}
+@media(max-width:760px){.settings .form-grid{grid-template-columns:1fr!important}.settings.panel{padding:14px!important}.settings .save-row{position:static}}

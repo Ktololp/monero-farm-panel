@@ -8,19 +8,19 @@ export function createUpdatesPage(ctx) {
     const latest=u.data?.xmrig?.version||'—';
     const statusLabel=status=>t(`updates.status.${status||'unknown'}`);
 
-    $('#view').innerHTML=`<div class="stats">
+    $('#view').innerHTML=`<div class="updates-page"><div class="stats updates-stats">
       <div class="stat"><span>XMRig latest</span><b>${esc(latest)}</b></div>
       <div class="stat"><span>p2pool latest</span><b>${esc(u.data?.p2pool?.version||'—')}</b></div>
       <div class="stat"><span>Monero latest</span><b>${esc(u.data?.monero?.version||'—')}</b></div>
       <div class="stat"><span>${t('updates.lastCheck')}</span><b class="small-value">${fmtDate(u.ts)}</b></div>
     </div>
-    ${u.error?`<div class="notice warn">GitHub API: ${esc(u.error)}</div>`:''}
-    <div class="panel table-wrap">
+    ${u.error?`<div class="notice warn updates-warning">GitHub API: ${esc(u.error)}</div>`:''}
+    <div class="panel table-wrap updates-table">
       <div class="panel-head"><h2>${t('updates.xmrigServers')}</h2><button id="update-selected" class="primary" ${latest==='—'?'disabled':''}>${t('updates.rollingTo',{version:esc(latest)})}</button></div>
       <table><thead><tr><th></th><th>${t('updates.server')}</th><th>${t('updates.installed')}</th><th>${t('updates.status')}</th><th>p2pool</th><th>monerod</th></tr></thead>
       <tbody>${u.servers.map(s=>`<tr><td><input class="upd-server" type="checkbox" value="${s.id}" ${s.xmrigStatus==='update'?'checked':''}></td><td>${esc(s.icon)} ${esc(s.name)}</td><td>${esc(s.installedXmrig||t('updates.notDetected'))}</td><td><span class="pill ${s.xmrigStatus==='current'?'online':s.xmrigStatus==='update'?'warn':''}">${esc(statusLabel(s.xmrigStatus))}</span></td><td>${esc(s.p2poolVersion||'—')}</td><td>${esc(s.monerodVersion||'—')}</td></tr>`).join('')}</tbody></table>
       <p class="muted small">${t('updates.rollingHint')}</p>
-    </div>${jobsPanel(jobs)}`;
+    </div>${jobsPanel(jobs)}</div>`;
 
     $('#check-updates').onclick=async()=>{toast(t('updates.checking'));await api('/updates?force=1');renderUpdates();};
     $('#update-selected').onclick=async()=>{

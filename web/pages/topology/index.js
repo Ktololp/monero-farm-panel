@@ -6,7 +6,7 @@ export function createTopologyPage(ctx) {
   async function renderTopology(full=true){
     if(full||!overview)await loadOverview();
     setHeader(t('topology.title'),t('topology.subtitle'));
-    $('#view').innerHTML=`<div class="topology-list">${overview.servers.map(s=>`<article class="panel topology-card">
+    $('#view').innerHTML=`<div class="topology-page"><div class="topology-list">${overview.servers.map(s=>`<article class="panel topology-card">
       <div class="topology-title"><button class="link open-server" data-id="${s.id}">${esc(s.icon)} ${esc(s.name)}</button><button class="icon-btn quick-terminal" data-id="${s.id}" title="SSH">⌨</button></div>
       <div class="topology-chain">
         <div class="topo-node ${s.live?.components?.xmrig==='active'?'ok':'bad'}"><b>XMRig</b><span>${fmtHash(s.live?.hash60s)}</span></div><i>→</i>
@@ -14,7 +14,7 @@ export function createTopologyPage(ctx) {
         <div class="topo-node ${s.live?.components?.monerod==='active'?'ok':'bad'}"><b>monerod</b><span>${s.live?.monero?.syncPercent!=null?`${Number(s.live.monero.syncPercent).toFixed(2)}%`:t('topology.syncUnknown')}</span></div><i>→</i>
         <div class="topo-node ${s.live?.network?.dns&&s.live?.network?.internet?'ok':'bad'}"><b>Internet</b><span>DNS ${s.live?.network?.dns?'OK':'?'} · WAN ${s.live?.network?.internet?'OK':'?'}</span></div>
       </div>
-    </article>`).join('')}</div>`;
+    </article>`).join('')}</div></div>`;
     bindCommonServerActions();
   }
 

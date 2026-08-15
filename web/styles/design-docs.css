@@ -1,0 +1,17 @@
+/* Monero Farm Panel v1.2.2 — Patch 2H.5 */
+.docs-intro{padding:15px 16px!important;border-color:#1f3a5c!important;background:linear-gradient(180deg,#0c1b2f,#091626)!important}
+.docs-intro h2{margin:0 0 7px!important;color:#eef5ff!important;font-size:14px!important;font-weight:760!important}
+.docs-intro p{margin:0!important;color:#8199b6!important;font-size:10.5px!important;line-height:1.5!important}
+.docs-intro .static-help{margin-left:4px}
+.docs-grid{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:10px!important;margin-bottom:14px!important}
+.doc-card{display:grid!important;grid-template-columns:auto minmax(0,1fr);gap:11px!important;align-items:start!important;min-width:0;min-height:128px;padding:13px 14px!important;margin:0!important;border-color:#1f3a5c!important;background:linear-gradient(180deg,#0d1c31,#091727)!important;transition:border-color .14s ease,transform .14s ease,background-color .14s ease}
+.doc-card:hover{border-color:#365f8a!important;background:#0d1d31!important;transform:translateY(-1px)}
+.doc-icon{display:grid!important;place-items:center;width:32px!important;height:32px!important;border:1px solid #294969;border-radius:8px!important;background:#0a192b!important;color:#9ec8f2!important;font-size:16px!important;line-height:1!important}
+.doc-card h2{margin:1px 0 6px!important;color:#edf5ff!important;font-size:12px!important;font-weight:750!important;line-height:1.25!important}
+.doc-card p{margin:0!important;color:#7892af!important;font-size:10px!important;line-height:1.45!important}
+.docs-grid ~ .panel{padding:14px 15px!important;border-color:#1f3a5c!important;background:linear-gradient(180deg,#0c1b2f,#091626)!important}
+.docs-grid ~ .panel h2{margin:0 0 7px!important;color:#eef5ff!important;font-size:13px!important;font-weight:760!important}
+.docs-grid ~ .panel p{margin:0!important;color:#8098b4!important;font-size:10.5px!important;line-height:1.5!important}
+@media(max-width:1200px){.docs-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
+@media(max-width:900px){.docs-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:560px){.docs-grid{grid-template-columns:1fr!important}.doc-card{min-height:0}}

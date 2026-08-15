@@ -37,30 +37,61 @@ async function renderDashboard(full=true){
         datasets:[{
           label:t('dashboard.chartFarm'),
           data:hist.map(x=>x.hash60s),
-          borderColor:'#f59e0b',
-          backgroundColor:'rgba(245,158,11,.18)',
-          pointBackgroundColor:'#f59e0b',
-          pointBorderColor:'#f59e0b',
-          borderWidth:2,
-          pointRadius:hist.length<3?3:0,
-          pointHoverRadius:4,
-          tension:.25,
+          borderColor:'#3d91ff',
+          backgroundColor:context=>{
+            const {ctx,chartArea}=context.chart;
+            if(!chartArea)return'rgba(61,145,255,.15)';
+            const gradient=ctx.createLinearGradient(0,chartArea.top,0,chartArea.bottom);
+            gradient.addColorStop(0,'rgba(61,145,255,.28)');
+            gradient.addColorStop(.55,'rgba(61,145,255,.11)');
+            gradient.addColorStop(1,'rgba(61,145,255,.015)');
+            return gradient;
+          },
+          pointBackgroundColor:'#79b6ff',
+          pointBorderColor:'#0b1627',
+          pointBorderWidth:2,
+          borderWidth:2.2,
+          pointRadius:hist.length<3?3.5:0,
+          pointHoverRadius:4.5,
+          pointHoverBackgroundColor:'#9acaff',
+          pointHoverBorderColor:'#132945',
+          pointHoverBorderWidth:2,
+          tension:.22,
+          cubicInterpolationMode:'monotone',
           fill:true
         }]
       },
       options:{
-        responsive:true,maintainAspectRatio:false,
+        responsive:true,
+        maintainAspectRatio:false,
+        animation:{duration:240},
         interaction:{intersect:false,mode:'index'},
         plugins:{
           legend:{display:false},
-          tooltip:{callbacks:{label:ctx=>t('dashboard.chartTooltip',{hash:fmtHash(ctx.parsed.y)})}}
+          tooltip:{
+            backgroundColor:'rgba(8,20,36,.96)',
+            titleColor:'#dbeafe',
+            bodyColor:'#f8fbff',
+            borderColor:'rgba(77,150,255,.45)',
+            borderWidth:1,
+            padding:10,
+            displayColors:false,
+            caretPadding:8,
+            callbacks:{label:ctx=>t('dashboard.chartTooltip',{hash:fmtHash(ctx.parsed.y)})}
+          }
         },
         scales:{
-          x:{grid:{display:false},ticks:{maxTicksLimit:10}},
+          x:{
+            grid:{display:false},
+            border:{display:false},
+            ticks:{color:'#647b99',maxTicksLimit:10,maxRotation:0,autoSkip:true,padding:8}
+          },
           y:{
             beginAtZero:false,
             min:farmScale.min,max:farmScale.max,
-            ticks:{stepSize:farmScale.stepSize,maxTicksLimit:6,callback:v=>fmtHash(v)}
+            border:{display:false},
+            grid:{color:'rgba(102,132,170,.10)',drawTicks:false},
+            ticks:{color:'#647b99',padding:8,stepSize:farmScale.stepSize,maxTicksLimit:6,callback:v=>fmtHash(v)}
           }
         }
       }

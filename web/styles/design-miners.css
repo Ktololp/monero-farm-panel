@@ -1,0 +1,208 @@
+/* Monero Farm Panel v1.2.2 — Patch 2E.3
+   Miners table polish only. No data or dashboard logic changes. */
+
+.dashboard-miners{
+  --miner-line:#1d3655;
+  --miner-text:#dce8f8;
+  --miner-muted:#7895b8;
+  --miner-green:#53df8d;
+}
+
+.dashboard-miners .panel-head{
+  margin-bottom:8px!important;
+}
+
+.dashboard-miners table{
+  min-width:900px;
+}
+
+.dashboard-miners thead th{
+  color:var(--miner-muted)!important;
+  font-size:10px!important;
+  font-weight:760!important;
+  letter-spacing:.06em!important;
+}
+
+.dashboard-miners tbody tr{
+  position:relative;
+  transition:background-color .14s ease,box-shadow .14s ease;
+}
+
+.dashboard-miners tbody tr:hover{
+  background:linear-gradient(90deg,rgba(61,145,255,.055),rgba(61,145,255,.015))!important;
+  box-shadow:inset 2px 0 0 rgba(61,145,255,.32);
+}
+
+.dashboard-miners tbody td{
+  color:var(--miner-text);
+  padding-top:10px!important;
+  padding-bottom:10px!important;
+  font-variant-numeric:tabular-nums;
+}
+
+.dashboard-miners .server-name-cell{
+  display:flex;
+  align-items:center;
+  gap:7px!important;
+  min-height:28px;
+}
+
+.dashboard-miners .open-server{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  min-width:0;
+  color:#edf5ff!important;
+  font-size:12px!important;
+  font-weight:760!important;
+  line-height:1.2!important;
+  text-decoration:none!important;
+}
+
+.dashboard-miners .open-server:hover{
+  color:#9acaff!important;
+}
+
+.dashboard-miners .server-icon{
+  display:inline-grid;
+  place-items:center;
+  flex:0 0 17px;
+  width:17px;
+  height:17px;
+  margin-right:0!important;
+  font-size:12px;
+  opacity:.86;
+}
+
+.dashboard-miners .server-name-cell + .muted,
+.dashboard-miners td > .muted.small{
+  margin-top:1px;
+  color:#7f96b4!important;
+  font-size:10.5px!important;
+  line-height:1.25!important;
+}
+
+.dashboard-miners .quick-terminal{
+  position:relative;
+  display:inline-grid!important;
+  place-items:center!important;
+  flex:0 0 28px;
+  width:28px!important;
+  height:26px!important;
+  min-width:28px!important;
+  margin-left:1px;
+  padding:0!important;
+  border:1px solid #2b5686!important;
+  border-radius:7px!important;
+  background:#0d2139!important;
+  color:transparent!important;
+  font-size:0!important;
+  box-shadow:inset 0 1px 0 rgba(137,193,255,.045);
+  transition:border-color .14s ease,background-color .14s ease,transform .14s ease,box-shadow .14s ease;
+}
+
+.dashboard-miners .quick-terminal::before{
+  content:"";
+  width:14px;
+  height:14px;
+  background:#79b6ff;
+  mask:url('../assets/icons/terminal.svg') center/contain no-repeat;
+  -webkit-mask:url('../assets/icons/terminal.svg') center/contain no-repeat;
+}
+
+.dashboard-miners .quick-terminal:hover{
+  border-color:#4d96ff!important;
+  background:#112c4a!important;
+  box-shadow:0 0 0 2px rgba(61,145,255,.08),inset 0 1px 0 rgba(160,207,255,.08);
+  transform:translateY(-1px);
+}
+
+.dashboard-miners .status{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:7px!important;
+  min-height:22px;
+  color:#a8b9ce;
+  font-size:11px!important;
+  font-weight:670!important;
+}
+
+.dashboard-miners .status.online{
+  color:#8ff0b2!important;
+}
+
+.dashboard-miners .status i{
+  flex:0 0 7px;
+  width:7px!important;
+  height:7px!important;
+}
+
+.dashboard-miners .status.online i{
+  background:var(--miner-green)!important;
+  box-shadow:0 0 5px rgba(83,223,141,.85),0 0 12px rgba(83,223,141,.23)!important;
+}
+
+.dashboard-miners .component-row{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:5px!important;
+}
+
+.dashboard-miners .component{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:4px!important;
+  min-height:20px!important;
+  padding:3px 6px!important;
+  border:1px solid #274563!important;
+  border-radius:5px!important;
+  background:#0a1727!important;
+  color:#8298b4!important;
+  font-size:9.5px!important;
+  font-weight:620!important;
+  line-height:1!important;
+}
+
+.dashboard-miners .component b{
+  color:#b9cbe0!important;
+  font-size:9.5px!important;
+  font-weight:700!important;
+}
+
+.dashboard-miners .component.active{
+  border-color:#216c43!important;
+  background:rgba(13,50,31,.68)!important;
+  color:#79e8a2!important;
+  box-shadow:inset 0 0 0 1px rgba(64,198,113,.035);
+}
+
+.dashboard-miners .component.active b{
+  color:#baf5cf!important;
+}
+
+.dashboard-miners .component.starting{
+  border-color:#315f8e!important;
+  background:rgba(18,48,78,.64)!important;
+  color:#9acaff!important;
+}
+
+.dashboard-miners .component.inactive{
+  border-color:#6b3440!important;
+  background:rgba(70,24,35,.46)!important;
+  color:#ff9daa!important;
+}
+
+.dashboard-miners tbody td:last-child{
+  color:#d6e3f3;
+  white-space:nowrap;
+}
+
+@media(max-width:1320px){
+  .dashboard-miners table{min-width:860px}
+  .dashboard-miners .component{padding-left:5px!important;padding-right:5px!important}
+}
+
+@media(max-width:760px){
+  .dashboard-miners table{min-width:820px}
+}

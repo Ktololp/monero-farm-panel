@@ -1,4 +1,5 @@
 @import './design-miners.css';
+@import './design-alerts.css';
 
 /* Monero Farm Panel v1.2.2 — Patch 2E.1
    Dashboard density and surfaces only. Data flow and Chart.js logic stay untouched. */

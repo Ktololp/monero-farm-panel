@@ -1,0 +1,117 @@
+/* Monero Farm Panel v1.2.2 — Patch 2H.1
+   Topology page only. Flow data and SSH actions stay untouched. */
+
+.topology-page .topology-list{
+  display:grid!important;
+  gap:12px!important;
+}
+.topology-page .topology-card{
+  margin:0!important;
+  padding:14px 15px!important;
+  overflow:hidden;
+  border-color:#1f3a5c!important;
+  background:linear-gradient(180deg,#0c1b2f,#091626)!important;
+}
+.topology-page .topology-title{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:10px!important;
+  margin:0 0 12px!important;
+}
+.topology-page .topology-title .link{
+  min-width:0;
+  color:#eef6ff!important;
+  font-size:13px!important;
+  font-weight:760!important;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.topology-page .quick-terminal{
+  width:34px!important;
+  height:34px!important;
+  flex:0 0 34px;
+  padding:0!important;
+  font-size:0!important;
+  border-color:#294563!important;
+  border-radius:8px!important;
+  background:#0a192b!important;
+}
+.topology-page .quick-terminal::before{
+  content:"";
+  display:block;
+  width:15px;
+  height:15px;
+  margin:auto;
+  background:#a9c3df;
+  mask:url('../assets/icons/terminal.svg') center/contain no-repeat;
+  -webkit-mask:url('../assets/icons/terminal.svg') center/contain no-repeat;
+}
+.topology-page .quick-terminal:hover{border-color:#4c78a7!important;background:#10223a!important}
+.topology-page .quick-terminal:hover::before{background:#e8f4ff}
+
+.topology-page .topology-chain{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1fr)!important;
+  align-items:stretch!important;
+  gap:8px!important;
+}
+.topology-page .topology-chain > i{
+  display:grid;
+  place-items:center;
+  min-width:18px;
+  color:#4d6886!important;
+  font-size:18px!important;
+  font-style:normal!important;
+}
+.topology-page .topo-node{
+  position:relative;
+  min-width:0;
+  min-height:82px;
+  padding:12px!important;
+  overflow:hidden;
+  border:1px solid #294260!important;
+  border-radius:9px!important;
+  background:#081523!important;
+}
+.topology-page .topo-node::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  width:3px;
+  background:#657890;
+}
+.topology-page .topo-node.ok{border-color:#24563e!important;background:linear-gradient(180deg,#0a211c,#081916)!important}
+.topology-page .topo-node.ok::before{background:#49d987}
+.topology-page .topo-node.bad{border-color:#66323d!important;background:linear-gradient(180deg,#211117,#180c11)!important}
+.topology-page .topo-node.bad::before{background:#ef6674}
+.topology-page .topo-node b{
+  display:block!important;
+  margin-bottom:7px!important;
+  color:#eef6ff!important;
+  font-size:12px!important;
+  font-weight:760!important;
+}
+.topology-page .topo-node span{
+  display:block!important;
+  overflow:hidden;
+  color:#8199b6!important;
+  font-size:10.5px!important;
+  line-height:1.35!important;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+@media(max-width:1100px){
+  .topology-page .topology-chain{
+    grid-template-columns:1fr!important;
+  }
+  .topology-page .topology-chain > i{
+    min-height:16px;
+    transform:rotate(90deg);
+  }
+  .topology-page .topo-node{min-height:72px}
+}

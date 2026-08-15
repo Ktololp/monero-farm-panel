@@ -1,0 +1,12 @@
+/* Monero Farm Panel v1.2.2 — Patch 2H.4 */
+.audit-page .audit-table{padding:14px 15px!important;overflow-x:auto;border-color:#1f3a5c!important;background:linear-gradient(180deg,#0c1b2f,#091626)!important}
+.audit-page table{width:100%;min-width:900px;border-collapse:collapse}
+.audit-page th{height:34px!important;padding:7px 9px!important;border-bottom:1px solid #213d5f!important;color:#6f8baa!important;font-size:9px!important;font-weight:760!important;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.audit-page td{padding:9px!important;border-bottom:1px solid rgba(31,57,89,.68)!important;color:#cbd8e8!important;font-size:10.5px!important;vertical-align:top}
+.audit-page tbody tr:hover{background:rgba(61,145,255,.035)}
+.audit-page td:first-child{color:#8fa9c6!important;font-variant-numeric:tabular-nums;white-space:nowrap}
+.audit-page .pill{min-height:20px!important;padding:3px 7px!important;border-radius:999px!important;font-size:9.5px!important;font-weight:700!important;line-height:1!important}
+.audit-page .pill.online{border-color:#217249!important;background:#0a2b1d!important;color:#73e5a0!important}
+.audit-page .pill.error{border-color:#71313d!important;background:#2b1017!important;color:#ff9da8!important}
+.audit-page .details{max-width:520px!important;color:#8fa5bf!important;white-space:pre-wrap!important;word-break:break-word!important;line-height:1.4!important}
+@media(max-width:760px){.audit-page .audit-table{padding:10px!important}}

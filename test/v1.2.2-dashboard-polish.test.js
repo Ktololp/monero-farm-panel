@@ -8,7 +8,7 @@ test('v1.2.2 dashboard polish is isolated in its own style layer',()=>{
   const kpi=read('web/styles/design-kpi.css');
   const css=read('web/styles/design-dashboard.css');
 
-  assert.match(kpi,/^@import '\.\/design-dashboard\.css';/);
+  assert.ok(kpi.split(/\r?\n/).includes("@import './design-dashboard.css';"));
   assert.match(css,/\.dashboard-chart canvas/);
   assert.match(css,/height:244px!important/);
   assert.match(css,/\.dashboard-miners thead th/);

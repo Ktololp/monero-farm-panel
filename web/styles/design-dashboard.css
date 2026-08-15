@@ -1,0 +1,202 @@
+/* Monero Farm Panel v1.2.2 — Patch 2E.1
+   Dashboard density and surfaces only. Data flow and Chart.js logic stay untouched. */
+
+.dashboard-chart,
+.dashboard-miners,
+.dashboard-alerts{
+  border-color:#1e3859!important;
+  background:linear-gradient(180deg,#0c1b2f 0%,#091626 100%)!important;
+  box-shadow:inset 0 1px 0 rgba(120,176,235,.025)!important;
+}
+
+.dashboard-chart{
+  margin-top:14px!important;
+  padding:15px 16px 12px!important;
+  min-height:0!important;
+}
+
+.dashboard-chart .panel-head{
+  min-height:38px;
+  margin-bottom:3px!important;
+  align-items:flex-start!important;
+}
+
+.dashboard-chart .panel-head h2,
+.dashboard-miners .panel-head h2,
+.dashboard-alerts .panel-head h2{
+  margin:0!important;
+  font-size:15px!important;
+  line-height:1.2!important;
+  letter-spacing:-.012em;
+}
+
+.dashboard-chart .panel-head .muted{
+  display:block;
+  margin-top:4px;
+  font-size:11px!important;
+  line-height:1.25;
+}
+
+.dashboard-chart canvas{
+  display:block;
+  width:100%!important;
+  height:244px!important;
+  max-height:244px!important;
+}
+
+.dashboard-chart #refresh-all,
+.dashboard-miners #all-servers{
+  min-height:36px!important;
+  padding:7px 13px!important;
+  border-color:#294667!important;
+  background:#0b192b!important;
+}
+
+.dashboard-miners{
+  margin-top:14px!important;
+  padding:14px 16px 10px!important;
+}
+
+.dashboard-miners .panel-head{
+  min-height:38px;
+  margin-bottom:6px!important;
+}
+
+.dashboard-miners table{
+  width:100%;
+  table-layout:auto;
+  border-collapse:separate;
+  border-spacing:0;
+}
+
+.dashboard-miners thead th{
+  padding:8px 10px!important;
+  border-bottom:1px solid #1d3655!important;
+  color:#7895b8!important;
+  font-size:10px!important;
+  font-weight:750!important;
+  letter-spacing:.055em!important;
+  line-height:1.2!important;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+
+.dashboard-miners tbody td{
+  padding:11px 10px!important;
+  border-bottom:1px solid rgba(29,54,85,.62)!important;
+  font-size:12px!important;
+  line-height:1.28!important;
+  vertical-align:middle!important;
+}
+
+.dashboard-miners tbody tr:last-child td{
+  border-bottom:0!important;
+}
+
+.dashboard-miners tbody tr{
+  transition:background-color .14s ease;
+}
+
+.dashboard-miners tbody tr:hover{
+  background:rgba(37,79,125,.10);
+}
+
+.dashboard-miners .server-name-cell{
+  display:flex;
+  align-items:center;
+  gap:7px!important;
+}
+
+.dashboard-miners .open-server{
+  font-weight:720!important;
+}
+
+.dashboard-miners .quick-terminal{
+  width:27px!important;
+  height:25px!important;
+  min-width:27px!important;
+  padding:0!important;
+  border-color:#315378!important;
+  background:#10223a!important;
+}
+
+.dashboard-miners .status{
+  gap:6px!important;
+  font-size:11px!important;
+  font-weight:650!important;
+  white-space:nowrap;
+}
+
+.dashboard-miners .status i{
+  width:7px!important;
+  height:7px!important;
+  box-shadow:0 0 8px currentColor;
+}
+
+.dashboard-miners .component-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px!important;
+}
+
+.dashboard-miners .component{
+  min-height:21px!important;
+  padding:3px 6px!important;
+  border-radius:5px!important;
+  font-size:10px!important;
+  line-height:1!important;
+}
+
+.dashboard-miners .component b{
+  font-size:10px!important;
+}
+
+.dashboard-alerts{
+  margin-top:14px!important;
+  min-height:118px!important;
+  padding:14px 16px!important;
+}
+
+.dashboard-alerts .panel-head{
+  min-height:30px;
+  margin-bottom:2px!important;
+}
+
+.dashboard-alerts .empty{
+  min-height:66px!important;
+  padding:8px 12px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  color:#7890ae!important;
+  font-size:13px!important;
+}
+
+.dashboard-alerts .alert-row{
+  display:grid;
+  grid-template-columns:minmax(120px,.7fr) minmax(220px,2fr) auto;
+  gap:12px;
+  align-items:center;
+  padding:10px 8px!important;
+  border-top:1px solid rgba(30,56,89,.72);
+}
+
+.dashboard-alerts .alert-row time{
+  color:#7189a6;
+  font-size:11px;
+  white-space:nowrap;
+}
+
+@media(max-width:1320px){
+  .dashboard-chart canvas{height:220px!important;max-height:220px!important}
+  .dashboard-miners{overflow-x:auto}
+  .dashboard-miners table{min-width:850px}
+}
+
+@media(max-width:760px){
+  .dashboard-chart,
+  .dashboard-miners,
+  .dashboard-alerts{padding-left:12px!important;padding-right:12px!important}
+  .dashboard-chart canvas{height:200px!important;max-height:200px!important}
+  .dashboard-alerts .alert-row{grid-template-columns:1fr;gap:4px}
+}

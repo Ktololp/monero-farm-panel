@@ -4,9 +4,9 @@ export function createAuditPage(ctx) {
   async function renderAudit(){
     const rows=await api('/actions?limit=300');
     setHeader(t('audit.title'),t('audit.subtitle'));
-    $('#view').innerHTML=`<div class="panel table-wrap"><table><thead><tr>
+    $('#view').innerHTML=`<div class="audit-page"><div class="panel table-wrap audit-table"><table><thead><tr>
       <th>${t('audit.time')}</th><th>${t('audit.action')}</th><th>${t('audit.server')}</th><th>${t('audit.status')}</th><th>IP</th><th>${t('audit.details')}</th>
-    </tr></thead><tbody>${rows.map(r=>`<tr><td>${fmtDate(r.ts)}</td><td>${esc(r.action)}</td><td>${esc(r.server_name||'—')}</td><td><span class="pill ${r.status==='ok'?'online':'error'}">${esc(r.status)}</span></td><td>${esc(r.ip||'')}</td><td class="details">${esc(r.details||'')}</td></tr>`).join('')}</tbody></table></div>`;
+    </tr></thead><tbody>${rows.map(r=>`<tr><td>${fmtDate(r.ts)}</td><td>${esc(r.action)}</td><td>${esc(r.server_name||'—')}</td><td><span class="pill ${r.status==='ok'?'online':'error'}">${esc(r.status)}</span></td><td>${esc(r.ip||'')}</td><td class="details">${esc(r.details||'')}</td></tr>`).join('')}</tbody></table></div></div>`;
   }
 
   return { renderAudit };

@@ -1,3 +1,4 @@
+@import './design-settings.css';
 @import './design-proxies.css';
 @import './design-topology.css';
 @import './design-updates.css';
@@ -9,39 +10,9 @@
 /* Monero Farm Panel v1.2.2 — Patch 2B
    KPI layout only. Explicit semantic width classes, no nth-child layout magic. */
 
-.farm-overview-stats{
-  display:grid;
-  gap:12px;
-  align-items:stretch;
-}
-
-.farm-overview-stats > .stat{
-  min-width:0;
-}
-
-@media (min-width:1501px){
-  .farm-overview-stats{display:flex!important;flex-wrap:nowrap!important;gap:12px!important}
-  .farm-overview-stats > .kpi-regular{flex:1 1 0!important;min-width:0!important}
-  .farm-overview-stats > .kpi-wide{flex:1.48 1 0!important;min-width:0!important}
-  .farm-overview-stats > .kpi-short{flex:.64 1 0!important;min-width:92px!important}
-}
-@media (min-width:1321px) and (max-width:1500px){
-  .farm-overview-stats{display:flex!important;flex-wrap:nowrap!important;gap:10px!important}
-  .farm-overview-stats > .kpi-regular{flex:1 1 0!important;min-width:0!important}
-  .farm-overview-stats > .kpi-wide{flex:1.34 1 0!important;min-width:0!important}
-  .farm-overview-stats > .kpi-short{flex:.70 1 0!important;min-width:84px!important}
-  .farm-overview-stats .stat{padding-left:12px;padding-right:12px}
-}
-@media (max-width:1320px){
-  .farm-overview-stats{grid-template-columns:repeat(4,minmax(145px,1fr))!important}
-  .farm-overview-stats > .kpi-wide{grid-column:span 2}
-  .farm-overview-stats > .kpi-short{max-width:none}
-}
-@media (max-width:980px){
-  .farm-overview-stats{grid-template-columns:repeat(2,minmax(145px,1fr))!important}
-  .farm-overview-stats > .kpi-wide{grid-column:span 2}
-}
-@media (max-width:520px){
-  .farm-overview-stats{grid-template-columns:1fr!important}
-  .farm-overview-stats > .kpi-wide{grid-column:auto}
-}
+.farm-overview-stats{display:grid;gap:12px;align-items:stretch}.farm-overview-stats>.stat{min-width:0}
+@media (min-width:1501px){.farm-overview-stats{display:flex!important;flex-wrap:nowrap!important;gap:12px!important}.farm-overview-stats>.kpi-regular{flex:1 1 0!important;min-width:0!important}.farm-overview-stats>.kpi-wide{flex:1.48 1 0!important;min-width:0!important}.farm-overview-stats>.kpi-short{flex:.64 1 0!important;min-width:92px!important}}
+@media (min-width:1321px) and (max-width:1500px){.farm-overview-stats{display:flex!important;flex-wrap:nowrap!important;gap:10px!important}.farm-overview-stats>.kpi-regular{flex:1 1 0!important;min-width:0!important}.farm-overview-stats>.kpi-wide{flex:1.34 1 0!important;min-width:0!important}.farm-overview-stats>.kpi-short{flex:.70 1 0!important;min-width:84px!important}.farm-overview-stats .stat{padding-left:12px;padding-right:12px}}
+@media (max-width:1320px){.farm-overview-stats{grid-template-columns:repeat(4,minmax(145px,1fr))!important}.farm-overview-stats>.kpi-wide{grid-column:span 2}.farm-overview-stats>.kpi-short{max-width:none}}
+@media (max-width:980px){.farm-overview-stats{grid-template-columns:repeat(2,minmax(145px,1fr))!important}.farm-overview-stats>.kpi-wide{grid-column:span 2}}
+@media (max-width:520px){.farm-overview-stats{grid-template-columns:1fr!important}.farm-overview-stats>.kpi-wide{grid-column:auto}}

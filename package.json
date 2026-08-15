@@ -21,7 +21,7 @@
     "@lingui/core": "6.6.0",
     "better-sqlite3": "12.2.0",
     "compression": "1.8.1",
-    "express": "5.1.0",
+    "express": "5.2.1",
     "helmet": "8.1.0",
     "socket.io": "4.8.1",
     "ssh2": "1.17.0"

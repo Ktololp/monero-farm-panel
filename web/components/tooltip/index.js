@@ -1,6 +1,7 @@
 const SELECTOR=[
   '.help-icon[data-tip]',
   '[data-tooltip]',
+  '[data-mfp-tooltip-title]',
   '[title]',
   '[data-i18n-title]'
 ].join(',');
@@ -26,6 +27,7 @@ function tooltipText(el){
   return String(
     el.getAttribute('data-tip') ||
     el.getAttribute('data-tooltip') ||
+    el.getAttribute('data-mfp-tooltip-title') ||
     el.getAttribute('title') ||
     el.getAttribute('aria-label') ||
     ''
@@ -34,13 +36,18 @@ function tooltipText(el){
 
 function suppressNativeTitle(el){
   if(!el.hasAttribute('title'))return;
-  restoreTitle={el,value:el.getAttribute('title')};
+  const value=el.getAttribute('title');
+  restoreTitle={el,value};
+  el.setAttribute('data-mfp-tooltip-title',value||'');
   el.removeAttribute('title');
 }
 function restoreNativeTitle(){
   if(!restoreTitle)return;
   const {el,value}=restoreTitle;
-  if(el?.isConnected && value!=null && !el.hasAttribute('title'))el.setAttribute('title',value);
+  if(el?.isConnected){
+    el.removeAttribute('data-mfp-tooltip-title');
+    if(value!=null && !el.hasAttribute('title'))el.setAttribute('title',value);
+  }
   restoreTitle=null;
 }
 
@@ -77,7 +84,7 @@ function showTooltip(el){
   if(active && active!==el)hideTooltip();
   active=el;
   suppressNativeTitle(el);
-  textNode.textContent=text;
+  textNode.textContent=tooltipText(el)||text;
   tooltip.classList.add('is-visible');
   tooltip.setAttribute('aria-hidden','false');
   el.setAttribute('aria-describedby','mfp-tooltip');
@@ -99,6 +106,7 @@ function hideTooltip(el=active){
 
 function refreshTooltip(){
   if(!active)return;
+  if(!active.isConnected){hideTooltip();return;}
   const text=tooltipText(active);
   if(!text){hideTooltip();return;}
   textNode.textContent=text;
@@ -113,10 +121,11 @@ document.addEventListener('pointerover',event=>{
 });
 
 document.addEventListener('pointerout',event=>{
-  const el=resolveTarget(event.target);
-  if(!el || active!==el)return;
-  if(event.relatedTarget instanceof Node && el.contains(event.relatedTarget))return;
-  hideTooltip(el);
+  if(!active)return;
+  const from=event.target instanceof Node ? event.target : null;
+  if(!from || !(from===active || active.contains(from)))return;
+  if(event.relatedTarget instanceof Node && active.contains(event.relatedTarget))return;
+  hideTooltip(active);
 });
 
 document.addEventListener('focusin',event=>{
@@ -125,17 +134,22 @@ document.addEventListener('focusin',event=>{
 });
 
 document.addEventListener('focusout',event=>{
-  const el=resolveTarget(event.target);
-  if(el && active===el)hideTooltip(el);
+  if(active && event.target instanceof Node && (event.target===active || active.contains(event.target)))hideTooltip(active);
 });
+
+document.addEventListener('pointerdown',()=>hideTooltip(),true);
 
 document.addEventListener('keydown',event=>{
   if(event.key==='Escape')hideTooltip();
 });
 
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden)hideTooltip();
+});
+
+window.addEventListener('blur',()=>hideTooltip());
 window.addEventListener('resize',refreshTooltip,{passive:true});
-window.addEventListener('scroll',refreshTooltip,{passive:true,capture:true});
+window.addEventListener('scroll',()=>hideTooltip(),{passive:true,capture:true});
 document.addEventListener('mfp:locale-change',refreshTooltip);
 
 export { hideTooltip, refreshTooltip };
-

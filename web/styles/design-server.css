@@ -1,5 +1,6 @@
 @import './design-server-components.css';
 @import './design-server-performance-system.css';
+@import './design-server-tools.css';
 
 /* Monero Farm Panel v1.2.2 — Patch 2F.1
    Server page header, tabs and overview summary only. No server data or SSH logic changes. */

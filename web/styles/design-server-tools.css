@@ -1,0 +1,130 @@
+/* Monero Farm Panel v1.2.2 — Patch 2F.4
+   Logs + Management tabs only. No command, terminal or restart behavior changes. */
+
+#server-tab-view .log-tabs{
+  display:flex!important;
+  align-items:center;
+  gap:7px!important;
+  margin:0 0 10px!important;
+  padding:0!important;
+  overflow-x:auto;
+}
+
+#server-tab-view .log-load{
+  min-height:35px!important;
+  padding:8px 12px!important;
+  border:1px solid #223e60!important;
+  border-radius:8px!important;
+  background:#091626!important;
+  color:#8da7c5!important;
+  font-size:10.5px!important;
+  font-weight:690!important;
+  line-height:1!important;
+}
+
+#server-tab-view .log-load:hover{
+  border-color:#3a638e!important;
+  background:#0e1f34!important;
+  color:#e3eefb!important;
+}
+
+#server-tab-view .log-load.active{
+  border-color:#4c7bac!important;
+  background:linear-gradient(180deg,#132b49,#10233c)!important;
+  color:#fff!important;
+  box-shadow:inset 0 1px 0 rgba(142,197,255,.07);
+}
+
+#server-tab-view #component-log,
+#server-tab-view #command-output{
+  margin:0!important;
+  overflow:auto;
+  border:1px solid #1f3a5b!important;
+  border-radius:9px!important;
+  background:#050d18!important;
+  color:#b9cbe0!important;
+  font:500 11px/1.55 ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace!important;
+  tab-size:2;
+  scrollbar-color:#2c5077 #07111f;
+}
+
+#server-tab-view #component-log{
+  min-height:430px!important;
+  max-height:62vh!important;
+  padding:14px 15px!important;
+}
+
+#server-tab-view .action-stack{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:9px!important;
+  margin-top:12px!important;
+}
+
+#server-tab-view .action-stack button{
+  min-height:38px!important;
+  padding:9px 11px!important;
+  border-radius:8px!important;
+  font-size:10.5px!important;
+  font-weight:690!important;
+}
+
+#server-tab-view #remote-command{
+  width:100%;
+  min-height:132px!important;
+  resize:vertical;
+  padding:11px 12px!important;
+  border:1px solid #284766!important;
+  border-radius:9px!important;
+  background:#071321!important;
+  color:#e5effb!important;
+  font:500 11px/1.5 ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace!important;
+  outline:none;
+  transition:border-color .14s ease,box-shadow .14s ease;
+}
+
+#server-tab-view #remote-command:focus{
+  border-color:#4b7fb4!important;
+  box-shadow:0 0 0 2px rgba(61,145,255,.08)!important;
+}
+
+#server-tab-view #run-command{
+  min-height:36px!important;
+  margin-top:9px!important;
+  padding:8px 12px!important;
+  border-radius:8px!important;
+  font-size:10.5px!important;
+  font-weight:690!important;
+}
+
+#server-tab-view #command-output{
+  min-height:150px!important;
+  max-height:360px!important;
+  margin-top:10px!important;
+  padding:12px 13px!important;
+}
+
+#server-tab-view > .grid2 > .panel:has(.action-stack),
+#server-tab-view > .grid2 > .panel:has(#remote-command){
+  min-width:0;
+  padding:15px 16px!important;
+  border-color:#1e3859!important;
+  background:linear-gradient(180deg,#0c1b2f,#091626)!important;
+}
+
+#server-tab-view > .grid2 > .panel:has(.action-stack) h2,
+#server-tab-view > .grid2 > .panel:has(#remote-command) h2{
+  margin:0 0 8px!important;
+  color:#eef5ff!important;
+  font-size:14px!important;
+  font-weight:760!important;
+}
+
+@media(max-width:900px){
+  #server-tab-view #component-log{min-height:360px!important}
+}
+
+@media(max-width:620px){
+  #server-tab-view .action-stack{grid-template-columns:1fr!important}
+  #server-tab-view #component-log{min-height:300px!important;font-size:10px!important}
+}

@@ -1,0 +1,180 @@
+/* Monero Farm Panel v1.2.2 — Patch 2G.1
+   Servers page only. No navigation, SSH or telemetry behavior changes. */
+
+.servers-page .server-grid{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:14px!important;
+}
+
+.servers-page .server-card{
+  position:relative;
+  min-width:0;
+  padding:15px 16px 13px!important;
+  overflow:hidden;
+  border:1px solid #1f3a5c!important;
+  border-radius:11px!important;
+  background:linear-gradient(180deg,#0d1c31 0%,#091727 100%)!important;
+  box-shadow:inset 0 1px 0 rgba(131,187,243,.035)!important;
+}
+
+.servers-page .server-card::before{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  top:0;
+  height:2px;
+  background:linear-gradient(90deg,#3d91ff,#5bbcff);
+  opacity:.82;
+}
+
+.servers-page .server-card-head{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+  margin-bottom:11px!important;
+}
+
+.servers-page .server-title{
+  display:flex!important;
+  align-items:center!important;
+  gap:10px!important;
+  min-width:0;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  color:inherit!important;
+  text-align:left!important;
+}
+
+.servers-page .server-title > span{
+  display:grid;
+  place-items:center;
+  width:30px;
+  height:30px;
+  flex:0 0 30px;
+  border:1px solid #29496e;
+  border-radius:8px;
+  background:#0b1a2d;
+  color:#b9d2ed;
+  font-size:15px;
+}
+
+.servers-page .server-title div{min-width:0}
+.servers-page .server-title b{
+  display:block;
+  overflow:hidden;
+  color:#f0f6ff!important;
+  font-size:13px!important;
+  font-weight:780!important;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.servers-page .server-title small{
+  display:block;
+  margin-top:3px;
+  overflow:hidden;
+  color:#7690af!important;
+  font-size:10px!important;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.servers-page .quick-terminal{
+  width:32px!important;
+  height:32px!important;
+  min-width:32px!important;
+  padding:0!important;
+  border:1px solid #2b4b70!important;
+  border-radius:8px!important;
+  background:#0b1a2d!important;
+  color:transparent!important;
+  font-size:0!important;
+}
+.servers-page .quick-terminal::before{
+  content:"";
+  display:block;
+  width:15px;
+  height:15px;
+  margin:auto;
+  background:#87b8e9;
+  mask:url('../assets/icons/terminal.svg') center/contain no-repeat;
+  -webkit-mask:url('../assets/icons/terminal.svg') center/contain no-repeat;
+}
+.servers-page .quick-terminal:hover{border-color:#4c76a5!important;background:#10233b!important}
+
+.servers-page .server-card-status{
+  display:flex!important;
+  align-items:center!important;
+  gap:12px!important;
+  min-height:31px;
+  padding:7px 0!important;
+  border-top:1px solid rgba(31,57,89,.7);
+  border-bottom:1px solid rgba(31,57,89,.7);
+  color:#cbd8e8!important;
+  font-size:10.5px!important;
+  font-variant-numeric:tabular-nums;
+}
+.servers-page .server-card-status .status{margin-right:auto}
+
+.servers-page .component-row{
+  display:flex!important;
+  flex-wrap:wrap;
+  gap:6px!important;
+  margin:10px 0 8px!important;
+}
+.servers-page .component-row .component{
+  min-height:20px!important;
+  padding:3px 6px!important;
+  border-radius:6px!important;
+  font-size:9.5px!important;
+  line-height:1!important;
+}
+
+.servers-page .spark-wrap{
+  height:104px!important;
+  margin:4px 0 10px!important;
+  padding:7px 4px 2px!important;
+  border:1px solid rgba(31,57,89,.62);
+  border-radius:8px;
+  background:#071423;
+}
+.servers-page .spark-wrap canvas{height:92px!important;max-height:92px!important}
+
+.servers-page .server-meta{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:8px!important;
+}
+.servers-page .server-meta > span{
+  min-width:0;
+  padding:8px 9px!important;
+  border:1px solid #1d3655;
+  border-radius:7px;
+  background:#081523;
+  color:#708aa8!important;
+  font-size:9px!important;
+  line-height:1.3!important;
+}
+.servers-page .server-meta b{
+  display:block;
+  margin-top:3px;
+  overflow:hidden;
+  color:#dbe7f5!important;
+  font-size:10.5px!important;
+  font-weight:700!important;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+}
+
+.servers-page .empty{grid-column:1 / -1}
+
+@media(max-width:1120px){
+  .servers-page .server-grid{grid-template-columns:1fr!important}
+}
+@media(max-width:620px){
+  .servers-page .server-meta{grid-template-columns:1fr!important}
+}

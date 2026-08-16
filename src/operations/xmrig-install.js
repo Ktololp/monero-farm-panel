@@ -7,13 +7,29 @@ import { serverById, validateWallet, validatePool } from './server.js';
 const statusScript = `#!/usr/bin/env bash
 set +e
 BIN=""
-if [ -x /opt/xmrig/xmrig ]; then
+
+# Prefer the executable that systemd is actually running. This covers
+# custom installs outside /opt/xmrig and binaries not present in PATH.
+MAIN_PID="$(systemctl show -p MainPID --value "$XMRIG_SERVICE_UNIT" 2>/dev/null)"
+if [ -n "$MAIN_PID" ] && [ "$MAIN_PID" != "0" ] && [ -e "/proc/$MAIN_PID/exe" ]; then
+  BIN="$(readlink -f "/proc/$MAIN_PID/exe" 2>/dev/null)"
+fi
+
+# If the service is currently stopped, recover the executable from ExecStart.
+if [ -z "$BIN" ]; then
+  EXEC_START="$(systemctl show -p ExecStart --value "$XMRIG_SERVICE_UNIT" 2>/dev/null)"
+  EXEC_BIN="$(printf '%s' "$EXEC_START" | sed -n 's/.*path=\\([^ ;}]*\\).*/\\1/p' | head -n 1)"
+  if [ -n "$EXEC_BIN" ] && [ -x "$EXEC_BIN" ]; then BIN="$EXEC_BIN"; fi
+fi
+
+if [ -z "$BIN" ] && [ -x /opt/xmrig/xmrig ]; then
   BIN=/opt/xmrig/xmrig
-elif command -v xmrig >/dev/null 2>&1; then
+elif [ -z "$BIN" ] && command -v xmrig >/dev/null 2>&1; then
   BIN="$(command -v xmrig)"
 fi
+
 VERSION=""
-if [ -n "$BIN" ]; then VERSION="$($BIN --version 2>/dev/null | head -n 1)"; fi
+if [ -n "$BIN" ] && [ -x "$BIN" ]; then VERSION="$($BIN --version 2>/dev/null | head -n 1)"; fi
 CONFIG=0
 [ -f "$XMRIG_CONFIG_PATH" ] && CONFIG=1
 LOAD_STATE="$(systemctl show -p LoadState --value "$XMRIG_SERVICE_UNIT" 2>/dev/null)"
@@ -23,12 +39,12 @@ ENABLED=0
 systemctl is-enabled --quiet "$XMRIG_SERVICE_UNIT" >/dev/null 2>&1 && ENABLED=1
 ACTIVE=0
 systemctl is-active --quiet "$XMRIG_SERVICE_UNIT" >/dev/null 2>&1 && ACTIVE=1
-printf 'MFP_BINARY=%s\n' "$BIN"
-printf 'MFP_VERSION=%s\n' "$VERSION"
-printf 'MFP_CONFIG=%s\n' "$CONFIG"
-printf 'MFP_SERVICE=%s\n' "$SERVICE"
-printf 'MFP_ENABLED=%s\n' "$ENABLED"
-printf 'MFP_ACTIVE=%s\n' "$ACTIVE"
+printf 'MFP_BINARY=%s\\n' "$BIN"
+printf 'MFP_VERSION=%s\\n' "$VERSION"
+printf 'MFP_CONFIG=%s\\n' "$CONFIG"
+printf 'MFP_SERVICE=%s\\n' "$SERVICE"
+printf 'MFP_ENABLED=%s\\n' "$ENABLED"
+printf 'MFP_ACTIVE=%s\\n' "$ACTIVE"
 exit 0
 `;
 

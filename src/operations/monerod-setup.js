@@ -44,10 +44,10 @@ systemctl is-active --quiet "$MONEROD_SERVICE_UNIT" >/dev/null 2>&1 && ACTIVE=1
 
 RPC=0
 PRUNED=""
-INFO="$(curl -fsS --max-time 3 "http://127.0.0.1:${MONEROD_RPC_PORT}/get_info" 2>/dev/null)"
+INFO="$(curl -fsS --max-time 3 "http://127.0.0.1:$MONEROD_RPC_PORT/get_info" 2>/dev/null)"
 if printf '%s' "$INFO" | grep -q '"status"'; then RPC=1; fi
 if [ "$RPC" = "1" ]; then
-  PRUNE_JSON="$(curl -fsS --max-time 3 -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","id":"0","method":"prune_blockchain","params":{"check":true}}' "http://127.0.0.1:${MONEROD_RPC_PORT}/json_rpc" 2>/dev/null)"
+  PRUNE_JSON="$(curl -fsS --max-time 3 -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","id":"0","method":"prune_blockchain","params":{"check":true}}' "http://127.0.0.1:$MONEROD_RPC_PORT/json_rpc" 2>/dev/null)"
   if printf '%s' "$PRUNE_JSON" | grep -Eq '"pruned"[[:space:]]*:[[:space:]]*true'; then PRUNED=1; fi
   if printf '%s' "$PRUNE_JSON" | grep -Eq '"pruned"[[:space:]]*:[[:space:]]*false'; then PRUNED=0; fi
 fi

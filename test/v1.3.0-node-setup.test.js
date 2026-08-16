@@ -14,9 +14,12 @@ test('XMRig setup discovers custom binaries from the running systemd service', (
   assert.match(operation, /path=/);
 });
 
-test('monerod installer uses official hashes, supports pruning and enables autostart', () => {
+test('monerod installer verifies signed official hashes, supports pruning and enables autostart', () => {
   const script = read('scripts/remote-install-monerod.sh');
   assert.match(script, /https:\/\/www\.getmonero\.org\/downloads\/hashes\.txt/);
+  assert.match(script, /binaryfate\.asc/);
+  assert.match(script, /81AC591FE9C4B65C5806AFC3F0AF4D462A0BDF92/);
+  assert.match(script, /gpg --batch --homedir "\$GNUPGHOME" --verify "\$TMP_HASHES"/);
   assert.match(script, /sha256sum/);
   assert.match(script, /monero-linux-x64/);
   assert.match(script, /monero-linux-armv8/);

@@ -5,7 +5,7 @@ import fs from 'node:fs';
 const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const exists=p=>fs.existsSync(new URL('../'+p,import.meta.url));
 
-const icons=['dashboard','servers','operations','updates','topology','proxy','settings','audit','docs'];
+const icons=['dashboard','servers','setup','operations','updates','topology','proxy','settings','audit','docs'];
 
 test('v1.2.2 sidebar uses semantic standalone SVG icons',()=>{
   const html=read('web/index.html');

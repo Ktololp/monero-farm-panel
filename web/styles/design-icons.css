@@ -48,6 +48,7 @@
 
 .sidebar .nav .nav-icon-dashboard::before{mask-image:url('../assets/icons/dashboard.svg')!important;-webkit-mask-image:url('../assets/icons/dashboard.svg')!important}
 .sidebar .nav .nav-icon-servers::before{mask-image:url('../assets/icons/servers.svg')!important;-webkit-mask-image:url('../assets/icons/servers.svg')!important}
+.sidebar .nav .nav-icon-setup::before{mask-image:url('../assets/icons/setup.svg')!important;-webkit-mask-image:url('../assets/icons/setup.svg')!important}
 .sidebar .nav .nav-icon-operations::before{mask-image:url('../assets/icons/operations.svg')!important;-webkit-mask-image:url('../assets/icons/operations.svg')!important}
 .sidebar .nav .nav-icon-updates::before{mask-image:url('../assets/icons/updates.svg')!important;-webkit-mask-image:url('../assets/icons/updates.svg')!important}
 .sidebar .nav .nav-icon-topology::before{mask-image:url('../assets/icons/topology.svg')!important;-webkit-mask-image:url('../assets/icons/topology.svg')!important}

@@ -7,29 +7,87 @@ import { serverById } from './server.js';
 const monerodStatusScript = `#!/usr/bin/env bash
 set +e
 BIN=""
-MAIN_PID="$(systemctl show -p MainPID --value "$MONEROD_SERVICE_UNIT" 2>/dev/null)"
-if [ -n "$MAIN_PID" ] && [ "$MAIN_PID" != "0" ] && [ -e "/proc/$MAIN_PID/exe" ]; then
-  BIN="$(readlink -f "/proc/$MAIN_PID/exe" 2>/dev/null)"
-fi
+PROC_PID=""
 EXEC_START="$(systemctl show -p ExecStart --value "$MONEROD_SERVICE_UNIT" 2>/dev/null)"
+
+find_target_process() {
+  local target="$1"
+  local unit="$2"
+  local cgroup pid exe
+  cgroup="$(systemctl show -p ControlGroup --value "$unit" 2>/dev/null)"
+
+  # Some installations use bash/python wrappers as the systemd MainPID.
+  # Find the actual monerod executable inside the service cgroup instead.
+  if [ -n "$cgroup" ] && [ "$cgroup" != "/" ]; then
+    for proc in /proc/[0-9]*; do
+      pid="${proc##*/}"
+      [ -r "/proc/$pid/cgroup" ] || continue
+      grep -Fq -- "$cgroup" "/proc/$pid/cgroup" 2>/dev/null || continue
+      exe="$(readlink -f "/proc/$pid/exe" 2>/dev/null)"
+      [ "$(basename "$exe" 2>/dev/null)" = "$target" ] || continue
+      printf '%s|%s\n' "$pid" "$exe"
+      return 0
+    done
+  fi
+
+  pid="$(pgrep -x "$target" 2>/dev/null | head -n 1)"
+  if [ -n "$pid" ]; then
+    exe="$(readlink -f "/proc/$pid/exe" 2>/dev/null)"
+    if [ "$(basename "$exe" 2>/dev/null)" = "$target" ]; then
+      printf '%s|%s\n' "$pid" "$exe"
+      return 0
+    fi
+  fi
+  return 1
+}
+
+MATCH="$(find_target_process monerod "$MONEROD_SERVICE_UNIT")"
+if [ -n "$MATCH" ]; then
+  PROC_PID="$(printf '%s' "$MATCH" | cut -d'|' -f1)"
+  BIN="$(printf '%s' "$MATCH" | cut -d'|' -f2-)"
+fi
+
+# For a stopped service, trust ExecStart only when it points directly to monerod.
+# Never report /bin/bash as the Monero binary.
 if [ -z "$BIN" ]; then
   EXEC_BIN="$(printf '%s' "$EXEC_START" | sed -n 's/.*path=\\([^ ;}]*\\).*/\\1/p' | head -n 1)"
-  if [ -n "$EXEC_BIN" ] && [ -x "$EXEC_BIN" ]; then BIN="$EXEC_BIN"; fi
+  if [ -n "$EXEC_BIN" ] && [ -x "$EXEC_BIN" ] && [ "$(basename "$EXEC_BIN")" = "monerod" ]; then BIN="$EXEC_BIN"; fi
 fi
 if [ -z "$BIN" ] && [ -x /opt/monero/monerod ]; then
   BIN=/opt/monero/monerod
 elif [ -z "$BIN" ] && command -v monerod >/dev/null 2>&1; then
-  BIN="$(command -v monerod)"
+  CANDIDATE="$(command -v monerod)"
+  [ "$(basename "$CANDIDATE")" = "monerod" ] && BIN="$CANDIDATE"
 fi
 
 VERSION=""
 if [ -n "$BIN" ] && [ -x "$BIN" ]; then VERSION="$($BIN --version 2>/dev/null | head -n 1)"; fi
 
-CONFIG_PATH="$(printf '%s' "$EXEC_START" | sed -n 's/.*--config-file[= ]\\([^ ;}]*\\).*/\\1/p' | head -n 1)"
-if [ -z "$CONFIG_PATH" ] && [ -f "$MONEROD_CONFIG_PATH" ]; then CONFIG_PATH="$MONEROD_CONFIG_PATH"; fi
+# Recover --config-file from the real monerod process, not from a wrapper.
+CONFIG_PATH=""
+if [ -n "$PROC_PID" ] && [ -r "/proc/$PROC_PID/cmdline" ]; then
+  WANT_CONFIG=0
+  while IFS= read -r arg; do
+    if [ "$WANT_CONFIG" = "1" ]; then
+      CONFIG_PATH="$arg"
+      break
+    fi
+    case "$arg" in
+      --config-file=*) CONFIG_PATH="$(printf '%s' "$arg" | cut -d= -f2-)"; break ;;
+      --config-file) WANT_CONFIG=1 ;;
+    esac
+  done < <(tr '\\0' '\\n' < "/proc/$PROC_PID/cmdline")
+fi
+if [ -z "$CONFIG_PATH" ]; then
+  CONFIG_PATH="$(printf '%s' "$EXEC_START" | sed -n 's/.*--config-file[= ]\\([^ ;}]*\\).*/\\1/p' | head -n 1)"
+fi
 if [ -z "$CONFIG_PATH" ]; then
   HOME_DIR="$(getent passwd "$TARGET_USER" 2>/dev/null | cut -d: -f6)"
-  if [ -n "$HOME_DIR" ] && [ -f "$HOME_DIR/.bitmonero/bitmonero.conf" ]; then CONFIG_PATH="$HOME_DIR/.bitmonero/bitmonero.conf"; fi
+  for candidate in "$MONEROD_CONFIG_PATH" /etc/monero/monerod.conf /etc/monerod.conf "$HOME_DIR/.bitmonero/bitmonero.conf"; do
+    [ -n "$candidate" ] && [ -f "$candidate" ] || continue
+    CONFIG_PATH="$candidate"
+    break
+  done
 fi
 CONFIG=0
 [ -n "$CONFIG_PATH" ] && [ -f "$CONFIG_PATH" ] && CONFIG=1
@@ -46,10 +104,11 @@ RPC=0
 PRUNED=""
 INFO="$(curl -fsS --max-time 3 "http://127.0.0.1:$MONEROD_RPC_PORT/get_info" 2>/dev/null)"
 if printf '%s' "$INFO" | grep -q '"status"'; then RPC=1; fi
-if [ "$RPC" = "1" ]; then
-  PRUNE_JSON="$(curl -fsS --max-time 3 -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","id":"0","method":"prune_blockchain","params":{"check":true}}' "http://127.0.0.1:$MONEROD_RPC_PORT/json_rpc" 2>/dev/null)"
-  if printf '%s' "$PRUNE_JSON" | grep -Eq '"pruned"[[:space:]]*:[[:space:]]*true'; then PRUNED=1; fi
-  if printf '%s' "$PRUNE_JSON" | grep -Eq '"pruned"[[:space:]]*:[[:space:]]*false'; then PRUNED=0; fi
+if printf '%s' "$INFO" | grep -Eq '"pruned"[[:space:]]*:[[:space:]]*true'; then PRUNED=1; fi
+if printf '%s' "$INFO" | grep -Eq '"pruned"[[:space:]]*:[[:space:]]*false'; then PRUNED=0; fi
+
+if [ -z "$PRUNED" ] && [ -n "$PROC_PID" ] && [ -r "/proc/$PROC_PID/cmdline" ]; then
+  if tr '\\0' '\\n' < "/proc/$PROC_PID/cmdline" | grep -qx -- '--prune-blockchain'; then PRUNED=1; fi
 fi
 if [ -z "$PRUNED" ] && [ "$CONFIG" = "1" ]; then
   if grep -Eq '^[[:space:]]*prune-blockchain[[:space:]]*=[[:space:]]*(1|true|yes)[[:space:]]*$' "$CONFIG_PATH"; then PRUNED=1; else PRUNED=0; fi
@@ -124,7 +183,9 @@ function parseMonerodStatus(output = '') {
     pruned,
     mode: pruned === true ? 'pruned' : pruned === false ? 'full' : 'unknown'
   };
-  status.ready = status.installed && status.configExists && status.serviceInstalled && status.enabled && status.active;
+  status.operational = status.installed && status.serviceInstalled && status.active && status.rpcAvailable;
+  status.ready = status.operational && status.enabled;
+  status.torConfigurable = status.operational && status.configExists && Boolean(status.configPath);
   return status;
 }
 
@@ -170,7 +231,7 @@ export async function installMonerod(serverId, options = {}, { actorIp = '' } = 
   if (!['pruned', 'full'].includes(mode)) throw new Error('Invalid monerod mode');
 
   const before = await getMonerodInstallStatus(serverId);
-  if (before.monerod.ready) {
+  if (before.monerod.operational) {
     if (before.monerod.mode !== 'unknown' && before.monerod.mode !== mode) {
       throw new Error(`monerod is already configured as ${before.monerod.mode}; changing node type after initial sync is intentionally not automatic`);
     }
@@ -197,7 +258,7 @@ export async function installMonerod(serverId, options = {}, { actorIp = '' } = 
   if (result.code !== 0) throw new Error(`monerod installation failed: ${result.stderr.trim() || result.stdout.slice(-2500)}`);
 
   const after = await getMonerodInstallStatus(serverId);
-  if (!after.monerod.ready) throw new Error('monerod installation finished, but the service is not fully ready');
+  if (!after.monerod.operational) throw new Error('monerod installation finished, but the daemon is not operational');
   if (after.monerod.mode !== 'unknown' && after.monerod.mode !== mode) throw new Error(`monerod started, but existing config kept node mode ${after.monerod.mode}`);
   return { ok: true, alreadyInstalled: false, monerod: after.monerod, output: result.stdout };
 }
@@ -205,7 +266,8 @@ export async function installMonerod(serverId, options = {}, { actorIp = '' } = 
 export async function configureMonerodTor(serverId, _options = {}, { actorIp = '' } = {}) {
   const server = serverById(serverId);
   const monerod = (await getMonerodInstallStatus(serverId)).monerod;
-  if (!monerod.ready || !monerod.configPath) throw new Error('monerod must be installed and running before Tor setup');
+  if (!monerod.operational) throw new Error('monerod must be running and its local RPC must be reachable before Tor setup');
+  if (!monerod.torConfigurable) throw new Error('monerod is running, but its config file could not be located safely; Tor setup was not applied');
   const before = await getMonerodTorStatus(serverId, monerod);
   if (before.tor.ready) return { ok: true, alreadyConfigured: true, tor: before.tor, output: '' };
 

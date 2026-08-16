@@ -6,12 +6,26 @@ import path from 'node:path';
 const root = path.resolve(import.meta.dirname, '..');
 const read = rel => fs.readFileSync(path.join(root, rel), 'utf8');
 
-test('XMRig setup discovers custom binaries from the running systemd service', () => {
+test('XMRig setup ignores wrapper shells and finds the real process in the systemd cgroup', () => {
   const operation = read('src/operations/xmrig-install.js');
-  assert.match(operation, /MainPID/);
-  assert.match(operation, /\/proc\/\$MAIN_PID\/exe/);
-  assert.match(operation, /ExecStart/);
-  assert.match(operation, /path=/);
+  assert.match(operation, /ControlGroup/);
+  assert.match(operation, /\/proc\/\[0-9\]\*/);
+  assert.match(operation, /pgrep -x "\$target"/);
+  assert.match(operation, /basename "\$exe"/);
+  assert.match(operation, /= "xmrig"/);
+  assert.doesNotMatch(operation, /BIN="\$\(readlink -f "\/proc\/\$MAIN_PID\/exe/);
+});
+
+test('monerod setup finds the daemon behind a wrapper and recovers its real config path', () => {
+  const operation = read('src/operations/monerod-setup.js');
+  assert.match(operation, /ControlGroup/);
+  assert.match(operation, /find_target_process monerod/);
+  assert.match(operation, /\/proc\/\$PROC_PID\/cmdline/);
+  assert.match(operation, /--config-file=\*/);
+  assert.match(operation, /torConfigurable/);
+  assert.match(operation, /status\.operational/);
+  assert.match(operation, /"pruned"\[\[:space:\]\]\*:\[\[:space:\]\]\*true/);
+  assert.doesNotMatch(operation, /BIN="\$\(readlink -f "\/proc\/\$MAIN_PID\/exe/);
 });
 
 test('monerod installer verifies signed official hashes, supports pruning and enables autostart', () => {
@@ -41,7 +55,7 @@ test('Tor setup exposes monerod P2P onion while keeping RPC private', () => {
   assert.doesNotMatch(script, /rpc-bind-ip=0\.0\.0\.0/);
 });
 
-test('setup API and UI expose monerod mode selection and Tor configuration', () => {
+test('setup API and UI expose monerod mode selection and only enable Tor with a located config', () => {
   const router = read('src/api/setup-router.js');
   const page = read('web/pages/setup/index.js');
   const copy = read('web/i18n/messages/setup-copy.js');
@@ -49,7 +63,9 @@ test('setup API and UI expose monerod mode selection and Tor configuration', () 
   assert.match(router, /servers\/:id\/monerod\/tor/);
   assert.match(page, /setup-node-mode/);
   assert.match(page, /body: \{ mode: selectedMode \}/);
-  assert.match(page, /\/monerod\/tor/);
+  assert.match(page, /monerod\.torConfigurable/);
+  assert.match(page, /monerod\.operational/);
+  assert.match(page, /torNeedsConfig/);
   assert.match(copy, /Pruned node/);
   assert.match(copy, /Обрезанная нода/);
   assert.match(copy, /Onion/);

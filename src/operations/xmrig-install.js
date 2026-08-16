@@ -7,25 +7,59 @@ import { serverById, validateWallet, validatePool } from './server.js';
 const statusScript = `#!/usr/bin/env bash
 set +e
 BIN=""
+PROC_PID=""
 
-# Prefer the executable that systemd is actually running. This covers
-# custom installs outside /opt/xmrig and binaries not present in PATH.
-MAIN_PID="$(systemctl show -p MainPID --value "$XMRIG_SERVICE_UNIT" 2>/dev/null)"
-if [ -n "$MAIN_PID" ] && [ "$MAIN_PID" != "0" ] && [ -e "/proc/$MAIN_PID/exe" ]; then
-  BIN="$(readlink -f "/proc/$MAIN_PID/exe" 2>/dev/null)"
+find_target_process() {
+  local target="$1"
+  local unit="$2"
+  local cgroup pid exe
+  cgroup="$(systemctl show -p ControlGroup --value "$unit" 2>/dev/null)"
+
+  # A service may use /bin/bash as MainPID and keep xmrig as a child.
+  # Prefer an exact executable name that belongs to the service cgroup.
+  if [ -n "$cgroup" ] && [ "$cgroup" != "/" ]; then
+    for proc in /proc/[0-9]*; do
+      pid="${proc##*/}"
+      [ -r "/proc/$pid/cgroup" ] || continue
+      grep -Fq -- "$cgroup" "/proc/$pid/cgroup" 2>/dev/null || continue
+      exe="$(readlink -f "/proc/$pid/exe" 2>/dev/null)"
+      [ "$(basename "$exe" 2>/dev/null)" = "$target" ] || continue
+      printf '%s|%s\n' "$pid" "$exe"
+      return 0
+    done
+  fi
+
+  # Fallback for unusual unit/cgroup layouts.
+  pid="$(pgrep -x "$target" 2>/dev/null | head -n 1)"
+  if [ -n "$pid" ]; then
+    exe="$(readlink -f "/proc/$pid/exe" 2>/dev/null)"
+    if [ "$(basename "$exe" 2>/dev/null)" = "$target" ]; then
+      printf '%s|%s\n' "$pid" "$exe"
+      return 0
+    fi
+  fi
+  return 1
+}
+
+MATCH="$(find_target_process xmrig "$XMRIG_SERVICE_UNIT")"
+if [ -n "$MATCH" ]; then
+  PROC_PID="$(printf '%s' "$MATCH" | cut -d'|' -f1)"
+  BIN="$(printf '%s' "$MATCH" | cut -d'|' -f2-)"
 fi
 
-# If the service is currently stopped, recover the executable from ExecStart.
+# If stopped, accept ExecStart only when it actually points to xmrig,
+# never a shell/interpreter wrapper.
 if [ -z "$BIN" ]; then
   EXEC_START="$(systemctl show -p ExecStart --value "$XMRIG_SERVICE_UNIT" 2>/dev/null)"
   EXEC_BIN="$(printf '%s' "$EXEC_START" | sed -n 's/.*path=\\([^ ;}]*\\).*/\\1/p' | head -n 1)"
-  if [ -n "$EXEC_BIN" ] && [ -x "$EXEC_BIN" ]; then BIN="$EXEC_BIN"; fi
+  if [ -n "$EXEC_BIN" ] && [ -x "$EXEC_BIN" ] && [ "$(basename "$EXEC_BIN")" = "xmrig" ]; then BIN="$EXEC_BIN"; fi
 fi
 
 if [ -z "$BIN" ] && [ -x /opt/xmrig/xmrig ]; then
   BIN=/opt/xmrig/xmrig
 elif [ -z "$BIN" ] && command -v xmrig >/dev/null 2>&1; then
-  BIN="$(command -v xmrig)"
+  CANDIDATE="$(command -v xmrig)"
+  [ "$(basename "$CANDIDATE")" = "xmrig" ] && BIN="$CANDIDATE"
 fi
 
 VERSION=""

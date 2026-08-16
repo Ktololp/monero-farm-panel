@@ -33,17 +33,19 @@ test('XMRig setup operation checks state before and after installation', () => {
   assert.match(operation, /action: 'install-xmrig'/);
 });
 
-test('miner setup UI is routed and checks XMRig before installing', () => {
+test('miner setup UI is routed, localized and checks XMRig before installing', () => {
   const main = read('web/app/main.js');
   const page = read('web/pages/setup/index.js');
+  const copy = read('web/i18n/messages/setup-copy.js');
   const html = read('web/index.html');
   assert.match(main, /createSetupPage/);
   assert.match(main, /currentPage==='setup'/);
   assert.match(html, /data-page="setup"/);
+  assert.match(page, /getSetupCopy/);
   assert.match(page, /\/setup\/servers\/\$\{serverId\}\/status/);
   assert.match(page, /\/setup\/servers\/\$\{serverId\}\/xmrig\/install/);
-  assert.match(page, /Autostart/);
-  assert.match(page, /Автозагрузка/);
+  assert.match(copy, /Autostart/);
+  assert.match(copy, /Автозагрузка/);
 });
 
 test('DEV_SYNC follows the v1.3.0 development branch', () => {

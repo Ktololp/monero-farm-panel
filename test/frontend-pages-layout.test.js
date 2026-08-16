@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const root = path.resolve(import.meta.dirname, '..');
-const pages = ['dashboard','servers','server','operations','updates','topology','settings','audit'];
+const pages = ['dashboard','servers','setup','server','operations','updates','topology','settings','audit'];
 
 test('frontend page renderers live under web/pages', () => {
   for (const page of pages) assert.equal(fs.existsSync(path.join(root, 'web', 'pages', page, 'index.js')), true, `missing web/pages/${page}/index.js`);

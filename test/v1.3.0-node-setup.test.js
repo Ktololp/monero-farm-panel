@@ -6,26 +6,38 @@ import path from 'node:path';
 const root = path.resolve(import.meta.dirname, '..');
 const read = rel => fs.readFileSync(path.join(root, rel), 'utf8');
 
-test('XMRig setup ignores wrapper shells and finds the real process in the systemd cgroup', () => {
+test('XMRig setup detects a running miner even when proc exe is not readable', () => {
   const operation = read('src/operations/xmrig-install.js');
-  assert.match(operation, /ControlGroup/);
-  assert.match(operation, /\/proc\/\[0-9\]\*/);
-  assert.match(operation, /pgrep -x "\$target"/);
-  assert.match(operation, /basename "\$exe"/);
-  assert.match(operation, /= "xmrig"/);
-  assert.doesNotMatch(operation, /BIN="\$\(readlink -f "\/proc\/\$MAIN_PID\/exe/);
+  const script = read('scripts/remote-status-xmrig.sh');
+  assert.match(operation, /remote-status-xmrig\.sh/);
+  assert.match(operation, /processDetected/);
+  assert.match(operation, /status\.detected/);
+  assert.match(script, /pgrep -xo "\$target"/);
+  assert.match(script, /ControlGroup/);
+  assert.match(script, /ps -p "\$pid" -o args=/);
+  assert.match(script, /systemctl status "\$XMRIG_SERVICE_UNIT"/);
+  assert.match(script, /MFP_PROCESS/);
+  assert.match(script, /MFP_CONFIG_PATH/);
+  assert.doesNotMatch(script, /MAIN_PID/);
 });
 
-test('monerod setup finds the daemon behind a wrapper and recovers its real config path', () => {
+test('monerod setup discovers legacy config locations and the actual RPC endpoint', () => {
   const operation = read('src/operations/monerod-setup.js');
-  assert.match(operation, /ControlGroup/);
-  assert.match(operation, /find_target_process monerod/);
-  assert.match(operation, /\/proc\/\$PROC_PID\/cmdline/);
-  assert.match(operation, /--config-file=\*/);
+  const script = read('scripts/remote-status-monerod.sh');
+  assert.match(operation, /remote-status-monerod\.sh/);
+  assert.match(operation, /rpcEndpoint/);
+  assert.match(operation, /status\.running/);
   assert.match(operation, /torConfigurable/);
-  assert.match(operation, /status\.operational/);
-  assert.match(operation, /"pruned"\[\[:space:\]\]\*:\[\[:space:\]\]\*true/);
-  assert.doesNotMatch(operation, /BIN="\$\(readlink -f "\/proc\/\$MAIN_PID\/exe/);
+  assert.doesNotMatch(operation, /local RPC must be reachable before Tor setup/);
+  assert.match(script, /pgrep -xo "\$target"/);
+  assert.match(script, /DATA_DIR\/bitmonero\.conf/);
+  assert.match(script, /PROC_CWD\/bitmonero\.conf/);
+  assert.match(script, /rpc-bind-port/);
+  assert.match(script, /rpc-restricted-bind-port/);
+  assert.match(script, /\/json_rpc/);
+  assert.match(script, /MFP_RPC_ENDPOINT/);
+  assert.match(script, /MFP_RPC_PRIVATE/);
+  assert.match(script, /--prune-blockchain/);
 });
 
 test('monerod installer verifies signed official hashes, supports pruning and enables autostart', () => {
@@ -44,7 +56,7 @@ test('monerod installer verifies signed official hashes, supports pruning and en
   assert.match(script, /systemctl enable "\$MONEROD_SERVICE_UNIT"/);
 });
 
-test('Tor setup exposes monerod P2P onion while keeping RPC private', () => {
+test('Tor setup exposes monerod P2P onion while leaving RPC configuration alone', () => {
   const script = read('scripts/remote-configure-monerod-tor.sh');
   assert.match(script, /HiddenServiceVersion 3/);
   assert.match(script, /HiddenServicePort \$\{TOR_ONION_PORT\} 127\.0\.0\.1:\$\{TOR_ONION_PORT\}/);
@@ -55,18 +67,22 @@ test('Tor setup exposes monerod P2P onion while keeping RPC private', () => {
   assert.doesNotMatch(script, /rpc-bind-ip=0\.0\.0\.0/);
 });
 
-test('setup API and UI expose monerod mode selection and only enable Tor with a located config', () => {
+test('setup UI uses the Tor onion icon and does not offer reinstall for a running monerod', () => {
   const router = read('src/api/setup-router.js');
   const page = read('web/pages/setup/index.js');
   const copy = read('web/i18n/messages/setup-copy.js');
+  const torIcon = read('web/assets/icons/tor.svg');
   assert.match(router, /servers\/:id\/monerod\/install/);
   assert.match(router, /servers\/:id\/monerod\/tor/);
   assert.match(page, /setup-node-mode/);
   assert.match(page, /body: \{ mode: selectedMode \}/);
   assert.match(page, /monerod\.torConfigurable/);
-  assert.match(page, /monerod\.operational/);
+  assert.match(page, /monerod\.running/);
+  assert.match(page, /rpcEndpoint/);
+  assert.match(page, /\/assets\/icons\/tor\.svg/);
   assert.match(page, /torNeedsConfig/);
-  assert.match(copy, /Pruned node/);
+  assert.match(copy, /RPC monerod/);
   assert.match(copy, /Обрезанная нода/);
-  assert.match(copy, /Onion/);
+  assert.match(torIcon, /#7d4698/i);
+  assert.match(torIcon, /#68b030/i);
 });

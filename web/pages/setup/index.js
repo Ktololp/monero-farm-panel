@@ -15,6 +15,13 @@ export function createSetupPage(ctx) {
     return c.modeUnknown;
   }
 
+  function rpcLabel(status, c) {
+    const endpoint = status.rpcEndpoint || '—';
+    if (status.rpcAvailable) return `${endpoint} · ${c.available}`;
+    if (status.rpcAuthRequired) return `${endpoint} · ${c.rpcAuthRequired}`;
+    return `${endpoint} · ${c.unavailableShort}`;
+  }
+
   async function loadStatus(serverId) {
     const c = copy();
     for (const id of ['#setup-xmrig-status', '#setup-monerod-status', '#setup-tor-status']) {
@@ -39,11 +46,16 @@ export function createSetupPage(ctx) {
     const c = copy();
     const target = $('#setup-xmrig-status');
     if (!target) return;
+    const fileState = status.installed
+      ? flag(true, status.binaryPath || c.yes, c.no)
+      : status.detected
+        ? flag(true, c.xmrigProcessDetected, c.no)
+        : flag(false, c.yes, c.no);
     target.innerHTML = `
       <div class="setup-status-grid">
-        <div><span>${esc(c.xmrigFile)}</span>${flag(status.installed, status.binaryPath || c.yes, c.no)}</div>
+        <div><span>${esc(c.xmrigFile)}</span>${fileState}</div>
         <div><span>${esc(c.version)}</span><b>${esc(status.version || '—')}</b></div>
-        <div><span>${esc(c.config)}</span>${flag(status.configExists, c.yes, c.no)}</div>
+        <div><span>${esc(c.config)}</span>${status.configExists ? flag(true, status.configPath || c.yes, c.no) : flag(false, c.yes, c.no)}</div>
         <div><span>${esc(c.service)}</span>${flag(status.serviceInstalled, c.yes, c.no)}</div>
         <div><span>${esc(c.autostart)}</span>${flag(status.enabled, c.enabled, c.disabled)}</div>
         <div><span>${esc(c.running)}</span>${flag(status.active, c.active, c.inactive)}</div>
@@ -76,7 +88,7 @@ export function createSetupPage(ctx) {
     const c = copy();
     const target = $('#setup-monerod-status');
     if (!target) return;
-    const detected = Boolean(status.operational);
+    const detected = Boolean(status.running);
     if (detected && ['pruned', 'full'].includes(status.mode)) selectedMode = status.mode;
     target.innerHTML = `
       <div class="setup-choice-row">
@@ -92,14 +104,14 @@ export function createSetupPage(ctx) {
         </div>
       </div>
       <div class="setup-status-grid setup-status-grid-4">
-        <div><span>${esc(c.monerodFile)}</span>${flag(status.installed, status.binaryPath || c.yes, c.no)}</div>
+        <div><span>${esc(c.monerodFile)}</span>${status.installed ? flag(true, status.binaryPath || c.yes, c.no) : status.detected ? flag(true, c.monerodProcessDetected, c.no) : flag(false, c.yes, c.no)}</div>
         <div><span>${esc(c.version)}</span><b>${esc(status.version || '—')}</b></div>
         <div><span>${esc(c.config)}</span>${status.configExists ? `<b>${esc(status.configPath || c.yes)}</b>` : flag(false, c.yes, c.no)}</div>
         <div><span>${esc(c.nodeType)}</span><b>${esc(modeLabel(status, c))}</b></div>
         <div><span>${esc(c.service)}</span>${flag(status.serviceInstalled, c.yes, c.no)}</div>
         <div><span>${esc(c.autostart)}</span>${flag(status.enabled, c.enabled, c.disabled)}</div>
         <div><span>${esc(c.running)}</span>${flag(status.active, c.active, c.inactive)}</div>
-        <div><span>${esc(c.rpc)}</span>${flag(status.rpcAvailable, c.available, c.unavailableShort)}</div>
+        <div><span>${esc(c.rpc)}</span>${flag(status.rpcAvailable, rpcLabel(status, c), rpcLabel(status, c))}</div>
       </div>
       <div class="setup-actions">
         <button class="ghost setup-refresh">${esc(c.refresh)}</button>
@@ -136,7 +148,7 @@ export function createSetupPage(ctx) {
     if (!target) return;
     const canConfigure = Boolean(monerod.torConfigurable);
     let blocker = '';
-    if (!monerod.operational) blocker = c.torNeedsMonerod;
+    if (!monerod.running) blocker = c.torNeedsMonerod;
     else if (!monerod.configExists || !monerod.configPath) blocker = c.torNeedsConfig;
 
     target.innerHTML = `
@@ -204,7 +216,7 @@ export function createSetupPage(ctx) {
           <div id="setup-monerod-status"></div>
         </article>
         <article class="panel setup-component-card setup-tor-card">
-          <div class="setup-component-head"><div><span class="setup-kicker">PRIVATE P2P</span><h2>◎ ${esc(c.tor)}</h2></div></div>
+          <div class="setup-component-head"><div><span class="setup-kicker">PRIVATE P2P</span><h2 class="setup-title-with-icon"><img class="setup-title-icon" src="/assets/icons/tor.svg" alt="" aria-hidden="true">${esc(c.tor)}</h2></div></div>
           <p class="muted">${esc(c.torHint)}</p>
           <div id="setup-tor-status"></div>
         </article>

@@ -5,6 +5,7 @@ import { createTerminalController } from '../components/terminal/index.js';
 import { createServerDialogs } from '../components/server-dialogs/index.js';
 import { createDashboardPage } from '../pages/dashboard/index.js';
 import { createServersPage } from '../pages/servers/index.js';
+import { createSetupPage } from '../pages/setup/index.js';
 import { createOperationsPage } from '../pages/operations/index.js';
 import { createUpdatesPage } from '../pages/updates/index.js';
 import { createTopologyPage } from '../pages/topology/index.js';
@@ -21,6 +22,7 @@ import '../styles/design-system.css';
 import '../styles/design-pass2.css';
 import '../styles/design-tooltips.css';
 import '../styles/design-kpi.css';
+import '../styles/design-setup.css';
 import '../components/tooltip/index.js';
 
 
@@ -66,7 +68,7 @@ function navigate(page,serverId=null,tab='overview'){
   const url=serverId?`/?server=${serverId}&tab=${encodeURIComponent(tab)}`:'/' ;history.replaceState({},'',url);
   void render().catch(err=>{console.error('[ui] render failed',err);toast(t('ui.renderError',{error:err.message||err}),'error');});
 }
-async function render(){destroyCharts();if(currentServerId)return renderServer(currentServerId,currentServerTab);if(currentPage==='servers')return renderServers();if(currentPage==='operations')return renderOperations();if(currentPage==='updates')return renderUpdates();if(currentPage==='topology')return renderTopology();if(currentPage==='settings')return renderSettings();if(currentPage==='audit')return renderAudit();if(currentPage==='proxies')return renderProxies();if(currentPage==='docs')return renderDocs();if(!overview)await loadOverview();return renderDashboard();}
+async function render(){destroyCharts();if(currentServerId)return renderServer(currentServerId,currentServerTab);if(currentPage==='servers')return renderServers();if(currentPage==='setup')return renderSetup();if(currentPage==='operations')return renderOperations();if(currentPage==='updates')return renderUpdates();if(currentPage==='topology')return renderTopology();if(currentPage==='settings')return renderSettings();if(currentPage==='audit')return renderAudit();if(currentPage==='proxies')return renderProxies();if(currentPage==='docs')return renderDocs();if(!overview)await loadOverview();return renderDashboard();}
 
 function statusBadge(live){const st=live?.status||'unknown',names={online:t('status.online'),offline:t('status.offline'),degraded:t('status.degraded'),starting:t('status.starting'),unknown:t('status.unknown')};return`<span class="status ${esc(st)}"><i></i>${esc(names[st]||st)}</span>`;}
 function compBadge(name,state){const s=state||'unknown',label={active:'OK',starting:t('component.starting'),inactive:'off',unknown:'?'}[s]||s;return`<span class="component ${esc(s)}"><b>${esc(name)}</b>${esc(label)}</span>`;}
@@ -88,6 +90,7 @@ function pageContext(){
 }
 const renderDashboard=(...args)=>createDashboardPage(pageContext()).renderDashboard(...args);
 const renderServers=(...args)=>createServersPage(pageContext()).renderServers(...args);
+const renderSetup=(...args)=>createSetupPage(pageContext()).renderSetup(...args);
 const renderOperations=(...args)=>createOperationsPage(pageContext()).renderOperations(...args);
 const renderUpdates=(...args)=>createUpdatesPage(pageContext()).renderUpdates(...args);
 const renderTopology=(...args)=>createTopologyPage(pageContext()).renderTopology(...args);

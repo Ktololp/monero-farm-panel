@@ -3,6 +3,7 @@ setlocal EnableExtensions EnableDelayedExpansion
 
 set "REPO=C:\Users\ktoto\Desktop\monero-farm-panel-1.2.1-test"
 set "BRANCH=dev/v1.3.0"
+set "GIT_SAFE=-c maintenance.auto=false -c gc.auto=0 -c gc.autoPackLimit=0"
 
 rem Always execute the worker from TEMP so git may safely update this file.
 if /I not "%~1"=="--worker" (
@@ -33,8 +34,8 @@ if not exist "%REPO%\package.json" (
 cd /d "%REPO%" || goto :fail
 git rev-parse --is-inside-work-tree >nul 2>&1 || goto :fail
 
-echo [MFP_SYNC] Fetching %BRANCH%...
-git fetch origin %BRANCH% || goto :fail
+echo [MFP_SYNC] Fetching %BRANCH% without auto-maintenance...
+git %GIT_SAFE% fetch --no-auto-maintenance origin %BRANCH% || goto :fail
 
 rem Protect all application/user changes. Updater-only changes are service state.
 set "DIRTY_COUNT=0"
@@ -74,10 +75,10 @@ if /I not "!CURRENT!"=="%BRANCH%" (
 
 if not "!DIRTY_COUNT!"=="0" (
     echo [MFP_SYNC] Repairing updater-only working tree state...
-    git reset --hard origin/%BRANCH% || goto :fail
+    git %GIT_SAFE% reset --hard origin/%BRANCH% || goto :fail
 ) else (
-    echo [MFP_SYNC] Fast-forwarding development branch...
-    git merge --ff-only origin/%BRANCH% || goto :fail
+    echo [MFP_SYNC] Fast-forwarding development branch without auto-maintenance...
+    git %GIT_SAFE% merge --ff-only origin/%BRANCH% || goto :fail
 )
 
 for /f "delims=" %%H in ('git rev-parse HEAD') do set "LOCAL_HEAD=%%H"

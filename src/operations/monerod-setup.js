@@ -76,11 +76,14 @@ systemctl is-enabled --quiet tor >/dev/null 2>&1 && ENABLED=1
 ACTIVE=0
 systemctl is-active --quiet tor >/dev/null 2>&1 && ACTIVE=1
 ONION=""
-[ -s /var/lib/tor/monerod/hostname ] && ONION="$(tr -d '\\r\\n ' </var/lib/tor/monerod/hostname)"
 TORRC=0
 if [ -f /etc/tor/torrc ] && grep -q '^# BEGIN MFP MONEROD TOR$' /etc/tor/torrc; then TORRC=1; fi
 MONERO_CONFIG=0
-if [ -n "$MONEROD_CONFIG_PATH" ] && [ -f "$MONEROD_CONFIG_PATH" ] && grep -q '^# BEGIN MFP TOR$' "$MONEROD_CONFIG_PATH"; then MONERO_CONFIG=1; fi
+if [ -n "$MONEROD_CONFIG_PATH" ] && [ -f "$MONEROD_CONFIG_PATH" ] && grep -q '^# BEGIN MFP TOR$' "$MONEROD_CONFIG_PATH"; then
+  MONERO_CONFIG=1
+  ONION="$(sed -n 's/^anonymous-inbound=\\([^,]*\\),.*/\\1/p' "$MONEROD_CONFIG_PATH" | head -n 1)"
+fi
+if [ -z "$ONION" ] && [ -r /var/lib/tor/monerod/hostname ]; then ONION="$(tr -d '\\r\\n ' </var/lib/tor/monerod/hostname)"; fi
 printf 'MFP_INSTALLED=%s\\n' "$INSTALLED"
 printf 'MFP_ENABLED=%s\\n' "$ENABLED"
 printf 'MFP_ACTIVE=%s\\n' "$ACTIVE"
@@ -156,7 +159,7 @@ export async function getMonerodTorStatus(serverId, monerodStatus = null) {
   const server = serverById(serverId);
   const monerod = monerodStatus || (await getMonerodInstallStatus(serverId)).monerod;
   const env = { MONEROD_CONFIG_PATH: monerod.configPath || '/etc/monero/monerod.conf' };
-  const result = await ssh.runScript(server, torStatusScript, env, { sudo: true, timeoutMs: 15000 });
+  const result = await ssh.runScript(server, torStatusScript, env, { sudo: false, timeoutMs: 15000 });
   if (result.code !== 0) throw new Error(`Tor status check failed: ${result.stderr.trim() || result.stdout.slice(-1000)}`);
   return { ok: true, tor: parseTorStatus(result.stdout) };
 }

@@ -1,61 +1,9 @@
+import { getSetupCopy } from '../../i18n/messages/setup-copy.js';
+
 export function createSetupPage(ctx) {
   const { $, esc, api, toast, setHeader, t, getLocale } = ctx;
 
-  function copy() {
-    return getLocale() === 'en' ? {
-      title: 'Miner setup',
-      subtitle: 'Prepare a new mining server from the panel',
-      server: 'Target server',
-      xmrig: 'XMRig',
-      hint: 'Checks the selected server first. If XMRig is missing or incomplete, the panel installs the configured XMRig version, creates a config when needed, enables the systemd service and autostart.',
-      checking: 'Checking server…',
-      unavailable: 'Status check failed',
-      installed: 'Binary',
-      version: 'Version',
-      config: 'Config',
-      service: 'systemd service',
-      autostart: 'Autostart',
-      running: 'Running now',
-      yes: 'Ready',
-      no: 'Missing',
-      enabled: 'Enabled',
-      disabled: 'Disabled',
-      active: 'Active',
-      inactive: 'Inactive',
-      install: 'Install / repair XMRig',
-      installedButton: 'XMRig is ready',
-      confirm: 'Install or repair XMRig on this server? The panel will enable the systemd service and autostart. Existing XMRig config and systemd unit are preserved when found.',
-      success: 'XMRig is installed and autostart is enabled.',
-      noServers: 'Add a server first, then return to Miner setup.',
-      refresh: 'Refresh status'
-    } : {
-      title: 'Установка майнера',
-      subtitle: 'Подготовка нового майнинг-сервера из панели',
-      server: 'Целевой сервер',
-      xmrig: 'XMRig',
-      hint: 'Сначала панель проверяет выбранный сервер. Если XMRig отсутствует или установлен не полностью, панель установит заданную версию XMRig, при необходимости создаст config, включит systemd-сервис и автозагрузку.',
-      checking: 'Проверяем сервер…',
-      unavailable: 'Не удалось проверить состояние',
-      installed: 'Бинарный файл',
-      version: 'Версия',
-      config: 'Config',
-      service: 'systemd-сервис',
-      autostart: 'Автозагрузка',
-      running: 'Запущен сейчас',
-      yes: 'Готово',
-      no: 'Не найдено',
-      enabled: 'Включена',
-      disabled: 'Выключена',
-      active: 'Работает',
-      inactive: 'Не работает',
-      install: 'Установить / исправить XMRig',
-      installedButton: 'XMRig готов',
-      confirm: 'Установить или исправить XMRig на этом сервере? Панель включит systemd-сервис и автозагрузку. Найденные существующие config и systemd unit будут сохранены.',
-      success: 'XMRig установлен, сервис запущен и автозагрузка включена.',
-      noServers: 'Сначала добавьте сервер, затем вернитесь в раздел установки.',
-      refresh: 'Обновить состояние'
-    };
-  }
+  const copy = () => getSetupCopy(getLocale());
 
   function flag(ok, yes, no) {
     return `<span class="setup-flag ${ok ? 'ok' : 'missing'}">${esc(ok ? yes : no)}</span>`;

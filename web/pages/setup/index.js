@@ -76,11 +76,12 @@ export function createSetupPage(ctx) {
     const c = copy();
     const target = $('#setup-monerod-status');
     if (!target) return;
-    if (status.ready && ['pruned', 'full'].includes(status.mode)) selectedMode = status.mode;
+    const detected = Boolean(status.operational);
+    if (detected && ['pruned', 'full'].includes(status.mode)) selectedMode = status.mode;
     target.innerHTML = `
       <div class="setup-choice-row">
         <label><span>${esc(c.nodeType)}</span>
-          <select id="setup-node-mode" ${status.ready ? 'disabled' : ''}>
+          <select id="setup-node-mode" ${detected ? 'disabled' : ''}>
             <option value="pruned" ${selectedMode === 'pruned' ? 'selected' : ''}>${esc(c.nodePruned)}</option>
             <option value="full" ${selectedMode === 'full' ? 'selected' : ''}>${esc(c.nodeFull)}</option>
           </select>
@@ -102,17 +103,17 @@ export function createSetupPage(ctx) {
       </div>
       <div class="setup-actions">
         <button class="ghost setup-refresh">${esc(c.refresh)}</button>
-        <button id="setup-install-monerod" class="${status.ready ? 'ghost' : 'primary'}" ${status.ready ? 'disabled' : ''}>${esc(status.ready ? c.monerodReady : c.installMonerod)}</button>
+        <button id="setup-install-monerod" class="${detected ? 'ghost' : 'primary'}" ${detected ? 'disabled' : ''}>${esc(detected ? c.monerodDetected : c.installMonerod)}</button>
       </div>`;
 
     target.querySelector('.setup-refresh').onclick = () => loadStatus(serverId);
     const mode = $('#setup-node-mode');
-    if (mode && !status.ready) mode.onchange = () => {
+    if (mode && !detected) mode.onchange = () => {
       selectedMode = mode.value;
       renderMonerodStatus(serverId, status);
     };
     const install = $('#setup-install-monerod');
-    if (install && !status.ready) install.onclick = async () => {
+    if (install && !detected) install.onclick = async () => {
       if (!confirm(c.monerodConfirm)) return;
       try {
         install.disabled = true;
@@ -133,7 +134,11 @@ export function createSetupPage(ctx) {
     const c = copy();
     const target = $('#setup-tor-status');
     if (!target) return;
-    const canConfigure = Boolean(monerod.ready);
+    const canConfigure = Boolean(monerod.torConfigurable);
+    let blocker = '';
+    if (!monerod.operational) blocker = c.torNeedsMonerod;
+    else if (!monerod.configExists || !monerod.configPath) blocker = c.torNeedsConfig;
+
     target.innerHTML = `
       <div class="setup-status-grid">
         <div><span>${esc(c.torPackage)}</span>${flag(status.installed, c.yes, c.no)}</div>
@@ -143,7 +148,7 @@ export function createSetupPage(ctx) {
         <div><span>${esc(c.monerodTorConfig)}</span>${flag(status.monerodConfigured, c.yes, c.no)}</div>
         <div><span>${esc(c.onion)}</span><b class="setup-onion">${esc(status.onion || '—')}</b></div>
       </div>
-      ${!canConfigure ? `<div class="notice warn setup-inline-notice">${esc(c.torNeedsMonerod)}</div>` : ''}
+      ${blocker ? `<div class="notice warn setup-inline-notice">${esc(blocker)}</div>` : ''}
       <div class="setup-actions">
         <button class="ghost setup-refresh">${esc(c.refresh)}</button>
         <button id="setup-configure-tor" class="${status.ready ? 'ghost' : 'primary'}" ${status.ready || !canConfigure ? 'disabled' : ''}>${esc(status.ready ? c.torReady : c.configureTor)}</button>

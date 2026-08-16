@@ -21,7 +21,7 @@ const setupCopy = {
 
     xmrig: 'XMRig',
     xmrigFile: 'XMRig file',
-    xmrigHint: 'The executable file is the actual XMRig program started by systemd. The panel detects it from the running process, systemd ExecStart and standard install paths.',
+    xmrigHint: 'The executable file is the actual XMRig program started by systemd. Wrapper shells are ignored; the panel searches the service cgroup for the real xmrig process.',
     xmrigInstall: 'Install / repair XMRig',
     xmrigReady: 'XMRig is ready',
     xmrigConfirm: 'Install or repair XMRig on this server? The panel will enable the systemd service and autostart. Existing XMRig config and systemd unit are preserved when found.',
@@ -29,7 +29,7 @@ const setupCopy = {
 
     monerod: 'Monero node',
     monerodFile: 'monerod file',
-    monerodHint: 'Installs the official Monero CLI, verifies its SHA256 against the official hashes list, creates a local-only RPC configuration, systemd service and autostart.',
+    monerodHint: 'Detects an existing daemon first. A fresh install uses the official Monero CLI, verifies the signed hashes list and archive SHA256, then creates a local-only RPC configuration, systemd service and autostart.',
     nodeType: 'Node type',
     nodePruned: 'Pruned node',
     nodePrunedHelp: 'Recommended when disk space matters. Saves about 2/3 of blockchain storage while keeping normal node functionality.',
@@ -38,6 +38,7 @@ const setupCopy = {
     rpc: 'Local RPC',
     installMonerod: 'Install monerod',
     monerodReady: 'monerod is ready',
+    monerodDetected: 'monerod detected',
     monerodConfirm: 'Install monerod with the selected node type? The choice is intended for the first synchronization and is not switched automatically later.',
     monerodSuccess: 'monerod is installed, running and enabled at boot.',
     modeFull: 'Full',
@@ -54,7 +55,8 @@ const setupCopy = {
     onion: 'Onion address',
     configureTor: 'Configure Tor onion',
     torReady: 'Tor onion is ready',
-    torNeedsMonerod: 'Install and start monerod first',
+    torNeedsMonerod: 'monerod must be running and its local RPC must be reachable first',
+    torNeedsConfig: 'monerod is running, but its config file was not found. Tor setup is blocked to avoid changing a working node blindly.',
     torConfirm: 'Install/configure Tor and expose only monerod P2P through a v3 onion service? Local RPC will remain private.',
     torSuccess: 'Tor onion for monerod is configured.'
   },
@@ -80,7 +82,7 @@ const setupCopy = {
 
     xmrig: 'XMRig',
     xmrigFile: 'Файл XMRig',
-    xmrigHint: 'Это сам исполняемый файл программы XMRig, который запускает systemd. Панель определяет его по реально запущенному процессу, ExecStart сервиса и стандартным путям установки.',
+    xmrigHint: 'Это реальный исполняемый файл XMRig. Bash-обёртки игнорируются: панель ищет настоящий процесс xmrig внутри cgroup systemd-сервиса.',
     xmrigInstall: 'Установить / исправить XMRig',
     xmrigReady: 'XMRig готов',
     xmrigConfirm: 'Установить или исправить XMRig на этом сервере? Панель включит systemd-сервис и автозагрузку. Найденные существующие config и systemd unit будут сохранены.',
@@ -88,7 +90,7 @@ const setupCopy = {
 
     monerod: 'Monero node',
     monerodFile: 'Файл monerod',
-    monerodHint: 'Устанавливает официальный Monero CLI, сверяет SHA256 с официальным списком хешей, создаёт локальный RPC, systemd-сервис и автозагрузку.',
+    monerodHint: 'Сначала определяет уже работающий daemon. При новой установке использует официальный Monero CLI, проверяет подпись списка хешей и SHA256 архива, затем создаёт локальный RPC, systemd-сервис и автозагрузку.',
     nodeType: 'Тип ноды',
     nodePruned: 'Обрезанная нода',
     nodePrunedHelp: 'Оптимальный вариант при ограниченном диске. Экономит примерно 2/3 места блокчейна без потери обычной функциональности ноды.',
@@ -97,6 +99,7 @@ const setupCopy = {
     rpc: 'Локальный RPC',
     installMonerod: 'Установить monerod',
     monerodReady: 'monerod готов',
+    monerodDetected: 'monerod обнаружен',
     monerodConfirm: 'Установить monerod с выбранным типом ноды? Этот выбор рассчитан на первую синхронизацию и позже автоматически не переключается.',
     monerodSuccess: 'monerod установлен, запущен и добавлен в автозагрузку.',
     modeFull: 'Полная',
@@ -113,7 +116,8 @@ const setupCopy = {
     onion: 'Onion-адрес',
     configureTor: 'Настроить Tor onion',
     torReady: 'Tor onion готов',
-    torNeedsMonerod: 'Сначала установите и запустите monerod',
+    torNeedsMonerod: 'Сначала monerod должен реально работать, а локальный RPC — отвечать',
+    torNeedsConfig: 'monerod работает, но его config-файл не найден. Настройка Tor заблокирована, чтобы не менять рабочую ноду вслепую.',
     torConfirm: 'Установить/настроить Tor и открыть через v3 onion только P2P monerod? Локальный RPC останется закрытым.',
     torSuccess: 'Tor onion для monerod настроен.'
   }

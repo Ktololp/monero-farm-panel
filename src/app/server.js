@@ -10,6 +10,7 @@ import { Server as SocketIOServer } from 'socket.io';
 import { config, validateConfig } from '../config/index.js';
 import { db, getAdminPasswordHash } from '../database/index.js';
 import { api } from '../api/router.js';
+import { setupApi } from '../api/setup-router.js';
 import { configureSockets } from '../realtime/socket.js';
 import { setMonitorIO, startMonitor, stopMonitor } from '../monitoring/index.js';
 import { setAlertIO } from '../alerts/index.js';
@@ -59,6 +60,9 @@ app.use(helmet({
 app.use(compression());
 app.use(express.json({ limit: '2mb' }));
 app.get('/healthz', (req,res)=>res.json({ok:true,time:Date.now()}));
+// Dedicated setup namespace keeps provisioning actions isolated from the stable API router.
+app.use('/api/v1/setup', setupApi);
+app.use('/api/setup', setupApi);
 // Canonical API namespace for v1.1+. Keep /api as a backwards-compatible alias.
 app.use('/api/v1', api);
 app.use('/api', api);

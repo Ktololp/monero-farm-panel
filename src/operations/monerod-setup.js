@@ -20,7 +20,7 @@ find_target_process() {
   # Find the actual monerod executable inside the service cgroup instead.
   if [ -n "$cgroup" ] && [ "$cgroup" != "/" ]; then
     for proc in /proc/[0-9]*; do
-      pid="${proc##*/}"
+      pid="$(basename "$proc")"
       [ -r "/proc/$pid/cgroup" ] || continue
       grep -Fq -- "$cgroup" "/proc/$pid/cgroup" 2>/dev/null || continue
       exe="$(readlink -f "/proc/$pid/exe" 2>/dev/null)"

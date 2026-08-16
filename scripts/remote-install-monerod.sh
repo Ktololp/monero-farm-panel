@@ -33,45 +33,41 @@ fi
 if [ -z "$BIN" ] || [ ! -x "$BIN" ]; then
   ARCH="$(uname -m)"
   case "$ARCH" in
-    x86_64|amd64) CHANNEL=linux64 ;;
-    aarch64|arm64) CHANNEL=linuxarm8 ;;
+    x86_64|amd64) ARCHIVE_RE='^monero-linux-x64-v.*[.]tar[.]bz2$' ;;
+    aarch64|arm64) ARCHIVE_RE='^monero-linux-armv8-v.*[.]tar[.]bz2$' ;;
     *) echo "Unsupported architecture for official Monero CLI binary: $ARCH" >&2; exit 4 ;;
   esac
 
-  DOWNLOAD_URL="https://downloads.getmonero.org/cli/${CHANNEL}"
-  FINAL_URL="$(curl -fsSIL -o /dev/null -w '%{url_effective}' "$DOWNLOAD_URL")"
-  ARCHIVE_NAME="$(basename "${FINAL_URL%%\?*}")"
-  case "$ARCHIVE_NAME" in
-    *.tar.bz2) ;;
-    *) echo "Could not determine official Monero archive name from $FINAL_URL" >&2; exit 5 ;;
-  esac
+  TMP_HASHES=/tmp/monero-hashes.txt
+  rm -f "$TMP_HASHES"
+  curl -fL --retry 3 --connect-timeout 20 "https://www.getmonero.org/downloads/hashes.txt" -o "$TMP_HASHES"
+  HASH_LINE="$(awk -v re="$ARCHIVE_RE" '$2 ~ re {print $1 " " $2; exit}' "$TMP_HASHES")"
+  EXPECTED="${HASH_LINE%% *}"
+  ARCHIVE_NAME="${HASH_LINE#* }"
+  if [ -z "$HASH_LINE" ] || [ -z "$EXPECTED" ] || [ -z "$ARCHIVE_NAME" ] || [ "$ARCHIVE_NAME" = "$HASH_LINE" ]; then
+    echo "Could not find the current official Monero archive in hashes.txt for architecture $ARCH" >&2
+    exit 5
+  fi
 
+  DOWNLOAD_URL="https://downloads.getmonero.org/cli/${ARCHIVE_NAME}"
   TMP_ARCHIVE="/tmp/$ARCHIVE_NAME"
-  TMP_HASHES="/tmp/monero-hashes.txt"
-  rm -f "$TMP_ARCHIVE" "$TMP_HASHES"
+  rm -f "$TMP_ARCHIVE"
   rm -rf /tmp/mfp-monero-extract
 
   echo "Downloading official Monero CLI: $ARCHIVE_NAME"
   curl -fL --retry 3 --connect-timeout 20 "$DOWNLOAD_URL" -o "$TMP_ARCHIVE"
-  curl -fL --retry 3 --connect-timeout 20 "https://www.getmonero.org/downloads/hashes.txt" -o "$TMP_HASHES"
-
-  EXPECTED="$(awk -v f="$ARCHIVE_NAME" '$2==f {print $1; exit}' "$TMP_HASHES")"
-  if [ -z "$EXPECTED" ]; then
-    echo "Official SHA256 for $ARCHIVE_NAME was not found in hashes.txt" >&2
-    exit 6
-  fi
   ACTUAL="$(sha256sum "$TMP_ARCHIVE" | awk '{print $1}')"
   if [ "$EXPECTED" != "$ACTUAL" ]; then
     echo "Monero archive SHA256 mismatch" >&2
     echo "Expected: $EXPECTED" >&2
     echo "Actual:   $ACTUAL" >&2
-    exit 7
+    exit 6
   fi
 
   mkdir -p /tmp/mfp-monero-extract
   tar -xjf "$TMP_ARCHIVE" -C /tmp/mfp-monero-extract
   ROOT="$(find /tmp/mfp-monero-extract -mindepth 1 -maxdepth 1 -type d -name 'monero-*' | head -n 1)"
-  [ -n "$ROOT" ] || { echo "Extracted Monero directory not found" >&2; exit 8; }
+  [ -n "$ROOT" ] || { echo "Extracted Monero directory not found" >&2; exit 7; }
   install -d -m 0755 /opt/monero
   for file in "$ROOT"/monero*; do
     [ -f "$file" ] && [ -x "$file" ] || continue

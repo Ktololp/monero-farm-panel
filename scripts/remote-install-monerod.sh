@@ -8,6 +8,9 @@ export DEBIAN_FRONTEND=noninteractive
 : "${MONEROD_CONFIG_PATH:=/etc/monero/monerod.conf}"
 : "${MONEROD_BINARY_PATH:=}"
 
+BINARYFATE_FINGERPRINT='81AC591FE9C4B65C5806AFC3F0AF4D462A0BDF92'
+BINARYFATE_KEY_URL='https://raw.githubusercontent.com/monero-project/monero/master/utils/gpg_keys/binaryfate.asc'
+
 case "$MONEROD_MODE" in
   full|pruned) ;;
   *) echo "Unsupported MONEROD_MODE: $MONEROD_MODE" >&2; exit 2 ;;
@@ -19,7 +22,7 @@ if ! command -v apt-get >/dev/null 2>&1; then
 fi
 
 apt-get update
-apt-get install -y --no-install-recommends ca-certificates curl bzip2 tar
+apt-get install -y --no-install-recommends ca-certificates curl bzip2 tar gnupg
 
 BIN="$MONEROD_BINARY_PATH"
 if [ -z "$BIN" ] || [ ! -x "$BIN" ]; then
@@ -39,14 +42,36 @@ if [ -z "$BIN" ] || [ ! -x "$BIN" ]; then
   esac
 
   TMP_HASHES=/tmp/monero-hashes.txt
-  rm -f "$TMP_HASHES"
+  TMP_KEY=/tmp/monero-binaryfate.asc
+  GNUPGHOME="$(mktemp -d /tmp/mfp-monero-gpg.XXXXXX)"
+  chmod 0700 "$GNUPGHOME"
+  trap 'rm -rf "$GNUPGHOME" "$TMP_KEY"' EXIT
+  rm -f "$TMP_HASHES" "$TMP_KEY"
+
   curl -fL --retry 3 --connect-timeout 20 "https://www.getmonero.org/downloads/hashes.txt" -o "$TMP_HASHES"
-  HASH_LINE="$(awk -v re="$ARCHIVE_RE" '$2 ~ re {print $1 " " $2; exit}' "$TMP_HASHES")"
+  curl -fL --retry 3 --connect-timeout 20 "$BINARYFATE_KEY_URL" -o "$TMP_KEY"
+  gpg --batch --homedir "$GNUPGHOME" --import "$TMP_KEY" >/dev/null 2>&1
+  IMPORTED_FINGERPRINT="$(gpg --batch --homedir "$GNUPGHOME" --with-colons --fingerprint | awk -F: '$1=="fpr" {print $10; exit}')"
+  if [ "$IMPORTED_FINGERPRINT" != "$BINARYFATE_FINGERPRINT" ]; then
+    echo "Monero release signing key fingerprint mismatch" >&2
+    echo "Expected: $BINARYFATE_FINGERPRINT" >&2
+    echo "Actual:   ${IMPORTED_FINGERPRINT:-missing}" >&2
+    exit 5
+  fi
+  if ! gpg --batch --homedir "$GNUPGHOME" --verify "$TMP_HASHES" >/dev/null 2>&1; then
+    echo "Monero hashes.txt PGP signature verification failed" >&2
+    exit 6
+  fi
+
+  HASH_LINE="$(awk -v re="$ARCHIVE_RE" '
+    $2 ~ re {print $1 " " $2; exit}
+    $1 ~ re {gsub(/,/, "", $1); gsub(/,/, "", $2); print $2 " " $1; exit}
+  ' "$TMP_HASHES")"
   EXPECTED="${HASH_LINE%% *}"
   ARCHIVE_NAME="${HASH_LINE#* }"
   if [ -z "$HASH_LINE" ] || [ -z "$EXPECTED" ] || [ -z "$ARCHIVE_NAME" ] || [ "$ARCHIVE_NAME" = "$HASH_LINE" ]; then
-    echo "Could not find the current official Monero archive in hashes.txt for architecture $ARCH" >&2
-    exit 5
+    echo "Could not find the current official Monero archive in verified hashes.txt for architecture $ARCH" >&2
+    exit 7
   fi
 
   DOWNLOAD_URL="https://downloads.getmonero.org/cli/${ARCHIVE_NAME}"
@@ -54,26 +79,28 @@ if [ -z "$BIN" ] || [ ! -x "$BIN" ]; then
   rm -f "$TMP_ARCHIVE"
   rm -rf /tmp/mfp-monero-extract
 
-  echo "Downloading official Monero CLI: $ARCHIVE_NAME"
+  echo "Downloading verified official Monero CLI: $ARCHIVE_NAME"
   curl -fL --retry 3 --connect-timeout 20 "$DOWNLOAD_URL" -o "$TMP_ARCHIVE"
   ACTUAL="$(sha256sum "$TMP_ARCHIVE" | awk '{print $1}')"
   if [ "$EXPECTED" != "$ACTUAL" ]; then
     echo "Monero archive SHA256 mismatch" >&2
     echo "Expected: $EXPECTED" >&2
     echo "Actual:   $ACTUAL" >&2
-    exit 6
+    exit 8
   fi
 
   mkdir -p /tmp/mfp-monero-extract
   tar -xjf "$TMP_ARCHIVE" -C /tmp/mfp-monero-extract
   ROOT="$(find /tmp/mfp-monero-extract -mindepth 1 -maxdepth 1 -type d -name 'monero-*' | head -n 1)"
-  [ -n "$ROOT" ] || { echo "Extracted Monero directory not found" >&2; exit 7; }
+  [ -n "$ROOT" ] || { echo "Extracted Monero directory not found" >&2; exit 9; }
   install -d -m 0755 /opt/monero
   for file in "$ROOT"/monero*; do
     [ -f "$file" ] && [ -x "$file" ] || continue
     install -m 0755 "$file" "/opt/monero/$(basename "$file")"
   done
   BIN=/opt/monero/monerod
+  rm -rf "$GNUPGHOME" "$TMP_KEY"
+  trap - EXIT
 fi
 
 if ! id monero >/dev/null 2>&1; then

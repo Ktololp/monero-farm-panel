@@ -10,6 +10,7 @@ permissions:
 
 jobs:
   test:
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
@@ -36,6 +37,7 @@ jobs:
         run: npm run build:web
 
   docker:
+    timeout-minutes: 20
     runs-on: ubuntu-latest
     name: Docker build
     steps:

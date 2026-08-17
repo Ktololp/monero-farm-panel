@@ -62,7 +62,7 @@ async function recoverMiningChain(server, monerod) {
     MONEROD_RPC_PORT: String(server.monerod_rpc_port || 18081),
     P2POOL_LOG_PATH: server.p2pool_log_path || '/var/log/p2pool.log',
     XMRIG_CONFIG_PATH: xmrig.configPath || ''
-  }, { sudo: true, timeoutMs: 5 * 60 * 1000 });
+  }, { sudo: true, timeoutMs: 7 * 60 * 1000 });
 
   if (result.code !== 0) {
     const concise = result.stderr.trim().split(/\r?\n/).filter(Boolean).at(-1)

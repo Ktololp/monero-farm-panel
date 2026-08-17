@@ -165,8 +165,9 @@ export function createSetupPage(ctx) {
     const networkState = checked
       ? flag(checked.reachable, checked.reachable ? c.torReachable : c.torUnreachable, c.torUnreachable)
       : planned(c.torNotChecked);
-    const p2pState = status.p2pRouted
-      ? flag(true, c.torP2pThroughTor, c.torP2pNormal)
+    const managedFullP2p = Boolean(status.p2pConfigured || status.p2pRouted);
+    const p2pState = managedFullP2p
+      ? flag(false, c.torP2pNormal, c.torP2pThroughTor)
       : planned(c.torP2pNormal);
 
     target.innerHTML = `
@@ -185,7 +186,7 @@ export function createSetupPage(ctx) {
       <div class="setup-actions">
         <button class="ghost setup-refresh">${esc(c.refresh)}</button>
         <button id="setup-check-tor" class="ghost" ${status.ready ? '' : 'disabled'}>${esc(c.checkTor)}</button>
-        <button id="setup-toggle-tor-p2p" class="${status.p2pRouted ? 'ghost' : 'primary'}" ${status.ready ? '' : 'disabled'}>${esc(status.p2pRouted ? c.disableTorP2p : c.enableTorP2p)}</button>
+        <button id="setup-toggle-tor-p2p" class="${managedFullP2p ? 'primary' : 'ghost'}" ${monerod.running ? '' : 'disabled'}>${esc(c.disableTorP2p)}</button>
         <button id="setup-configure-tor" class="${status.ready ? 'ghost' : 'primary'}" ${status.ready || !canConfigure ? 'disabled' : ''}>${esc(status.ready ? c.torReady : c.configureTor)}</button>
       </div>`;
 
@@ -207,20 +208,20 @@ export function createSetupPage(ctx) {
     };
 
     const p2pButton = $('#setup-toggle-tor-p2p');
-    if (p2pButton && status.ready) p2pButton.onclick = async () => {
-      const enable = !status.p2pRouted;
-      if (!confirm(enable ? c.enableTorP2pConfirm : c.disableTorP2pConfirm)) return;
+    if (p2pButton && monerod.running) p2pButton.onclick = async () => {
+      if (!confirm(c.disableTorP2pConfirm)) return;
       try {
         p2pButton.disabled = true;
         p2pButton.textContent = t('bootstrap.running');
-        await api(`/setup/servers/${serverId}/monerod/tor/p2p`, { method: 'POST', body: { enabled: enable } });
+        await api(`/setup/servers/${serverId}/monerod/tor/p2p`, { method: 'POST', body: { enabled: false } });
         torChecks.delete(serverId);
-        toast(enable ? c.torP2pEnabled : c.torP2pDisabled);
+        toast(c.torP2pDisabled);
+        await ctx.loadOverview().catch(() => null);
         await loadStatus(serverId);
       } catch (error) {
         toast(error.message, 'error');
         p2pButton.disabled = false;
-        p2pButton.textContent = enable ? c.enableTorP2p : c.disableTorP2p;
+        p2pButton.textContent = c.disableTorP2p;
       }
     };
 

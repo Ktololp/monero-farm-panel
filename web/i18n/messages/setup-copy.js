@@ -41,6 +41,8 @@ const setupCopy = {
     rpcAuthRequired: 'authentication required',
     rpcLocalOnly: 'local only',
     rpcNetworkBind: 'network bind',
+    configNotUsed: 'Not used',
+    configlessInfo: 'This monerod is running from command-line/systemd arguments without a config file. That is valid. MFP will not reinstall or rewrite the node because of it.',
     installMonerod: 'Install monerod',
     monerodReady: 'monerod is ready',
     monerodDetected: 'monerod detected',
@@ -61,8 +63,8 @@ const setupCopy = {
     configureTor: 'Configure Tor onion',
     torReady: 'Tor onion is ready',
     torNeedsMonerod: 'monerod must be running first',
-    torNeedsConfig: 'monerod is running, but its config file was not found. Tor setup is blocked to avoid changing a working node blindly.',
-    torConfirm: 'Install/configure Tor and expose only monerod P2P through a v3 onion service? The current monerod RPC bind settings will not be changed.',
+    torWillCreateConfig: 'This node currently has no config file. During Tor setup MFP will create the standard bitmonero.conf in the daemon data directory and add only the managed Tor block. Existing command-line arguments remain unchanged.',
+    torConfirm: 'Install/configure Tor and expose only monerod P2P through a v3 onion service? If this node has no config file, MFP will create the standard bitmonero.conf in its current data directory. Existing monerod command-line and RPC bind settings will not be changed.',
     torSuccess: 'Tor onion for monerod is configured.'
   },
   ru: {
@@ -107,6 +109,8 @@ const setupCopy = {
     rpcAuthRequired: 'нужна авторизация',
     rpcLocalOnly: 'только локально',
     rpcNetworkBind: 'доступен по сети',
+    configNotUsed: 'Не используется',
+    configlessInfo: 'Этот monerod запущен через параметры командной строки/systemd без config-файла. Это нормальная конфигурация. MFP не будет из-за этого переустанавливать или переписывать рабочую ноду.',
     installMonerod: 'Установить monerod',
     monerodReady: 'monerod готов',
     monerodDetected: 'monerod обнаружен',
@@ -127,8 +131,8 @@ const setupCopy = {
     configureTor: 'Настроить Tor onion',
     torReady: 'Tor onion готов',
     torNeedsMonerod: 'Сначала monerod должен реально работать',
-    torNeedsConfig: 'monerod работает, но его config-файл не найден. Настройка Tor заблокирована, чтобы не менять рабочую ноду вслепую.',
-    torConfirm: 'Установить/настроить Tor и открыть через v3 onion только P2P monerod? Текущие настройки RPC monerod изменяться не будут.',
+    torWillCreateConfig: 'У этой ноды сейчас нет config-файла. При настройке Tor MFP создаст стандартный bitmonero.conf в текущем каталоге данных monerod и добавит туда только управляемый Tor-блок. Существующие аргументы запуска останутся без изменений.',
+    torConfirm: 'Установить/настроить Tor и открыть через v3 onion только P2P monerod? Если у ноды нет config-файла, MFP создаст стандартный bitmonero.conf в её текущем data-dir. Существующие параметры запуска и настройки RPC monerod изменяться не будут.',
     torSuccess: 'Tor onion для monerod настроен.'
   }
 };

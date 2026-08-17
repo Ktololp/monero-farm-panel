@@ -76,9 +76,11 @@ test('Tor setup supports a configless running monerod without rewriting its CLI 
   assert.doesNotMatch(script, /rpc-bind-ip=0\.0\.0\.0/);
 });
 
-test('full P2P Tor experiment is recovery-only and restores the mining dependency chain', () => {
+test('full P2P Tor experiment has checkpoint, validation and automatic rollback', () => {
   const p2pScript = read('scripts/remote-set-monerod-tor-p2p.sh');
   const recoveryScript = read('scripts/remote-recover-mining-chain.sh');
+  const snapshotScript = read('scripts/remote-tor-experiment-snapshot.sh');
+  const healthScript = read('scripts/remote-validate-mining-health.sh');
   const operation = read('src/operations/monerod-tor-p2p.js');
   const router = read('src/api/setup-router.js');
   const page = read('web/pages/setup/index.js');
@@ -96,15 +98,18 @@ test('full P2P Tor experiment is recovery-only and restores the mining dependenc
   assert.match(recoveryScript, /shared wrapper/);
   assert.match(recoveryScript, /Restarting dedicated \$XMRIG_PROXY_SERVICE_UNIT/);
   assert.match(recoveryScript, /XMRig uses the shared mining wrapper/);
-  assert.match(recoveryScript, /Restarting dedicated \$XMRIG_SERVICE_UNIT/);
+  assert.match(snapshotScript, /MFP_SNAPSHOT_PATH/);
+  assert.match(snapshotScript, /MFP_RESTORED=1/);
+  assert.match(healthScript, /MFP_XMRIG_HASH_HS/);
   assert.match(operation, /remote-recover-mining-chain\.sh/);
-  assert.match(operation, /Always run the disable script as a probe/);
-  assert.match(operation, /ORPHAN_CLEANED/);
-  assert.match(operation, /TOR_P2P_MODE: 'disable'/);
-  assert.match(operation, /Recovery-only safety mode/);
+  assert.match(operation, /remote-tor-experiment-snapshot\.sh/);
+  assert.match(operation, /remote-validate-mining-health\.sh/);
+  assert.match(operation, /startTorP2pExperiment/);
+  assert.match(operation, /restoreExperimentSnapshot/);
+  assert.match(operation, /Automatic rollback succeeded/);
+  assert.match(operation, /options\.enabled === false/);
   assert.match(router, /monerod\/tor\/p2p/);
   assert.match(page, /body: \{ enabled: false \}/);
-  assert.doesNotMatch(page, /body: \{ enabled: enable \}/);
 });
 
 test('Tor onion check validates the local hidden-service pipeline without self-connecting through Tor', () => {
@@ -124,7 +129,7 @@ test('Tor onion check validates the local hidden-service pipeline without self-c
   assert.match(router, /monerod\/tor\/check/);
 });
 
-test('setup UI uses inline Tor icon, local pipeline check and recovery-only P2P control', () => {
+test('setup UI uses inline Tor icon, local pipeline check and guarded experiment copy', () => {
   const router = read('src/api/setup-router.js');
   const page = read('web/pages/setup/index.js');
   const copy = read('web/i18n/messages/setup-copy.js');
@@ -150,7 +155,8 @@ test('setup UI uses inline Tor icon, local pipeline check and recovery-only P2P 
   assert.doesNotMatch(page, /<img class="setup-title-icon"/);
   assert.match(copy, /RPC monerod/);
   assert.match(copy, /Не используется/);
-  assert.match(copy, /Восстановить обычный P2P \+ майнинг/);
+  assert.match(copy, /Tor P2P эксперимент \/ откат/);
+  assert.match(copy, /автоматический точный откат/);
   assert.match(copy, /Локальная цепочка onion/);
   assert.match(copy, /bitmonero\.conf/);
   assert.match(css, /setup-flag\.planned/);

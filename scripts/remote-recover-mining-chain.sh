@@ -21,7 +21,7 @@ wait_active() {
 }
 process_pid() { pgrep -xo "$1" 2>/dev/null | head -n 1; }
 wait_process() {
-  local name="$1" seconds="${2:-60}"
+  local name="$1" seconds="${2:-75}"
   for _ in $(seq 1 "$seconds"); do
     [ -n "$(process_pid "$name")" ] && return 0
     sleep 1
@@ -49,7 +49,8 @@ process_established_port() {
   fi
 }
 wait_listener_with_process() {
-  local port="$1" proc="$2" seconds="${3:-90}"
+  local port="$1" proc="$2" seconds="${3:-120}"
+  local rc=1
   for _ in $(seq 1 "$seconds"); do
     if listen_port "$port"; then return 0; else rc=$?; fi
     [ "$rc" = "2" ] && return 2
@@ -60,6 +61,7 @@ wait_listener_with_process() {
 }
 wait_process_established() {
   local proc="$1" port="$2" seconds="${3:-45}"
+  local rc=1
   for _ in $(seq 1 "$seconds"); do
     if process_established_port "$proc" "$port"; then return 0; else rc=$?; fi
     [ "$rc" = "2" ] && return 2
@@ -93,7 +95,7 @@ p2pool_runtime_info() {
   local pid="$1"
   command -v python3 >/dev/null 2>&1 || return 1
   python3 - "$pid" <<'PY'
-import os,re,shlex,sys
+import os,sys
 pid=sys.argv[1]
 try:
     args=[x.decode(errors='ignore') for x in open(f'/proc/{pid}/cmdline','rb').read().split(b'\0') if x]
@@ -101,13 +103,11 @@ except Exception:
     raise SystemExit(1)
 try: cwd=os.readlink(f'/proc/{pid}/cwd')
 except Exception: cwd=''
-
 def arg(name):
     for i,a in enumerate(args):
         if a==name and i+1<len(args): return args[i+1]
         if a.startswith(name+'='): return a.split('=',1)[1]
     return ''
-
 def clean(v):
     v=str(v or '').strip()
     if len(v)>=2 and v[0]==v[-1] and v[0] in ('"',"'"): v=v[1:-1]
@@ -122,8 +122,7 @@ if params and os.path.isfile(params):
             if '=' not in line: continue
             k,v=line.split('=',1); conf[k.strip().lower()]=clean(v)
     except Exception: pass
-
-def val(cli, key, default=''):
+def val(cli,key,default=''):
     return clean(arg(cli)) or clean(conf.get(key,'')) or default
 stratum=val('--stratum','stratum','0.0.0.0:3333')
 zmq=val('--zmq-port','zmq-port','18083')
@@ -156,11 +155,9 @@ diag_p2pool() {
     journalctl -u "$P2POOL_SERVICE_UNIT" -n 80 --no-pager 2>&1 || true
   fi
   echo "---- listeners ----"
-  ss -ltnp 2>&1 | head -n 120 || true
+  if command -v ss >/dev/null 2>&1; then ss -ltnp 2>&1 | head -n 120 || true; fi
 }
 
-# Discover current local mining routes before restarting anything. The proxy
-# can remain installed even when XMRig mines directly to P2Pool.
 PROXY_CONFIG=/etc/xmrig-proxy/config.json
 LOCAL_UPSTREAM_PORT="$(local_pool_port_from_json "$PROXY_CONFIG" || true)"
 XMRIG_LOCAL_POOL_PORT="$(local_pool_port_from_json "$XMRIG_CONFIG_PATH" || true)"
@@ -186,34 +183,39 @@ log "monerod RPC is ready"
 P2POOL_RESTARTED=0
 P2POOL_STRATUM_READY=0
 P2POOL_ZMQ_READY=0
-P2POOL_PID="$(process_pid p2pool || true)"
-if unit_exists "$P2POOL_SERVICE_UNIT" || [ -n "$P2POOL_PID" ]; then
-  # Shared wrapper units are common. If the real process already survived or
-  # was restarted by the monerod wrapper, do not restart the same unit again.
-  if [ -z "$P2POOL_PID" ]; then
-    if [ "$P2POOL_SERVICE_UNIT" != "$MONEROD_SERVICE_UNIT" ] && unit_exists "$P2POOL_SERVICE_UNIT"; then
-      log "Real p2pool process is absent; restarting $P2POOL_SERVICE_UNIT"
-      systemctl reset-failed "$P2POOL_SERVICE_UNIT" >/dev/null 2>&1 || true
-      systemctl restart "$P2POOL_SERVICE_UNIT"
-      P2POOL_RESTARTED=1
-    else
-      log "P2Pool shares the monerod service wrapper; waiting for the real process instead of restarting the wrapper again"
-    fi
-    if ! wait_process p2pool 75; then
-      diag_p2pool
-      echo "P2Pool service is present, but the real p2pool process did not start." >&2
-      exit 21
-    fi
-    P2POOL_PID="$(process_pid p2pool || true)"
+if unit_exists "$P2POOL_SERVICE_UNIT" || [ -n "$(process_pid p2pool || true)" ]; then
+  if unit_exists "$P2POOL_SERVICE_UNIT" && [ "$P2POOL_SERVICE_UNIT" != "$MONEROD_SERVICE_UNIT" ]; then
+    log "Restarting dedicated P2Pool unit $P2POOL_SERVICE_UNIT"
+    systemctl reset-failed "$P2POOL_SERVICE_UNIT" >/dev/null 2>&1 || true
+    systemctl restart "$P2POOL_SERVICE_UNIT"
+    P2POOL_RESTARTED=1
+  else
+    log "P2Pool uses the monerod/shared wrapper; not restarting that wrapper a second time"
   fi
 
+  if ! wait_process p2pool 75; then
+    diag_p2pool
+    echo "P2Pool service is present, but the real p2pool process did not start." >&2
+    exit 21
+  fi
+  P2POOL_PID="$(process_pid p2pool || true)"
   INFO="$(p2pool_runtime_info "$P2POOL_PID" 2>/dev/null || true)"
-  eval "$(printf '%s\n' "$INFO" | grep -E '^(P2POOL_(PID|STRATUM|STRATUM_PORTS|ZMQ_PORT|RPC_PORT|MONEROD_HOST|PARAMS_FILE))=' | sed 's/\([^=]*\)=\(.*\)/\1="\2"/')"
+  P2POOL_STRATUM=''; P2POOL_STRATUM_PORTS=''; P2POOL_ZMQ_PORT=''; P2POOL_MONEROD_HOST=''; P2POOL_PARAMS_FILE=''
+  while IFS='=' read -r key value; do
+    case "$key" in
+      P2POOL_STRATUM) P2POOL_STRATUM="$value" ;;
+      P2POOL_STRATUM_PORTS) P2POOL_STRATUM_PORTS="$value" ;;
+      P2POOL_ZMQ_PORT) P2POOL_ZMQ_PORT="$value" ;;
+      P2POOL_MONEROD_HOST) P2POOL_MONEROD_HOST="$value" ;;
+      P2POOL_PARAMS_FILE) P2POOL_PARAMS_FILE="$value" ;;
+    esac
+  done <<< "$INFO"
   : "${P2POOL_STRATUM:=0.0.0.0:3333}"
   : "${P2POOL_STRATUM_PORTS:=3333}"
   : "${P2POOL_ZMQ_PORT:=18083}"
   : "${P2POOL_MONEROD_HOST:=127.0.0.1}"
   log "Detected P2Pool PID $P2POOL_PID, Stratum $P2POOL_STRATUM, monerod ZMQ $P2POOL_MONEROD_HOST:$P2POOL_ZMQ_PORT"
+  [ -z "$P2POOL_PARAMS_FILE" ] || log "P2Pool params file: $P2POOL_PARAMS_FILE"
 
   if [ "$P2POOL_MONEROD_HOST" = "127.0.0.1" ] || [ "$P2POOL_MONEROD_HOST" = "localhost" ] || [ "$P2POOL_MONEROD_HOST" = "::1" ]; then
     if listen_port "$P2POOL_ZMQ_PORT"; then
@@ -235,7 +237,7 @@ if unit_exists "$P2POOL_SERVICE_UNIT" || [ -n "$P2POOL_PID" ]; then
   for port in "${STRATUM_PORTS[@]}"; do
     [ -n "$port" ] || continue
     log "Waiting for real P2Pool Stratum listener on port $port"
-    if wait_listener_with_process "$port" p2pool 90; then
+    if wait_listener_with_process "$port" p2pool 120; then
       P2POOL_STRATUM_READY=1
     else
       rc=$?
@@ -275,7 +277,7 @@ if unit_exists "$XMRIG_PROXY_SERVICE_UNIT"; then
   log "Restarting $XMRIG_PROXY_SERVICE_UNIT"
   systemctl restart "$XMRIG_PROXY_SERVICE_UNIT"
   wait_active "$XMRIG_PROXY_SERVICE_UNIT" 30 || {
-    systemctl --no-pager --full status "$XMRIG_PROXY_SERVICE_UNIT" | head -n 60 >&2 || true
+    systemctl --no-pager --full status "$XMRIG_PROXY_SERVICE_UNIT" | head -n 60 || true
     echo "$XMRIG_PROXY_SERVICE_UNIT did not become active" >&2
     exit 22
   }
@@ -305,7 +307,7 @@ if unit_exists "$XMRIG_SERVICE_UNIT"; then
   log "Restarting $XMRIG_SERVICE_UNIT"
   systemctl restart "$XMRIG_SERVICE_UNIT"
   wait_active "$XMRIG_SERVICE_UNIT" 30 || {
-    systemctl --no-pager --full status "$XMRIG_SERVICE_UNIT" | head -n 60 >&2 || true
+    systemctl --no-pager --full status "$XMRIG_SERVICE_UNIT" | head -n 60 || true
     echo "$XMRIG_SERVICE_UNIT did not become active" >&2
     exit 23
   }

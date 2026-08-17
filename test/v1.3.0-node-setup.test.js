@@ -76,53 +76,48 @@ test('Tor setup supports a configless running monerod without rewriting its CLI 
   assert.doesNotMatch(script, /rpc-bind-ip=0\.0\.0\.0/);
 });
 
-test('full monerod P2P routing through Tor is managed, runtime-verified, reversible and does not change RPC', () => {
-  const script = read('scripts/remote-set-monerod-tor-p2p.sh');
-  const statusScript = read('scripts/remote-status-monerod-tor.sh');
+test('full P2P Tor experiment is recovery-only and restores the mining dependency chain', () => {
+  const p2pScript = read('scripts/remote-set-monerod-tor-p2p.sh');
+  const recoveryScript = read('scripts/remote-recover-mining-chain.sh');
   const operation = read('src/operations/monerod-tor-p2p.js');
   const router = read('src/api/setup-router.js');
-  assert.match(script, /proxy=127\.0\.0\.1:\$\{TOR_SOCKS_PORT\}/);
-  assert.match(script, /p2p-bind-ip=127\.0\.0\.1/);
-  assert.match(script, /no-igd=1/);
-  assert.match(script, /hide-my-port=1/);
-  assert.match(script, /BEGIN MFP TOR P2P/);
-  assert.match(script, /TOR_P2P_MODE/);
-  assert.match(script, /mfp-tor-p2p-backup/);
-  assert.match(script, /Rolling back monerod config/);
-  assert.match(script, /127\.0\.0\.1:/);
-  assert.doesNotMatch(script, /rpc-bind-ip=/);
-  assert.doesNotMatch(script, /rpc-bind-port=/);
-  assert.match(statusScript, /MFP_P2P_CONFIGURED/);
-  assert.match(statusScript, /MFP_P2P_LOOPBACK/);
-  assert.match(statusScript, /MFP_P2P_WILDCARD/);
-  assert.match(statusScript, /127\[\.\]0\[\.\]0\[\.\]1/);
-  assert.doesNotMatch(statusScript, /127\\\\\.0/);
-  assert.match(operation, /setMonerodTorP2p/);
-  assert.match(operation, /p2pRouted/);
-  assert.match(operation, /p2pLoopback/);
+  const page = read('web/pages/setup/index.js');
+  assert.match(p2pScript, /BEGIN MFP TOR P2P/);
+  assert.match(p2pScript, /TOR_P2P_MODE/);
+  assert.match(p2pScript, /mfp-tor-p2p-backup/);
+  assert.doesNotMatch(p2pScript, /rpc-bind-ip=/);
+  assert.doesNotMatch(p2pScript, /rpc-bind-port=/);
+  assert.match(recoveryScript, /Waiting for monerod RPC/);
+  assert.match(recoveryScript, /Restarting \$P2POOL_SERVICE_UNIT/);
+  assert.match(recoveryScript, /Restarting \$XMRIG_PROXY_SERVICE_UNIT/);
+  assert.match(recoveryScript, /Restarting \$XMRIG_SERVICE_UNIT/);
+  assert.match(operation, /remote-recover-mining-chain\.sh/);
+  assert.match(operation, /before\.tor\.p2pConfigured/);
+  assert.match(operation, /TOR_P2P_MODE: 'disable'/);
+  assert.match(operation, /recovery-only/);
   assert.match(router, /monerod\/tor\/p2p/);
+  assert.match(page, /body: \{ enabled: false \}/);
+  assert.doesNotMatch(page, /body: \{ enabled: enable \}/);
 });
 
-test('Tor reachability probe exits after SOCKS5 grant instead of waiting for an open P2P session', () => {
+test('Tor onion check validates the local hidden-service pipeline without self-connecting through Tor', () => {
   const script = read('scripts/remote-check-monerod-tor.sh');
   const operation = read('src/operations/tor-reachability.js');
   const router = read('src/api/setup-router.js');
   assert.match(script, /LOCAL_LISTENER/);
-  assert.match(script, /monerod is not listening on local anonymous P2P port/);
-  assert.match(script, /--socks5-hostname/);
-  assert.match(script, /--connect-timeout 30 --max-time 35/);
-  assert.match(script, /telnet:\/\//);
-  assert.match(script, /SOCKS5 request granted/);
-  assert.match(script, /kill "\$CURL_PID"/);
-  assert.match(script, /sleep 0\.2/);
-  assert.match(script, /MFP_REACHABLE/);
-  assert.match(operation, /timeoutMs: 45000/);
-  assert.match(operation, /localListener/);
+  assert.match(script, /HiddenServicePort/);
+  assert.match(script, /127\.0\.0\.1/);
+  assert.match(script, /MFP_EXTERNAL_VERIFIED=0/);
+  assert.match(script, /Local Tor onion pipeline is ready/);
+  assert.doesNotMatch(script, /--socks5-hostname/);
+  assert.doesNotMatch(script, /telnet:\/\//);
+  assert.match(operation, /timeoutMs: 15000/);
+  assert.match(operation, /externalVerified/);
   assert.match(operation, /checkMonerodTorReachability/);
   assert.match(router, /monerod\/tor\/check/);
 });
 
-test('setup UI uses inline Tor icon, network check and full P2P Tor toggle', () => {
+test('setup UI uses inline Tor icon, local pipeline check and recovery-only P2P control', () => {
   const router = read('src/api/setup-router.js');
   const page = read('web/pages/setup/index.js');
   const copy = read('web/i18n/messages/setup-copy.js');
@@ -141,14 +136,15 @@ test('setup UI uses inline Tor icon, network check and full P2P Tor toggle', () 
   assert.match(page, /monerod\/tor\/check/);
   assert.match(page, /setup-toggle-tor-p2p/);
   assert.match(page, /monerod\/tor\/p2p/);
-  assert.match(page, /status\.p2pRouted/);
+  assert.match(page, /status\.p2pConfigured/);
+  assert.match(page, /body: \{ enabled: false \}/);
   assert.match(page, /configNotUsed/);
   assert.match(page, /torWillCreateConfig/);
   assert.doesNotMatch(page, /<img class="setup-title-icon"/);
   assert.match(copy, /RPC monerod/);
   assert.match(copy, /Не используется/);
-  assert.match(copy, /Включить весь P2P через Tor/);
-  assert.match(copy, /Проверка сети Tor/);
+  assert.match(copy, /Восстановить обычный P2P \+ майнинг/);
+  assert.match(copy, /Локальная цепочка onion/);
   assert.match(copy, /bitmonero\.conf/);
   assert.match(css, /setup-flag\.planned/);
 });

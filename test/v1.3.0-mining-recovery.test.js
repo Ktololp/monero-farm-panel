@@ -101,6 +101,20 @@ test('Tor experiment suppresses auto recovery and exact rollback avoids needless
   assert.match(op, /options\.enabled === false/);
 });
 
+test('Tor rollback retries the real recovery service once after a shared-wrapper P2Pool race', () => {
+  const op = read('src/operations/monerod-tor-p2p.js');
+  assert.match(op, /restartRecoveryServiceScript/);
+  assert.match(op, /RECOVERY_SERVICE_UNIT/);
+  assert.match(op, /recoverAfterRestoreWithRetry/);
+  assert.match(op, /restartRecoveryService\(server\)/);
+  assert.match(op, /Recovery retry after restarting/);
+  assert.match(op, /rollbackRecoveryRetried/);
+  assert.match(op, /rollbackP2poolStratumReady/);
+  assert.match(op, /rollbackProxyUpstreamReady/);
+  assert.match(op, /rollbackXmrigPoolLinkReady/);
+  assert.match(op, /releaseAutoRecoverySuppression\(server\.id\)/);
+});
+
 test('API errors are JSON and frontend strips fallback Express stacks', () => {
   const server = read('src/app/server.js');
   const client = read('web/services/api.js');

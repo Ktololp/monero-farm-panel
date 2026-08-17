@@ -30,10 +30,11 @@ test('recovery waits for monerod sync and never restarts a named shared mining w
   assert.match(script, /XMRIG_SERVICE_UNIT" = "\$MONEROD_SERVICE_UNIT/);
   assert.match(script, /XMRIG_SERVICE_UNIT" = "\$P2POOL_SERVICE_UNIT/);
   assert.match(script, /not restarting the whole chain/);
+  assert.match(script, /P2POOL_ZMQ_READY/);
   assert.match(op, /P2POOL_LOG_PATH/);
   assert.match(op, /8 \* 60 \* 1000/);
   assert.match(op, /MONEROD_SYNCED/);
-  assert.match(op, /P2POOL_ZMQ_READY/);
+  assert.match(op, /P2POOL_STRATUM_READY/);
   assert.match(op, /conciseResult/);
 });
 

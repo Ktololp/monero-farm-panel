@@ -79,6 +79,25 @@ test('Tor full-P2P experiment bootstraps through captured public peers without D
   assert.doesNotMatch(script, /proxy-allow-dns-leaks/);
 });
 
+test('Tor bind verification follows the fresh monerod process and rejects external listeners', () => {
+  const script = read('scripts/remote-set-monerod-tor-p2p.sh');
+  assert.match(script, /find_monerod_pid/);
+  assert.match(script, /ControlGroup/);
+  assert.match(script, /OLD_MONEROD_PID/);
+  assert.match(script, /wait_fresh_monerod/);
+  assert.match(script, /MFP_MONEROD_PID/);
+  assert.match(script, /wait_monerod_rpc/);
+  assert.match(script, /classify_bind/);
+  assert.match(script, /MFP_P2P_BIND_STATE/);
+  assert.match(script, /MFP_P2P_LISTENERS/);
+  assert.match(script, /loopback/);
+  assert.match(script, /closed/);
+  assert.match(script, /unsafe/);
+  assert.match(script, /p2p-use-ipv6/);
+  assert.match(script, /p2p-bind-ipv6-address/);
+  assert.doesNotMatch(script, /pgrep -xo monerod/);
+});
+
 test('Tor experiment suppresses auto recovery and exact rollback avoids needless restarts', () => {
   const recovery = read('src/monitoring/recovery.js');
   const snapshot = read('scripts/remote-tor-experiment-snapshot.sh');

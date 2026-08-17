@@ -6,7 +6,8 @@ import {
   getMonerodInstallStatus,
   installMonerod,
   getMonerodTorStatus,
-  configureMonerodTor
+  configureMonerodTor,
+  checkMonerodTorReachability
 } from '../operations/index.js';
 import { discoverServer } from '../discovery/index.js';
 import { pollServerNow } from '../monitoring/index.js';
@@ -58,6 +59,15 @@ setupApi.post('/servers/:id/monerod/tor', async (req, res, next) => {
     const result = await configureMonerodTor(req.params.id, req.body || {}, { actorIp: ip(req) });
     const live = await pollServerNow(req.params.id).catch(() => null);
     res.json({ ...result, live });
+  } catch (error) {
+    next(error);
+  }
+});
+
+setupApi.post('/servers/:id/monerod/tor/check', async (req, res, next) => {
+  try {
+    const result = await checkMonerodTorReachability(req.params.id, { actorIp: ip(req) });
+    res.json(result);
   } catch (error) {
     next(error);
   }

@@ -72,7 +72,9 @@ function parseMonerodStatus(output = '') {
   status.running = status.detected && status.serviceInstalled && status.active;
   status.operational = status.running;
   status.ready = status.running && status.enabled;
-  status.torConfigurable = status.running && status.configExists && Boolean(status.configPath);
+  // A configless running monerod is valid: Tor provisioning can create the
+  // standard bitmonero.conf in the daemon's current data directory safely.
+  status.torConfigurable = status.running;
   return status;
 }
 
@@ -106,7 +108,7 @@ export async function getMonerodInstallStatus(serverId) {
 export async function getMonerodTorStatus(serverId, monerodStatus = null) {
   const server = serverById(serverId);
   const monerod = monerodStatus || (await getMonerodInstallStatus(serverId)).monerod;
-  const env = { MONEROD_CONFIG_PATH: monerod.configPath || '/etc/monero/monerod.conf' };
+  const env = { MONEROD_CONFIG_PATH: monerod.configPath || '' };
   const result = await ssh.runScript(server, torStatusScript, env, { sudo: false, timeoutMs: 15000 });
   if (result.code !== 0) throw new Error(`Tor status check failed: ${result.stderr.trim() || result.stdout.slice(-1000)}`);
   return { ok: true, tor: parseTorStatus(result.stdout) };
@@ -154,14 +156,14 @@ export async function configureMonerodTor(serverId, _options = {}, { actorIp = '
   const server = serverById(serverId);
   const monerod = (await getMonerodInstallStatus(serverId)).monerod;
   if (!monerod.running) throw new Error('monerod must be running before Tor setup');
-  if (!monerod.torConfigurable) throw new Error('monerod is running, but its config file could not be located safely; Tor setup was not applied');
   const before = await getMonerodTorStatus(serverId, monerod);
   if (before.tor.ready) return { ok: true, alreadyConfigured: true, tor: before.tor, output: '' };
 
   const script = fs.readFileSync(path.resolve('scripts/remote-configure-monerod-tor.sh'), 'utf8');
   const env = {
+    TARGET_USER: server.username,
     MONEROD_SERVICE_UNIT: unitName(server),
-    MONEROD_CONFIG_PATH: monerod.configPath,
+    MONEROD_CONFIG_PATH: monerod.configPath || '',
     TOR_ONION_PORT: '18084',
     TOR_SOCKS_PORT: '9050'
   };
@@ -176,7 +178,8 @@ export async function configureMonerodTor(serverId, _options = {}, { actorIp = '
   audit({ ip: actorIp, serverId: server.id, action: 'configure-monerod-tor', status: result.code === 0 ? 'ok' : 'error', details: { code: result.code } });
   if (result.code !== 0) throw new Error(`Tor setup failed: ${result.stderr.trim() || result.stdout.slice(-2500)}`);
 
-  const after = await getMonerodTorStatus(serverId, (await getMonerodInstallStatus(serverId)).monerod);
+  const freshMonerod = (await getMonerodInstallStatus(serverId)).monerod;
+  const after = await getMonerodTorStatus(serverId, freshMonerod);
   if (!after.tor.ready) throw new Error('Tor setup finished, but onion service is not fully ready');
-  return { ok: true, alreadyConfigured: false, tor: after.tor, output: result.stdout };
+  return { ok: true, alreadyConfigured: false, tor: after.tor, monerod: freshMonerod, output: result.stdout };
 }

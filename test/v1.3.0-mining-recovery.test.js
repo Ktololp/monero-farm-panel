@@ -66,6 +66,19 @@ test('Tor P2P cleanup remains no-op safe and only removes proven orphaned MFP op
   assert.match(script, /MFP_CHANGED=1/);
 });
 
+test('Tor full-P2P experiment bootstraps through captured public peers without DNS leak mode', () => {
+  const script = read('scripts/remote-set-monerod-tor-p2p.sh');
+  assert.match(script, /MONEROD_RPC_PORT/);
+  assert.match(script, /get_connections/);
+  assert.match(script, /capture_priority_peers/);
+  assert.match(script, /ip\.is_global/);
+  assert.match(script, /add-priority-node=/);
+  assert.match(script, /MFP_PRIORITY_PEERS/);
+  assert.match(script, /no current public outbound IPv4 monerod peers could be captured/);
+  assert.match(script, /proxy=127\.0\.0\.1:/);
+  assert.doesNotMatch(script, /proxy-allow-dns-leaks/);
+});
+
 test('Tor experiment suppresses auto recovery and exact rollback avoids needless restarts', () => {
   const recovery = read('src/monitoring/recovery.js');
   const snapshot = read('scripts/remote-tor-experiment-snapshot.sh');

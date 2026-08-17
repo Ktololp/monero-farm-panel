@@ -88,10 +88,12 @@ test('full P2P Tor experiment is recovery-only and restores the mining dependenc
   assert.doesNotMatch(p2pScript, /rpc-bind-ip=/);
   assert.doesNotMatch(p2pScript, /rpc-bind-port=/);
   assert.match(recoveryScript, /Waiting for monerod RPC/);
+  assert.match(recoveryScript, /synchronized=true/);
   assert.match(recoveryScript, /Restarting dedicated P2Pool unit \$P2POOL_SERVICE_UNIT/);
   assert.match(recoveryScript, /shared wrapper/);
-  assert.match(recoveryScript, /Restarting \$XMRIG_PROXY_SERVICE_UNIT/);
-  assert.match(recoveryScript, /Restarting \$XMRIG_SERVICE_UNIT/);
+  assert.match(recoveryScript, /Restarting dedicated \$XMRIG_PROXY_SERVICE_UNIT/);
+  assert.match(recoveryScript, /XMRig uses the shared mining wrapper/);
+  assert.match(recoveryScript, /Restarting dedicated \$XMRIG_SERVICE_UNIT/);
   assert.match(operation, /remote-recover-mining-chain\.sh/);
   assert.match(operation, /before\.tor\.p2pConfigured/);
   assert.match(operation, /TOR_P2P_MODE: 'disable'/);

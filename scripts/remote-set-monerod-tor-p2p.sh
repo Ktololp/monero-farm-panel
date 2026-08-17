@@ -3,6 +3,7 @@ set -euo pipefail
 
 : "${MONEROD_SERVICE_UNIT:=monerod.service}"
 : "${MONEROD_CONFIG_PATH:=}"
+: "${MONEROD_RPC_PORT:=18081}"
 : "${TOR_SOCKS_PORT:=9050}"
 : "${TOR_P2P_MODE:=enable}"
 
@@ -45,6 +46,53 @@ arg_value() {
   return 1
 }
 
+capture_priority_peers() {
+  command -v curl >/dev/null 2>&1 || return 0
+  command -v python3 >/dev/null 2>&1 || return 0
+  curl -fsS --max-time 5 \
+    -H 'Content-Type: application/json' \
+    --data '{"jsonrpc":"2.0","id":"0","method":"get_connections"}' \
+    "http://127.0.0.1:${MONEROD_RPC_PORT}/json_rpc" \
+  | python3 -c 'import ipaddress,json,sys
+try:
+    result=(json.load(sys.stdin).get("result") or {})
+    rows=result.get("connections") or []
+except Exception:
+    raise SystemExit(0)
+seen=[]
+for c in rows:
+    if c.get("incoming") is True:
+        continue
+    try:
+        if int(c.get("address_type") or 0) != 1:
+            continue
+    except Exception:
+        continue
+    host=str(c.get("host") or "").strip()
+    port=str(c.get("port") or "").strip()
+    if not host:
+        address=str(c.get("address") or "").strip()
+        if address.count(":") == 1:
+            host,port=address.rsplit(":",1)
+            host=host.strip()
+            port=port.strip()
+    try:
+        ip=ipaddress.ip_address(host)
+    except Exception:
+        continue
+    if ip.version != 4 or not ip.is_global:
+        continue
+    if not port.isdigit() or not (1 <= int(port) <= 65535):
+        continue
+    value=f"{host}:{port}"
+    if value in seen:
+        continue
+    seen.append(value)
+    if len(seen) >= 8:
+        break
+sys.stdout.write("\\n".join(seen))'
+}
+
 if [ "$TOR_P2P_MODE" = "enable" ]; then
   if has_arg "$MONEROD_PID" --proxy || has_arg "$MONEROD_PID" --p2p-bind-ip || has_arg "$MONEROD_PID" --igd || has_arg "$MONEROD_PID" --no-igd || has_arg "$MONEROD_PID" --hide-my-port; then
     echo "monerod command line already controls proxy/P2P bind/IGD/privacy options; MFP will not override those arguments" >&2
@@ -60,6 +108,7 @@ END='# END MFP TOR P2P'
 TMP_CFG="$(mktemp)"
 BACKUP="${MONEROD_CONFIG_PATH}.mfp-tor-p2p-backup-$(date +%Y%m%d%H%M%S)"
 ORPHAN_CLEANED=0
+PRIORITY_COUNT=0
 
 awk -v begin="$BEGIN" -v end="$END" '
   $0==begin {skip=1; next}
@@ -73,15 +122,29 @@ if [ "$TOR_P2P_MODE" = "enable" ]; then
     echo "monerod config already contains custom proxy/P2P bind/IGD/privacy options outside the MFP block; automatic Tor P2P routing was not applied" >&2
     exit 8
   fi
-  cat >>"$TMP_CFG" <<EOF
 
-$BEGIN
-proxy=127.0.0.1:${TOR_SOCKS_PORT}
-p2p-bind-ip=127.0.0.1
-no-igd=1
-hide-my-port=1
-$END
-EOF
+  PRIORITY_PEERS="$(capture_priority_peers || true)"
+  if [ -n "$PRIORITY_PEERS" ]; then
+    PRIORITY_COUNT="$(printf '%s\n' "$PRIORITY_PEERS" | sed '/^[[:space:]]*$/d' | wc -l | tr -d '[:space:]')"
+  fi
+  : "${PRIORITY_COUNT:=0}"
+  if [ "$PRIORITY_COUNT" -lt 1 ]; then
+    rm -f "$TMP_CFG"
+    echo "Tor P2P experiment was not started because no current public outbound IPv4 monerod peers could be captured for proxy bootstrap. Working config was not changed." >&2
+    exit 12
+  fi
+
+  {
+    printf '\n%s\n' "$BEGIN"
+    printf 'proxy=127.0.0.1:%s\n' "$TOR_SOCKS_PORT"
+    printf 'p2p-bind-ip=127.0.0.1\n'
+    printf 'no-igd=1\n'
+    printf 'hide-my-port=1\n'
+    while IFS= read -r peer; do
+      [ -n "$peer" ] && printf 'add-priority-node=%s\n' "$peer"
+    done <<< "$PRIORITY_PEERS"
+    printf '%s\n' "$END"
+  } >>"$TMP_CFG"
 else
   # Early v1.3 development builds could leave the four experimental full-P2P
   # options outside the managed marker. Only clean that exact combination when
@@ -120,6 +183,7 @@ if cmp -s "$MONEROD_CONFIG_PATH" "$TMP_CFG"; then
   rm -f "$TMP_CFG"
   printf 'MFP_CHANGED=0\n'
   printf 'MFP_ORPHAN_CLEANED=0\n'
+  printf 'MFP_PRIORITY_PEERS=0\n'
   echo "No managed or proven orphaned MFP full-P2P Tor settings remain; service restart skipped."
   exit 0
 fi
@@ -153,6 +217,7 @@ fi
 
 printf 'MFP_CHANGED=1\n'
 printf 'MFP_ORPHAN_CLEANED=%s\n' "$ORPHAN_CLEANED"
+printf 'MFP_PRIORITY_PEERS=%s\n' "$PRIORITY_COUNT"
 
 if [ "$TOR_P2P_MODE" = "enable" ]; then
   NEW_MONEROD_PID="$(pgrep -xo monerod 2>/dev/null | head -n 1)"
@@ -183,7 +248,7 @@ if [ "$TOR_P2P_MODE" = "enable" ]; then
     echo "Tor P2P config was written, but monerod did not switch ordinary P2P exclusively to 127.0.0.1:${P2P_PORT}; previous config was restored" >&2
     exit 11
   fi
-  echo "Full monerod P2P routing through Tor is enabled and loopback binding is active on port ${P2P_PORT}."
+  echo "Full monerod P2P routing through Tor is enabled on loopback port ${P2P_PORT} with ${PRIORITY_COUNT} captured IPv4 bootstrap peer(s)."
 else
   if [ "$ORPHAN_CLEANED" = "1" ]; then
     echo "Removed proven orphaned MFP full-P2P Tor options and restarted the monerod service chain once."

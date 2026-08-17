@@ -68,6 +68,17 @@ app.use('/api/v1', api);
 app.use('/api', api);
 app.use('/api/v1', (req,res)=>res.status(404).json({error:'API route not found'}));
 app.use('/api', (req,res)=>res.status(404).json({error:'API route not found'}));
+// Never expose Express development HTML/stack traces to the browser. Keep the
+// full stack in the panel console, while API clients receive one concise JSON error.
+app.use((error, req, res, next) => {
+  const originalUrl = String(req.originalUrl || req.url || '');
+  if (!originalUrl.startsWith('/api/')) return next(error);
+  console.error(`[api] ${req.method} ${originalUrl}:`, error?.stack || error);
+  if (res.headersSent) return next(error);
+  const rawStatus = Number(error?.status || error?.statusCode || 500);
+  const status = Number.isInteger(rawStatus) && rawStatus >= 400 && rawStatus < 600 ? rawStatus : 500;
+  return res.status(status).json({ error: error?.message || 'Internal server error' });
+});
 app.use(express.static(path.resolve('public'), { maxAge: config.nodeEnv === 'production' ? '1h' : 0 }));
 app.use((req,res)=>res.sendFile(path.resolve('public/index.html')));
 

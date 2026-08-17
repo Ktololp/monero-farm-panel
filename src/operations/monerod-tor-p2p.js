@@ -4,6 +4,7 @@ import { audit } from '../database/index.js';
 import { ssh, safeServiceName } from '../ssh/index.js';
 import { serverById } from './server.js';
 import { getMonerodInstallStatus } from './monerod-setup.js';
+import { getXmrigInstallStatus } from './xmrig-install.js';
 
 const torStatusScript = fs.readFileSync(path.resolve('scripts/remote-status-monerod-tor.sh'), 'utf8');
 const torP2pScript = fs.readFileSync(path.resolve('scripts/remote-set-monerod-tor-p2p.sh'), 'utf8');
@@ -52,18 +53,20 @@ export async function getMonerodTorStatus(serverId, monerodStatus = null) {
 }
 
 async function recoverMiningChain(server, monerod) {
+  const xmrig = (await getXmrigInstallStatus(server.id)).xmrig;
   const result = await ssh.runScript(server, miningRecoveryScript, {
     MONEROD_SERVICE_UNIT: serviceUnit(server.monerod_service, 'monerod'),
     P2POOL_SERVICE_UNIT: serviceUnit(server.p2pool_service, 'p2pool'),
     XMRIG_PROXY_SERVICE_UNIT: 'xmrig-proxy.service',
     XMRIG_SERVICE_UNIT: serviceUnit(server.xmrig_service, 'xmrig'),
-    MONEROD_RPC_PORT: String(server.monerod_rpc_port || 18081)
+    MONEROD_RPC_PORT: String(server.monerod_rpc_port || 18081),
+    XMRIG_CONFIG_PATH: xmrig.configPath || ''
   }, { sudo: true, timeoutMs: 2 * 60 * 1000 });
 
   if (result.code !== 0) {
     throw new Error(`Mining chain recovery failed: ${result.stderr.trim() || result.stdout.slice(-2500)}`);
   }
-  return { output: result.stdout, steps: parsePairs(result.stdout), monerod };
+  return { output: result.stdout, steps: parsePairs(result.stdout), monerod, xmrig };
 }
 
 export async function setMonerodTorP2p(serverId, options = {}, { actorIp = '' } = {}) {
@@ -112,8 +115,11 @@ export async function setMonerodTorP2p(serverId, options = {}, { actorIp = '' } 
       removedManagedBlock: before.tor.p2pConfigured,
       rpcReady: recovery.steps.RPC_READY === '1',
       p2poolRestarted: recovery.steps.P2POOL_RESTARTED === '1',
+      p2poolStratumReady: recovery.steps.P2POOL_STRATUM_READY === '1',
       proxyRestarted: recovery.steps.PROXY_RESTARTED === '1',
-      xmrigRestarted: recovery.steps.XMRIG_RESTARTED === '1'
+      proxyUpstreamReady: recovery.steps.PROXY_UPSTREAM_READY === '1',
+      xmrigRestarted: recovery.steps.XMRIG_RESTARTED === '1',
+      xmrigPoolLinkReady: recovery.steps.XMRIG_POOL_LINK_READY === '1'
     }
   });
 

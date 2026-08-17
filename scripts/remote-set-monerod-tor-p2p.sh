@@ -111,28 +111,36 @@ if ! systemctl is-active --quiet "$MONEROD_SERVICE_UNIT" >/dev/null 2>&1; then
 fi
 
 if [ "$TOR_P2P_MODE" = "enable" ]; then
-  P2P_PORT="$(arg_value "$MONEROD_PID" --p2p-bind-port 2>/dev/null || true)"
+  NEW_MONEROD_PID="$(pgrep -xo monerod 2>/dev/null | head -n 1)"
+  P2P_PORT=""
+  [ -n "$NEW_MONEROD_PID" ] && P2P_PORT="$(arg_value "$NEW_MONEROD_PID" --p2p-bind-port 2>/dev/null || true)"
   [ -z "$P2P_PORT" ] && P2P_PORT="$(sed -n 's/^[[:space:]]*p2p-bind-port[[:space:]]*=[[:space:]]*\([0-9][0-9]*\)[[:space:]]*$/\1/p' "$MONEROD_CONFIG_PATH" | tail -n 1)"
   [ -z "$P2P_PORT" ] && P2P_PORT=18080
 
   RUNTIME_OK=0
   for _ in $(seq 1 30); do
+    LOOPBACK=0
+    WILDCARD=0
     if command -v ss >/dev/null 2>&1; then
       ss -ltnH 2>/dev/null | awk -v p="$P2P_PORT" '$4 == "127.0.0.1:" p { found=1 } END { exit !found }'
-      [ $? -eq 0 ] && RUNTIME_OK=1
+      [ $? -eq 0 ] && LOOPBACK=1
+      ss -ltnH 2>/dev/null | awk -v p="$P2P_PORT" '$4 == "0.0.0.0:" p || $4 == "*:" p { found=1 } END { exit !found }'
+      [ $? -eq 0 ] && WILDCARD=1
     elif command -v netstat >/dev/null 2>&1; then
       netstat -lnt 2>/dev/null | awk -v p="$P2P_PORT" '$4 == "127.0.0.1:" p { found=1 } END { exit !found }'
-      [ $? -eq 0 ] && RUNTIME_OK=1
+      [ $? -eq 0 ] && LOOPBACK=1
+      netstat -lnt 2>/dev/null | awk -v p="$P2P_PORT" '$4 == "0.0.0.0:" p || $4 == "*:" p { found=1 } END { exit !found }'
+      [ $? -eq 0 ] && WILDCARD=1
     else
-      RUNTIME_OK=1
+      LOOPBACK=1
     fi
-    [ "$RUNTIME_OK" = "1" ] && break
+    if [ "$LOOPBACK" = "1" ] && [ "$WILDCARD" = "0" ]; then RUNTIME_OK=1; break; fi
     sleep 1
   done
 
   if [ "$RUNTIME_OK" != "1" ]; then
     rollback
-    echo "Tor P2P config was written, but monerod did not bind ordinary P2P to 127.0.0.1:${P2P_PORT}; previous config was restored" >&2
+    echo "Tor P2P config was written, but monerod did not switch ordinary P2P exclusively to 127.0.0.1:${P2P_PORT}; previous config was restored" >&2
     exit 11
   fi
   echo "Full monerod P2P routing through Tor is enabled and loopback binding is active on port ${P2P_PORT}."

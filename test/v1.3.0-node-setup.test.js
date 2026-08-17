@@ -27,7 +27,7 @@ test('monerod setup discovers legacy config locations and the actual RPC endpoin
   assert.match(operation, /remote-status-monerod\.sh/);
   assert.match(operation, /rpcEndpoint/);
   assert.match(operation, /status\.running/);
-  assert.match(operation, /torConfigurable/);
+  assert.match(operation, /status\.torConfigurable = status\.running/);
   assert.doesNotMatch(operation, /local RPC must be reachable before Tor setup/);
   assert.match(script, /pgrep -xo "\$target"/);
   assert.match(script, /DATA_DIR\/bitmonero\.conf/);
@@ -56,21 +56,31 @@ test('monerod installer verifies signed official hashes, supports pruning and en
   assert.match(script, /systemctl enable "\$MONEROD_SERVICE_UNIT"/);
 });
 
-test('Tor setup exposes monerod P2P onion while leaving RPC configuration alone', () => {
+test('Tor setup supports a configless running monerod without rewriting its CLI arguments', () => {
   const script = read('scripts/remote-configure-monerod-tor.sh');
+  const operation = read('src/operations/monerod-setup.js');
+  assert.match(script, /pgrep -xo monerod/);
+  assert.match(script, /--config-file/);
+  assert.match(script, /--data-dir/);
+  assert.match(script, /PROC_HOME/);
+  assert.match(script, /bitmonero\.conf/);
+  assert.match(script, /Created by Monero Farm Panel/);
   assert.match(script, /HiddenServiceVersion 3/);
   assert.match(script, /HiddenServicePort \$\{TOR_ONION_PORT\} 127\.0\.0\.1:\$\{TOR_ONION_PORT\}/);
   assert.match(script, /anonymous-inbound=/);
   assert.match(script, /tx-proxy=tor,127\.0\.0\.1:/);
   assert.match(script, /systemctl enable tor/);
+  assert.match(operation, /MONEROD_CONFIG_PATH: monerod\.configPath \|\| ''/);
+  assert.doesNotMatch(operation, /config file could not be located safely/);
   assert.doesNotMatch(script, /HiddenServicePort 18081/);
   assert.doesNotMatch(script, /rpc-bind-ip=0\.0\.0\.0/);
 });
 
-test('setup UI uses the Tor onion icon and does not offer reinstall for a running monerod', () => {
+test('setup UI bundles the Tor onion icon and treats configless monerod as valid', () => {
   const router = read('src/api/setup-router.js');
   const page = read('web/pages/setup/index.js');
   const copy = read('web/i18n/messages/setup-copy.js');
+  const css = read('web/styles/design-setup.css');
   const torIcon = read('web/assets/icons/tor.svg');
   assert.match(router, /servers\/:id\/monerod\/install/);
   assert.match(router, /servers\/:id\/monerod\/tor/);
@@ -79,10 +89,15 @@ test('setup UI uses the Tor onion icon and does not offer reinstall for a runnin
   assert.match(page, /monerod\.torConfigurable/);
   assert.match(page, /monerod\.running/);
   assert.match(page, /rpcEndpoint/);
-  assert.match(page, /\/assets\/icons\/tor\.svg/);
-  assert.match(page, /torNeedsConfig/);
+  assert.match(page, /import torIcon from '\.\.\/\.\.\/assets\/icons\/tor\.svg'/);
+  assert.match(page, /src="\$\{torIcon\}"/);
+  assert.match(page, /configNotUsed/);
+  assert.match(page, /torWillCreateConfig/);
+  assert.doesNotMatch(page, /src="\/assets\/icons\/tor\.svg"/);
   assert.match(copy, /RPC monerod/);
-  assert.match(copy, /Обрезанная нода/);
+  assert.match(copy, /Не используется/);
+  assert.match(copy, /bitmonero\.conf/);
+  assert.match(css, /setup-flag\.planned/);
   assert.match(torIcon, /#7d4698/i);
   assert.match(torIcon, /#68b030/i);
 });

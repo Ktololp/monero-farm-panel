@@ -10,32 +10,53 @@ export function getRecoveryInfo(serverId) {
   return recoveryState.get(Number(serverId)) || { failures: 0, lastAttempt: 0, recoveringUntil: 0 };
 }
 
+async function runtimeUnitOwnership(server, service) {
+  const cmd = `cg="$(systemctl show ${service} -p ControlGroup --value 2>/dev/null || true)"; `
+    + `if [ -z "$cg" ]; then echo unknown; exit 0; fi; `
+    + `for proc in monerod p2pool; do pid="$(pgrep -xo "$proc" 2>/dev/null | head -n1)"; `
+    + `if [ -n "$pid" ] && [ -r "/proc/$pid/cgroup" ] && grep -Fq "$cg" "/proc/$pid/cgroup"; then echo shared; exit 0; fi; done; `
+    + `echo dedicated`;
+  try {
+    const r = await ssh.exec(server, cmd, { timeoutMs: 7000 });
+    return String(r.stdout || '').trim().split(/\r?\n/).at(-1) || 'unknown';
+  } catch {
+    return 'unknown';
+  }
+}
+
 export async function maybeAutoRecover(server, live) {
   if (String(getSetting('auto_recovery_enabled')) === '0' || live.status === 'offline' || live.grace) return;
   const rs = recoveryState.get(server.id) || { failures: 0, lastAttempt: 0, recoveringUntil: 0 };
 
-  // A zero XMRig hashrate is expected while P2Pool is waiting for monerod to
-  // synchronize. Restarting the miner here can be actively harmful on legacy
-  // installations where monerod, P2Pool and XMRig share one mining.service.
+  // A zero hashrate is NOT proof that XMRig itself is broken. It is commonly an
+  // upstream problem (P2Pool/Proxy/monerod). If the XMRig API is alive, never
+  // restart it automatically just because the current hashrate is zero.
+  const xmrigApiAlive = live.xmrigStatus === 'active' || live.components?.xmrig === 'active';
+  if (xmrigApiAlive && live.hash60s != null && Number(live.hash60s) < 1) {
+    rs.failures = 0;
+    recoveryState.set(server.id, rs);
+    return;
+  }
+
+  // P2Pool intentionally waits while monerod is not synchronized. Restarting
+  // anything in that state only delays recovery, especially on legacy installs
+  // where all three processes are launched by one mining.service wrapper.
   if (live.monero?.synchronized === false) {
     rs.failures = 0;
     recoveryState.set(server.id, rs);
     return;
   }
 
-  const badHash = live.hash60s != null && live.hash60s < 1;
-  const broken = live.status === 'degraded' || live.xmrigStatus === 'inactive' || badHash;
+  const broken = live.status === 'degraded' || live.xmrigStatus === 'inactive' || live.xmrigStatus === 'unknown';
   if (!broken) { rs.failures = 0; recoveryState.set(server.id, rs); return; }
 
   const service = safeServiceName(server.xmrig_service || 'xmrig');
   const monerodService = safeServiceName(server.monerod_service || 'monerod');
   const p2poolService = safeServiceName(server.p2pool_service || 'p2pool');
-  const sharedMiningService = service === monerodService || service === p2poolService;
+  const sharedByName = service === monerodService || service === p2poolService;
 
-  // Never automatically restart a unit that also owns monerod or P2Pool.
-  // Component-aware recovery may be added later; restarting the shared wrapper
-  // can reset node synchronization and create an endless zero-hash restart loop.
-  if (sharedMiningService) {
+  // Never automatically restart a unit that is known to own monerod or P2Pool.
+  if (sharedByName) {
     rs.failures = 0;
     recoveryState.set(server.id, rs);
     return;
@@ -45,6 +66,20 @@ export async function maybeAutoRecover(server, live) {
   const needed = Math.max(1, Number(getSetting('auto_recovery_failures')) || 2);
   const cooldown = Math.max(60, Number(getSetting('auto_recovery_cooldown_seconds')) || 300) * 1000;
   if (rs.failures < needed || Date.now() - rs.lastAttempt < cooldown) { recoveryState.set(server.id, rs); return; }
+
+  // Service names discovered on older installations can be misleading. Before
+  // the destructive systemctl restart, inspect the real systemd cgroup. If the
+  // XMRig unit also contains monerod or p2pool, or ownership cannot be proven,
+  // suppress automatic recovery instead of risking a full mining-chain restart.
+  const ownership = await runtimeUnitOwnership(server, service);
+  if (ownership !== 'dedicated') {
+    rs.lastAttempt = Date.now();
+    rs.failures = 0;
+    recoveryState.set(server.id, rs);
+    audit({ serverId: server.id, action: 'auto-recovery-suppressed', details: `restart ${service} blocked: runtime ownership=${ownership}` });
+    return;
+  }
+
   rs.lastAttempt = Date.now(); rs.failures = 0;
   const graceMs = Math.max(15, Number(getSetting('grace_period_seconds')) || 90) * 1000;
   rs.recoveringUntil = Date.now() + graceMs;

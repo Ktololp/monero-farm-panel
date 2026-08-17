@@ -18,9 +18,19 @@ ONION=""
 TORRC=0
 if [ -f /etc/tor/torrc ] && grep -q '^# BEGIN MFP MONEROD TOR$' /etc/tor/torrc; then TORRC=1; fi
 MONERO_CONFIG=0
-if [ -n "$MONEROD_CONFIG_PATH" ] && [ -f "$MONEROD_CONFIG_PATH" ] && grep -q '^# BEGIN MFP TOR$' "$MONEROD_CONFIG_PATH"; then
-  MONERO_CONFIG=1
-  ONION="$(sed -n 's/^anonymous-inbound=\\([^,]*\\),.*/\\1/p' "$MONEROD_CONFIG_PATH" | head -n 1)"
+P2P_ROUTED=0
+if [ -n "$MONEROD_CONFIG_PATH" ] && [ -f "$MONEROD_CONFIG_PATH" ]; then
+  if grep -q '^# BEGIN MFP TOR$' "$MONEROD_CONFIG_PATH"; then
+    MONERO_CONFIG=1
+    ONION="$(sed -n 's/^anonymous-inbound=\\([^,]*\\),.*/\\1/p' "$MONEROD_CONFIG_PATH" | head -n 1)"
+  fi
+  if grep -q '^# BEGIN MFP TOR P2P$' "$MONEROD_CONFIG_PATH" \
+    && grep -Eq '^proxy[[:space:]]*=[[:space:]]*127\\.0\\.0\\.1:9050[[:space:]]*$' "$MONEROD_CONFIG_PATH" \
+    && grep -Eq '^p2p-bind-ip[[:space:]]*=[[:space:]]*127\\.0\\.0\\.1[[:space:]]*$' "$MONEROD_CONFIG_PATH" \
+    && grep -Eq '^no-igd[[:space:]]*=[[:space:]]*1[[:space:]]*$' "$MONEROD_CONFIG_PATH" \
+    && grep -Eq '^hide-my-port[[:space:]]*=[[:space:]]*1[[:space:]]*$' "$MONEROD_CONFIG_PATH"; then
+    P2P_ROUTED=1
+  fi
 fi
 if [ -z "$ONION" ] && [ -r /var/lib/tor/monerod/hostname ]; then ONION="$(tr -d '\\r\\n ' </var/lib/tor/monerod/hostname)"; fi
 printf 'MFP_INSTALLED=%s\\n' "$INSTALLED"
@@ -29,6 +39,7 @@ printf 'MFP_ACTIVE=%s\\n' "$ACTIVE"
 printf 'MFP_ONION=%s\\n' "$ONION"
 printf 'MFP_TORRC=%s\\n' "$TORRC"
 printf 'MFP_MONERO_CONFIG=%s\\n' "$MONERO_CONFIG"
+printf 'MFP_P2P_ROUTED=%s\\n' "$P2P_ROUTED"
 exit 0
 `;
 
@@ -72,8 +83,6 @@ function parseMonerodStatus(output = '') {
   status.running = status.detected && status.serviceInstalled && status.active;
   status.operational = status.running;
   status.ready = status.running && status.enabled;
-  // A configless running monerod is valid: Tor provisioning can create the
-  // standard bitmonero.conf in the daemon's current data directory safely.
   status.torConfigurable = status.running;
   return status;
 }
@@ -86,7 +95,8 @@ function parseTorStatus(output = '') {
     active: values.ACTIVE === '1',
     onion: values.ONION || '',
     torrcConfigured: values.TORRC === '1',
-    monerodConfigured: values.MONERO_CONFIG === '1'
+    monerodConfigured: values.MONERO_CONFIG === '1',
+    p2pRouted: values.P2P_ROUTED === '1'
   };
   status.ready = status.installed && status.enabled && status.active && Boolean(status.onion) && status.torrcConfigured && status.monerodConfigured;
   return status;
@@ -182,4 +192,39 @@ export async function configureMonerodTor(serverId, _options = {}, { actorIp = '
   const after = await getMonerodTorStatus(serverId, freshMonerod);
   if (!after.tor.ready) throw new Error('Tor setup finished, but onion service is not fully ready');
   return { ok: true, alreadyConfigured: false, tor: after.tor, monerod: freshMonerod, output: result.stdout };
+}
+
+export async function setMonerodTorP2p(serverId, options = {}, { actorIp = '' } = {}) {
+  const server = serverById(serverId);
+  const enabled = options.enabled !== false;
+  const monerod = (await getMonerodInstallStatus(serverId)).monerod;
+  if (!monerod.running) throw new Error('monerod must be running before changing Tor P2P mode');
+  if (!monerod.configExists || !monerod.configPath) throw new Error('monerod config must exist before changing Tor P2P mode');
+
+  const before = await getMonerodTorStatus(serverId, monerod);
+  if (enabled && !before.tor.ready) throw new Error('Tor onion must be fully configured before routing P2P through Tor');
+  if (before.tor.p2pRouted === enabled) return { ok: true, changed: false, enabled, tor: before.tor, monerod, output: '' };
+
+  const script = fs.readFileSync(path.resolve('scripts/remote-set-monerod-tor-p2p.sh'), 'utf8');
+  const env = {
+    MONEROD_SERVICE_UNIT: unitName(server),
+    MONEROD_CONFIG_PATH: monerod.configPath,
+    TOR_SOCKS_PORT: '9050',
+    TOR_P2P_MODE: enabled ? 'enable' : 'disable'
+  };
+
+  let result;
+  try {
+    result = await ssh.runScript(server, script, env, { sudo: true, timeoutMs: 3 * 60 * 1000 });
+  } catch (error) {
+    audit({ ip: actorIp, serverId: server.id, action: 'set-monerod-tor-p2p', status: 'error', details: { enabled, error: error.message } });
+    throw error;
+  }
+  audit({ ip: actorIp, serverId: server.id, action: 'set-monerod-tor-p2p', status: result.code === 0 ? 'ok' : 'error', details: { code: result.code, enabled } });
+  if (result.code !== 0) throw new Error(`Tor P2P mode change failed: ${result.stderr.trim() || result.stdout.slice(-2500)}`);
+
+  const freshMonerod = (await getMonerodInstallStatus(serverId)).monerod;
+  const after = await getMonerodTorStatus(serverId, freshMonerod);
+  if (after.tor.p2pRouted !== enabled) throw new Error('monerod restarted, but Tor P2P mode did not match the requested state');
+  return { ok: true, changed: true, enabled, tor: after.tor, monerod: freshMonerod, output: result.stdout };
 }

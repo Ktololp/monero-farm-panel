@@ -6,6 +6,7 @@ set -euo pipefail
 : "${XMRIG_PROXY_SERVICE_UNIT:=xmrig-proxy.service}"
 : "${XMRIG_SERVICE_UNIT:=xmrig.service}"
 : "${MONEROD_RPC_PORT:=18081}"
+: "${XMRIG_CONFIG_PATH:=}"
 
 log() { printf '[mfp-recovery] %s\n' "$*"; }
 unit_exists() { systemctl cat "$1" >/dev/null 2>&1; }
@@ -27,12 +28,12 @@ listen_port() {
     return 2
   fi
 }
-established_port() {
-  local port="$1"
+process_established_port() {
+  local proc="$1" port="$2"
   if command -v ss >/dev/null 2>&1; then
-    ss -tnH state established 2>/dev/null | awk -v p="$port" '$4 ~ ":" p "$" || $5 ~ ":" p "$" { found=1 } END { exit !found }'
+    ss -tnpH state established 2>/dev/null | awk -v p="$port" -v n="$proc" '($4 ~ ":" p "$" || $5 ~ ":" p "$") && index($0,n) { found=1 } END { exit !found }'
   elif command -v netstat >/dev/null 2>&1; then
-    netstat -nt 2>/dev/null | awk -v p="$port" '$6 == "ESTABLISHED" && ($4 ~ ":" p "$" || $5 ~ ":" p "$") { found=1 } END { exit !found }'
+    netstat -ntp 2>/dev/null | awk -v p="$port" -v n="$proc" '$6 == "ESTABLISHED" && ($4 ~ ":" p "$" || $5 ~ ":" p "$") && index($0,n) { found=1 } END { exit !found }'
   else
     return 2
   fi
@@ -40,54 +41,48 @@ established_port() {
 wait_listener() {
   local port="$1" seconds="${2:-30}"
   for _ in $(seq 1 "$seconds"); do
-    listen_port "$port" && return 0
-    [ $? -eq 2 ] && return 2
+    if listen_port "$port"; then return 0; else rc=$?; fi
+    [ "$rc" = "2" ] && return 2
     sleep 1
   done
   return 1
 }
-wait_established() {
-  local port="$1" seconds="${2:-30}"
+wait_process_established() {
+  local proc="$1" port="$2" seconds="${3:-30}"
   for _ in $(seq 1 "$seconds"); do
-    established_port "$port" && return 0
-    [ $? -eq 2 ] && return 2
+    if process_established_port "$proc" "$port"; then return 0; else rc=$?; fi
+    [ "$rc" = "2" ] && return 2
     sleep 1
   done
   return 1
 }
 
-# Discover the proxy's current local topology before restarting anything. This
-# lets recovery verify the actual P2Pool -> Proxy -> XMRig data path instead of
-# trusting systemd active states.
-PROXY_CONFIG=/etc/xmrig-proxy/config.json
-LOCAL_UPSTREAM_PORT=""
-PROXY_BIND_PORT=""
-if [ -f "$PROXY_CONFIG" ] && command -v python3 >/dev/null 2>&1; then
-  readarray -t PROXY_INFO < <(python3 - "$PROXY_CONFIG" <<'PY'
+local_pool_port_from_json() {
+  local config="$1"
+  [ -n "$config" ] && [ -f "$config" ] && command -v python3 >/dev/null 2>&1 || return 0
+  python3 - "$config" <<'PY'
 import json,sys
 try:
     c=json.load(open(sys.argv[1],encoding='utf-8'))
 except Exception:
-    c={}
+    raise SystemExit(0)
 pools=c.get('pools') or []
 url=str((pools[0] if pools else {}).get('url') or '').strip()
-binds=c.get('bind') or []
-bind_port=''
-if binds and isinstance(binds[0],dict):
-    bind_port=str(binds[0].get('port') or '')
-local_upstream=''
-if ':' in url:
-    host,port=url.rsplit(':',1)
-    host=host.strip('[]').lower()
-    if host in ('127.0.0.1','localhost','::1') and port.isdigit():
-        local_upstream=port
-print(local_upstream)
-print(bind_port if bind_port.isdigit() else '')
+if ':' not in url:
+    raise SystemExit(0)
+host,port=url.rsplit(':',1)
+host=host.strip('[]').lower()
+if host in ('127.0.0.1','localhost','::1') and port.isdigit():
+    print(port)
 PY
-  )
-  LOCAL_UPSTREAM_PORT="${PROXY_INFO[0]:-}"
-  PROXY_BIND_PORT="${PROXY_INFO[1]:-}"
-fi
+}
+
+# Discover current topology before restarting anything. The proxy can remain
+# installed even when XMRig is configured to mine directly to P2Pool, so the
+# two local links are verified independently.
+PROXY_CONFIG=/etc/xmrig-proxy/config.json
+LOCAL_UPSTREAM_PORT="$(local_pool_port_from_json "$PROXY_CONFIG" || true)"
+XMRIG_LOCAL_POOL_PORT="$(local_pool_port_from_json "$XMRIG_CONFIG_PATH" || true)"
 
 log "Waiting for monerod RPC on 127.0.0.1:${MONEROD_RPC_PORT}"
 RPC_OK=0
@@ -118,16 +113,21 @@ if unit_exists "$P2POOL_SERVICE_UNIT"; then
     exit 21
   }
   P2POOL_RESTARTED=1
-  if [ -n "$LOCAL_UPSTREAM_PORT" ]; then
-    log "Waiting for local P2Pool/Proxy upstream listener on port $LOCAL_UPSTREAM_PORT"
-    if wait_listener "$LOCAL_UPSTREAM_PORT" 30; then
+
+  # If either XMRig Proxy or XMRig directly uses a local pool port, P2Pool must
+  # reopen that listener before downstream services are restarted.
+  EXPECTED_P2POOL_PORT="$LOCAL_UPSTREAM_PORT"
+  [ -z "$EXPECTED_P2POOL_PORT" ] && EXPECTED_P2POOL_PORT="$XMRIG_LOCAL_POOL_PORT"
+  if [ -n "$EXPECTED_P2POOL_PORT" ] && [ "$EXPECTED_P2POOL_PORT" != "3334" ]; then
+    log "Waiting for local P2Pool Stratum listener on port $EXPECTED_P2POOL_PORT"
+    if wait_listener "$EXPECTED_P2POOL_PORT" 30; then
       P2POOL_STRATUM_READY=1
     else
       rc=$?
       if [ "$rc" = "2" ]; then
-        log "ss/netstat unavailable; skipping local upstream listener verification"
+        log "ss/netstat unavailable; skipping P2Pool listener verification"
       else
-        echo "P2Pool is active but the local XMRig Proxy upstream port ${LOCAL_UPSTREAM_PORT} is not listening" >&2
+        echo "P2Pool is active but the expected local Stratum port ${EXPECTED_P2POOL_PORT} is not listening" >&2
         exit 24
       fi
     fi
@@ -149,7 +149,7 @@ if unit_exists "$XMRIG_PROXY_SERVICE_UNIT"; then
   PROXY_RESTARTED=1
   if [ -n "$LOCAL_UPSTREAM_PORT" ]; then
     log "Waiting for XMRig Proxy upstream TCP connection to local port $LOCAL_UPSTREAM_PORT"
-    if wait_established "$LOCAL_UPSTREAM_PORT" 30; then
+    if wait_process_established xmrig-proxy "$LOCAL_UPSTREAM_PORT" 30; then
       PROXY_UPSTREAM_READY=1
     else
       rc=$?
@@ -167,7 +167,7 @@ if unit_exists "$XMRIG_PROXY_SERVICE_UNIT"; then
 fi
 
 XMRIG_RESTARTED=0
-XMRIG_PROXY_LINK_READY=0
+XMRIG_POOL_LINK_READY=0
 if unit_exists "$XMRIG_SERVICE_UNIT"; then
   log "Restarting $XMRIG_SERVICE_UNIT"
   systemctl restart "$XMRIG_SERVICE_UNIT"
@@ -177,17 +177,17 @@ if unit_exists "$XMRIG_SERVICE_UNIT"; then
     exit 23
   }
   XMRIG_RESTARTED=1
-  if [ -n "$PROXY_BIND_PORT" ] && [ "$PROXY_RESTARTED" = "1" ]; then
-    log "Waiting for miner TCP connection on XMRig Proxy port $PROXY_BIND_PORT"
-    if wait_established "$PROXY_BIND_PORT" 30; then
-      XMRIG_PROXY_LINK_READY=1
+  if [ -n "$XMRIG_LOCAL_POOL_PORT" ]; then
+    log "Waiting for XMRig TCP connection to its configured local pool port $XMRIG_LOCAL_POOL_PORT"
+    if wait_process_established xmrig "$XMRIG_LOCAL_POOL_PORT" 30; then
+      XMRIG_POOL_LINK_READY=1
     else
       rc=$?
       if [ "$rc" = "2" ]; then
-        log "ss/netstat unavailable; skipping miner-to-proxy TCP verification"
+        log "ss/netstat unavailable; skipping XMRig pool-link verification"
       else
         systemctl --no-pager --full status "$XMRIG_SERVICE_UNIT" | head -n 60 >&2 || true
-        echo "XMRig is active but no established miner connection appeared on XMRig Proxy port ${PROXY_BIND_PORT}" >&2
+        echo "XMRig is active but did not reconnect to its configured local pool port ${XMRIG_LOCAL_POOL_PORT}" >&2
         exit 26
       fi
     fi
@@ -200,5 +200,5 @@ printf 'MFP_P2POOL_STRATUM_READY=%s\n' "$P2POOL_STRATUM_READY"
 printf 'MFP_PROXY_RESTARTED=%s\n' "$PROXY_RESTARTED"
 printf 'MFP_PROXY_UPSTREAM_READY=%s\n' "$PROXY_UPSTREAM_READY"
 printf 'MFP_XMRIG_RESTARTED=%s\n' "$XMRIG_RESTARTED"
-printf 'MFP_XMRIG_PROXY_LINK_READY=%s\n' "$XMRIG_PROXY_LINK_READY"
+printf 'MFP_XMRIG_POOL_LINK_READY=%s\n' "$XMRIG_POOL_LINK_READY"
 log "Mining dependency chain restart completed"

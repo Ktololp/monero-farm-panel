@@ -85,6 +85,9 @@ test('full P2P Tor experiment is recovery-only and restores the mining dependenc
   assert.match(p2pScript, /BEGIN MFP TOR P2P/);
   assert.match(p2pScript, /TOR_P2P_MODE/);
   assert.match(p2pScript, /mfp-tor-p2p-backup/);
+  assert.match(p2pScript, /OLD_BACKUPS/);
+  assert.match(p2pScript, /MFP_CHANGED=0/);
+  assert.match(p2pScript, /ORPHAN_CLEANED/);
   assert.doesNotMatch(p2pScript, /rpc-bind-ip=/);
   assert.doesNotMatch(p2pScript, /rpc-bind-port=/);
   assert.match(recoveryScript, /Waiting for monerod RPC/);
@@ -95,9 +98,10 @@ test('full P2P Tor experiment is recovery-only and restores the mining dependenc
   assert.match(recoveryScript, /XMRig uses the shared mining wrapper/);
   assert.match(recoveryScript, /Restarting dedicated \$XMRIG_SERVICE_UNIT/);
   assert.match(operation, /remote-recover-mining-chain\.sh/);
-  assert.match(operation, /before\.tor\.p2pConfigured/);
+  assert.match(operation, /Always run the disable script as a probe/);
+  assert.match(operation, /ORPHAN_CLEANED/);
   assert.match(operation, /TOR_P2P_MODE: 'disable'/);
-  assert.match(operation, /recovery-only/);
+  assert.match(operation, /Recovery-only safety mode/);
   assert.match(router, /monerod\/tor\/p2p/);
   assert.match(page, /body: \{ enabled: false \}/);
   assert.doesNotMatch(page, /body: \{ enabled: enable \}/);

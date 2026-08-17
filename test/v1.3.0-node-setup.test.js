@@ -76,9 +76,10 @@ test('Tor setup supports a configless running monerod without rewriting its CLI 
   assert.doesNotMatch(script, /rpc-bind-ip=0\.0\.0\.0/);
 });
 
-test('full monerod P2P routing through Tor is managed, reversible and does not change RPC', () => {
+test('full monerod P2P routing through Tor is managed, runtime-verified, reversible and does not change RPC', () => {
   const script = read('scripts/remote-set-monerod-tor-p2p.sh');
-  const operation = read('src/operations/monerod-setup.js');
+  const statusScript = read('scripts/remote-status-monerod-tor.sh');
+  const operation = read('src/operations/monerod-tor-p2p.js');
   const router = read('src/api/setup-router.js');
   assert.match(script, /proxy=127\.0\.0\.1:\$\{TOR_SOCKS_PORT\}/);
   assert.match(script, /p2p-bind-ip=127\.0\.0\.1/);
@@ -87,25 +88,35 @@ test('full monerod P2P routing through Tor is managed, reversible and does not c
   assert.match(script, /BEGIN MFP TOR P2P/);
   assert.match(script, /TOR_P2P_MODE/);
   assert.match(script, /mfp-tor-p2p-backup/);
+  assert.match(script, /Rolling back monerod config/);
+  assert.match(script, /127\.0\.0\.1:/);
   assert.doesNotMatch(script, /rpc-bind-ip=/);
   assert.doesNotMatch(script, /rpc-bind-port=/);
+  assert.match(statusScript, /MFP_P2P_CONFIGURED/);
+  assert.match(statusScript, /MFP_P2P_LOOPBACK/);
+  assert.match(statusScript, /MFP_P2P_WILDCARD/);
+  assert.match(statusScript, /127\[\.\]0\[\.\]0\[\.\]1/);
+  assert.doesNotMatch(statusScript, /127\\\\\.0/);
   assert.match(operation, /setMonerodTorP2p/);
   assert.match(operation, /p2pRouted/);
+  assert.match(operation, /p2pLoopback/);
   assert.match(router, /monerod\/tor\/p2p/);
 });
 
-test('Tor reachability probe verifies local anonymous listener before the onion SOCKS5 stream', () => {
+test('Tor reachability probe exits after SOCKS5 grant instead of waiting for an open P2P session', () => {
   const script = read('scripts/remote-check-monerod-tor.sh');
   const operation = read('src/operations/tor-reachability.js');
   const router = read('src/api/setup-router.js');
   assert.match(script, /LOCAL_LISTENER/);
   assert.match(script, /monerod is not listening on local anonymous P2P port/);
   assert.match(script, /--socks5-hostname/);
-  assert.match(script, /--connect-timeout 45 --max-time 60/);
+  assert.match(script, /--connect-timeout 30 --max-time 35/);
   assert.match(script, /telnet:\/\//);
   assert.match(script, /SOCKS5 request granted/);
+  assert.match(script, /kill "\$CURL_PID"/);
+  assert.match(script, /sleep 0\.2/);
   assert.match(script, /MFP_REACHABLE/);
-  assert.match(operation, /timeoutMs: 75000/);
+  assert.match(operation, /timeoutMs: 45000/);
   assert.match(operation, /localListener/);
   assert.match(operation, /checkMonerodTorReachability/);
   assert.match(router, /monerod\/tor\/check/);

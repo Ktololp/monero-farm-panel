@@ -76,20 +76,42 @@ test('Tor setup supports a configless running monerod without rewriting its CLI 
   assert.doesNotMatch(script, /rpc-bind-ip=0\.0\.0\.0/);
 });
 
-test('Tor reachability probe verifies the onion P2P stream through SOCKS5', () => {
+test('full monerod P2P routing through Tor is managed, reversible and does not change RPC', () => {
+  const script = read('scripts/remote-set-monerod-tor-p2p.sh');
+  const operation = read('src/operations/monerod-setup.js');
+  const router = read('src/api/setup-router.js');
+  assert.match(script, /proxy=127\.0\.0\.1:\$\{TOR_SOCKS_PORT\}/);
+  assert.match(script, /p2p-bind-ip=127\.0\.0\.1/);
+  assert.match(script, /no-igd=1/);
+  assert.match(script, /hide-my-port=1/);
+  assert.match(script, /BEGIN MFP TOR P2P/);
+  assert.match(script, /TOR_P2P_MODE/);
+  assert.match(script, /mfp-tor-p2p-backup/);
+  assert.doesNotMatch(script, /rpc-bind-ip=/);
+  assert.doesNotMatch(script, /rpc-bind-port=/);
+  assert.match(operation, /setMonerodTorP2p/);
+  assert.match(operation, /p2pRouted/);
+  assert.match(router, /monerod\/tor\/p2p/);
+});
+
+test('Tor reachability probe verifies local anonymous listener before the onion SOCKS5 stream', () => {
   const script = read('scripts/remote-check-monerod-tor.sh');
   const operation = read('src/operations/tor-reachability.js');
   const router = read('src/api/setup-router.js');
+  assert.match(script, /LOCAL_LISTENER/);
+  assert.match(script, /monerod is not listening on local anonymous P2P port/);
   assert.match(script, /--socks5-hostname/);
+  assert.match(script, /--connect-timeout 45 --max-time 60/);
   assert.match(script, /telnet:\/\//);
   assert.match(script, /SOCKS5 request granted/);
   assert.match(script, /MFP_REACHABLE/);
+  assert.match(operation, /timeoutMs: 75000/);
+  assert.match(operation, /localListener/);
   assert.match(operation, /checkMonerodTorReachability/);
-  assert.match(operation, /remote-check-monerod-tor\.sh/);
   assert.match(router, /monerod\/tor\/check/);
 });
 
-test('setup UI uses inline Tor icon, network check and treats configless monerod as valid', () => {
+test('setup UI uses inline Tor icon, network check and full P2P Tor toggle', () => {
   const router = read('src/api/setup-router.js');
   const page = read('web/pages/setup/index.js');
   const copy = read('web/i18n/messages/setup-copy.js');
@@ -106,11 +128,15 @@ test('setup UI uses inline Tor icon, network check and treats configless monerod
   assert.match(page, /#68b030/i);
   assert.match(page, /setup-check-tor/);
   assert.match(page, /monerod\/tor\/check/);
+  assert.match(page, /setup-toggle-tor-p2p/);
+  assert.match(page, /monerod\/tor\/p2p/);
+  assert.match(page, /status\.p2pRouted/);
   assert.match(page, /configNotUsed/);
   assert.match(page, /torWillCreateConfig/);
   assert.doesNotMatch(page, /<img class="setup-title-icon"/);
   assert.match(copy, /RPC monerod/);
   assert.match(copy, /Не используется/);
+  assert.match(copy, /Включить весь P2P через Tor/);
   assert.match(copy, /Проверка сети Tor/);
   assert.match(copy, /bitmonero\.conf/);
   assert.match(css, /setup-flag\.planned/);

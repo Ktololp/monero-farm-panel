@@ -59,6 +59,7 @@ BEGIN='# BEGIN MFP TOR P2P'
 END='# END MFP TOR P2P'
 TMP_CFG="$(mktemp)"
 BACKUP="${MONEROD_CONFIG_PATH}.mfp-tor-p2p-backup-$(date +%Y%m%d%H%M%S)"
+ORPHAN_CLEANED=0
 
 awk -v begin="$BEGIN" -v end="$END" '
   $0==begin {skip=1; next}
@@ -81,6 +82,46 @@ no-igd=1
 hide-my-port=1
 $END
 EOF
+else
+  # Early v1.3 development builds could leave the four experimental full-P2P
+  # options outside the managed marker. Only clean that exact combination when
+  # a prior MFP Tor-P2P backup proves that MFP actually touched this config.
+  shopt -s nullglob
+  OLD_BACKUPS=("${MONEROD_CONFIG_PATH}".mfp-tor-p2p-backup-*)
+  shopt -u nullglob
+  if [ "${#OLD_BACKUPS[@]}" -gt 0 ] \
+    && grep -Eq '^[[:space:]]*proxy[[:space:]]*=[[:space:]]*127[.]0[.]0[.]1:'"${TOR_SOCKS_PORT}"'[[:space:]]*$' "$TMP_CFG" \
+    && grep -Eq '^[[:space:]]*p2p-bind-ip[[:space:]]*=[[:space:]]*127[.]0[.]0[.]1[[:space:]]*$' "$TMP_CFG" \
+    && grep -Eq '^[[:space:]]*no-igd[[:space:]]*=[[:space:]]*1[[:space:]]*$' "$TMP_CFG" \
+    && grep -Eq '^[[:space:]]*hide-my-port[[:space:]]*=[[:space:]]*1[[:space:]]*$' "$TMP_CFG"; then
+    CLEAN_CFG="$(mktemp)"
+    awk -v socks="$TOR_SOCKS_PORT" '
+      /^[[:space:]]*p2p-bind-ip[[:space:]]*=[[:space:]]*127[.]0[.]0[.]1[[:space:]]*$/ {next}
+      /^[[:space:]]*no-igd[[:space:]]*=[[:space:]]*1[[:space:]]*$/ {next}
+      /^[[:space:]]*hide-my-port[[:space:]]*=[[:space:]]*1[[:space:]]*$/ {next}
+      {
+        line=$0
+        if (line ~ /^[[:space:]]*proxy[[:space:]]*=/) {
+          value=line
+          sub(/^[[:space:]]*proxy[[:space:]]*=[[:space:]]*/, "", value)
+          gsub(/[[:space:]]+$/, "", value)
+          if (value == "127.0.0.1:" socks) next
+        }
+        print
+      }
+    ' "$TMP_CFG" >"$CLEAN_CFG"
+    mv "$CLEAN_CFG" "$TMP_CFG"
+    ORPHAN_CLEANED=1
+  fi
+fi
+
+# A recovery request must be harmless when there is nothing left to change.
+if cmp -s "$MONEROD_CONFIG_PATH" "$TMP_CFG"; then
+  rm -f "$TMP_CFG"
+  printf 'MFP_CHANGED=0\n'
+  printf 'MFP_ORPHAN_CLEANED=0\n'
+  echo "No managed or proven orphaned MFP full-P2P Tor settings remain; service restart skipped."
+  exit 0
 fi
 
 cp -a "$MONEROD_CONFIG_PATH" "$BACKUP"
@@ -110,6 +151,9 @@ if ! systemctl is-active --quiet "$MONEROD_SERVICE_UNIT" >/dev/null 2>&1; then
   exit 10
 fi
 
+printf 'MFP_CHANGED=1\n'
+printf 'MFP_ORPHAN_CLEANED=%s\n' "$ORPHAN_CLEANED"
+
 if [ "$TOR_P2P_MODE" = "enable" ]; then
   NEW_MONEROD_PID="$(pgrep -xo monerod 2>/dev/null | head -n 1)"
   P2P_PORT=""
@@ -122,15 +166,11 @@ if [ "$TOR_P2P_MODE" = "enable" ]; then
     LOOPBACK=0
     WILDCARD=0
     if command -v ss >/dev/null 2>&1; then
-      ss -ltnH 2>/dev/null | awk -v p="$P2P_PORT" '$4 == "127.0.0.1:" p { found=1 } END { exit !found }'
-      [ $? -eq 0 ] && LOOPBACK=1
-      ss -ltnH 2>/dev/null | awk -v p="$P2P_PORT" '$4 == "0.0.0.0:" p || $4 == "*:" p { found=1 } END { exit !found }'
-      [ $? -eq 0 ] && WILDCARD=1
+      if ss -ltnH 2>/dev/null | awk -v p="$P2P_PORT" '$4 == "127.0.0.1:" p { found=1 } END { exit !found }'; then LOOPBACK=1; fi
+      if ss -ltnH 2>/dev/null | awk -v p="$P2P_PORT" '$4 == "0.0.0.0:" p || $4 == "*:" p { found=1 } END { exit !found }'; then WILDCARD=1; fi
     elif command -v netstat >/dev/null 2>&1; then
-      netstat -lnt 2>/dev/null | awk -v p="$P2P_PORT" '$4 == "127.0.0.1:" p { found=1 } END { exit !found }'
-      [ $? -eq 0 ] && LOOPBACK=1
-      netstat -lnt 2>/dev/null | awk -v p="$P2P_PORT" '$4 == "0.0.0.0:" p || $4 == "*:" p { found=1 } END { exit !found }'
-      [ $? -eq 0 ] && WILDCARD=1
+      if netstat -lnt 2>/dev/null | awk -v p="$P2P_PORT" '$4 == "127.0.0.1:" p { found=1 } END { exit !found }'; then LOOPBACK=1; fi
+      if netstat -lnt 2>/dev/null | awk -v p="$P2P_PORT" '$4 == "0.0.0.0:" p || $4 == "*:" p { found=1 } END { exit !found }'; then WILDCARD=1; fi
     else
       LOOPBACK=1
     fi
@@ -145,5 +185,9 @@ if [ "$TOR_P2P_MODE" = "enable" ]; then
   fi
   echo "Full monerod P2P routing through Tor is enabled and loopback binding is active on port ${P2P_PORT}."
 else
-  echo "MFP full-P2P Tor routing block was removed; normal monerod P2P defaults apply again."
+  if [ "$ORPHAN_CLEANED" = "1" ]; then
+    echo "Removed proven orphaned MFP full-P2P Tor options and restarted the monerod service chain once."
+  else
+    echo "MFP full-P2P Tor routing block was removed; normal monerod P2P defaults apply again."
+  fi
 fi

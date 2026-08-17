@@ -7,9 +7,10 @@ import { getMonerodInstallStatus } from './monerod-setup.js';
 
 const torStatusScript = fs.readFileSync(path.resolve('scripts/remote-status-monerod-tor.sh'), 'utf8');
 const torP2pScript = fs.readFileSync(path.resolve('scripts/remote-set-monerod-tor-p2p.sh'), 'utf8');
+const miningRecoveryScript = fs.readFileSync(path.resolve('scripts/remote-recover-mining-chain.sh'), 'utf8');
 
-function unitName(server) {
-  const raw = safeServiceName(server.monerod_service || 'monerod');
+function serviceUnit(value, fallback) {
+  const raw = safeServiceName(value || fallback);
   return raw.endsWith('.service') ? raw : `${raw}.service`;
 }
 
@@ -50,6 +51,21 @@ export async function getMonerodTorStatus(serverId, monerodStatus = null) {
   return { ok: true, tor };
 }
 
+async function recoverMiningChain(server, monerod) {
+  const result = await ssh.runScript(server, miningRecoveryScript, {
+    MONEROD_SERVICE_UNIT: serviceUnit(server.monerod_service, 'monerod'),
+    P2POOL_SERVICE_UNIT: serviceUnit(server.p2pool_service, 'p2pool'),
+    XMRIG_PROXY_SERVICE_UNIT: 'xmrig-proxy.service',
+    XMRIG_SERVICE_UNIT: serviceUnit(server.xmrig_service, 'xmrig'),
+    MONEROD_RPC_PORT: String(server.monerod_rpc_port || 18081)
+  }, { sudo: true, timeoutMs: 2 * 60 * 1000 });
+
+  if (result.code !== 0) {
+    throw new Error(`Mining chain recovery failed: ${result.stderr.trim() || result.stdout.slice(-2500)}`);
+  }
+  return { output: result.stdout, steps: parsePairs(result.stdout), monerod };
+}
+
 export async function setMonerodTorP2p(serverId, options = {}, { actorIp = '' } = {}) {
   const server = serverById(serverId);
   const enabled = options.enabled !== false;
@@ -58,26 +74,61 @@ export async function setMonerodTorP2p(serverId, options = {}, { actorIp = '' } 
   if (!monerod.configExists || !monerod.configPath) throw new Error('monerod config must exist before changing Tor P2P mode');
 
   const before = await getMonerodTorStatus(serverId, monerod);
-  if (enabled && !before.tor.ready) throw new Error('Tor onion must be fully configured before routing P2P through Tor');
-  if (before.tor.p2pRouted === enabled) return { ok: true, changed: false, enabled, tor: before.tor, monerod, output: '' };
 
-  const result = await ssh.runScript(server, torP2pScript, {
-    MONEROD_SERVICE_UNIT: unitName(server),
-    MONEROD_CONFIG_PATH: monerod.configPath,
-    TOR_SOCKS_PORT: '9050',
-    TOR_P2P_MODE: enabled ? 'enable' : 'disable'
-  }, { sudo: true, timeoutMs: 3 * 60 * 1000 });
+  // Full ordinary-P2P routing through Tor is temporarily disabled in the UI/API.
+  // The onion service + tx-proxy mode remains supported. On a mining host,
+  // restarting monerod can break the local P2Pool -> Proxy -> XMRig dependency
+  // chain even when every individual systemd unit still reports active.
+  if (enabled) {
+    throw new Error('Full P2P routing through Tor is temporarily disabled. Use the onion + tx-proxy mode; the full-P2P option will return after end-to-end mining-chain validation.');
+  }
 
-  audit({ ip: actorIp, serverId: server.id, action: 'set-monerod-tor-p2p', status: result.code === 0 ? 'ok' : 'error', details: { code: result.code, enabled } });
-  if (result.code !== 0) throw new Error(`Tor P2P mode change failed: ${result.stderr.trim() || result.stdout.slice(-2500)}`);
+  let p2pOutput = '';
+  if (before.tor.p2pConfigured) {
+    const result = await ssh.runScript(server, torP2pScript, {
+      MONEROD_SERVICE_UNIT: serviceUnit(server.monerod_service, 'monerod'),
+      MONEROD_CONFIG_PATH: monerod.configPath,
+      TOR_SOCKS_PORT: '9050',
+      TOR_P2P_MODE: 'disable'
+    }, { sudo: true, timeoutMs: 3 * 60 * 1000 });
+    p2pOutput = result.stdout;
+    if (result.code !== 0) {
+      audit({ ip: actorIp, serverId: server.id, action: 'recover-monerod-p2p', status: 'error', details: { stage: 'remove-tor-p2p', code: result.code } });
+      throw new Error(`Could not restore normal monerod P2P: ${result.stderr.trim() || result.stdout.slice(-2500)}`);
+    }
+  }
 
   const freshMonerod = (await getMonerodInstallStatus(serverId)).monerod;
-  const after = await getMonerodTorStatus(serverId, freshMonerod);
-  if (after.tor.p2pRouted !== enabled) {
-    const diag = enabled
-      ? `configured=${after.tor.p2pConfigured}, loopback=${after.tor.p2pLoopback}, wildcard=${after.tor.p2pWildcard}, port=${after.tor.p2pPort}`
-      : `configured=${after.tor.p2pConfigured}`;
-    throw new Error(`monerod restarted, but Tor P2P mode did not match the requested state (${diag})`);
+  const recovery = await recoverMiningChain(server, freshMonerod);
+  const afterMonerod = (await getMonerodInstallStatus(serverId)).monerod;
+  const after = await getMonerodTorStatus(serverId, afterMonerod);
+
+  if (after.tor.p2pConfigured) {
+    throw new Error('Normal P2P recovery completed service restarts, but the managed full-P2P Tor block is still present in monerod config');
   }
-  return { ok: true, changed: true, enabled, tor: after.tor, monerod: freshMonerod, output: result.stdout };
+
+  audit({
+    ip: actorIp,
+    serverId: server.id,
+    action: 'recover-monerod-p2p',
+    status: 'ok',
+    details: {
+      removedManagedBlock: before.tor.p2pConfigured,
+      rpcReady: recovery.steps.RPC_READY === '1',
+      p2poolRestarted: recovery.steps.P2POOL_RESTARTED === '1',
+      proxyRestarted: recovery.steps.PROXY_RESTARTED === '1',
+      xmrigRestarted: recovery.steps.XMRIG_RESTARTED === '1'
+    }
+  });
+
+  return {
+    ok: true,
+    changed: before.tor.p2pConfigured,
+    enabled: false,
+    recovered: true,
+    tor: after.tor,
+    monerod: afterMonerod,
+    recovery: recovery.steps,
+    output: `${p2pOutput}\n${recovery.output}`.trim()
+  };
 }

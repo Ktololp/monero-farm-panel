@@ -14,6 +14,24 @@ const miningRecoveryScript = fs.readFileSync(path.resolve('scripts/remote-recove
 const experimentSnapshotScript = fs.readFileSync(path.resolve('scripts/remote-tor-experiment-snapshot.sh'), 'utf8');
 const miningHealthScript = fs.readFileSync(path.resolve('scripts/remote-validate-mining-health.sh'), 'utf8');
 
+const restartRecoveryServiceScript = `#!/usr/bin/env bash
+set -euo pipefail
+test -n "$RECOVERY_SERVICE_UNIT"
+systemctl reset-failed "$RECOVERY_SERVICE_UNIT" >/dev/null 2>&1 || true
+systemctl restart "$RECOVERY_SERVICE_UNIT"
+for _ in $(seq 1 45); do
+  if systemctl is-active --quiet "$RECOVERY_SERVICE_UNIT" >/dev/null 2>&1; then
+    printf 'MFP_RECOVERY_SERVICE_ACTIVE=1\n'
+    printf 'MFP_RECOVERY_SERVICE_UNIT=%s\n' "$RECOVERY_SERVICE_UNIT"
+    exit 0
+  fi
+  sleep 1
+done
+systemctl --no-pager --full status "$RECOVERY_SERVICE_UNIT" 2>&1 | head -n 80 || true
+echo "recovery service did not become active: $RECOVERY_SERVICE_UNIT" >&2
+exit 1
+`;
+
 function serviceUnit(value, fallback) {
   const raw = safeServiceName(value || fallback);
   return raw.endsWith('.service') ? raw : `${raw}.service`;
@@ -78,6 +96,38 @@ async function recoverMiningChain(server, monerod) {
   return { output: result.stdout, steps: parsePairs(result.stdout), monerod, xmrig };
 }
 
+async function restartRecoveryService(server) {
+  const unit = serviceUnit(server.monerod_service, 'monerod');
+  const result = await ssh.runScript(server, restartRecoveryServiceScript, {
+    RECOVERY_SERVICE_UNIT: unit
+  }, { sudo: true, timeoutMs: 60 * 1000 });
+  if (result.code !== 0) throw new Error(`Could not restart ${unit} for recovery retry: ${conciseResult(result)}`);
+  return { unit, output: result.stdout, steps: parsePairs(result.stdout) };
+}
+
+async function recoverAfterRestoreWithRetry(server, monerod) {
+  try {
+    return { recovery: await recoverMiningChain(server, monerod), retry: null };
+  } catch (firstError) {
+    const restart = await restartRecoveryService(server);
+    const freshMonerod = (await getMonerodInstallStatus(server.id)).monerod;
+    try {
+      const recovery = await recoverMiningChain(server, freshMonerod);
+      return {
+        recovery,
+        retry: {
+          restartedUnit: restart.unit,
+          firstError: firstError.message
+        }
+      };
+    } catch (retryError) {
+      throw new Error(
+        `${firstError.message}. Recovery retry after restarting ${restart.unit} also failed: ${retryError.message}`
+      );
+    }
+  }
+}
+
 async function validateMiningHealth(server, waitSeconds) {
   const token = server.xmrig_api_token_enc ? decryptSecret(server.xmrig_api_token_enc) : '';
   const result = await ssh.runScript(server, miningHealthScript, {
@@ -138,7 +188,8 @@ async function stopTorP2pExperiment(server, monerod, before, { actorIp = '', req
       return { ok: true, changed: false, enabled: false, recovered: false, tor: before.tor, recovery: {} };
     }
     const freshMonerod = (await getMonerodInstallStatus(server.id)).monerod;
-    const recovery = await recoverMiningChain(server, freshMonerod);
+    const recovered = await recoverAfterRestoreWithRetry(server, freshMonerod);
+    const recovery = recovered.recovery;
     const health = await validateMiningHealth(server, 90);
     const afterMonerod = (await getMonerodInstallStatus(server.id)).monerod;
     const after = await getMonerodTorStatus(server.id, afterMonerod);
@@ -149,9 +200,27 @@ async function stopTorP2pExperiment(server, monerod, before, { actorIp = '', req
       serverId: server.id,
       action: 'tor-p2p-experiment-stop',
       status: 'ok',
-      details: { requestedEnabled, hashHs: health.hashHs, accepted: health.accepted, orphanedMfpOptionsCleaned: cleanup.ORPHAN_CLEANED === '1' }
+      details: {
+        requestedEnabled,
+        hashHs: health.hashHs,
+        accepted: health.accepted,
+        orphanedMfpOptionsCleaned: cleanup.ORPHAN_CLEANED === '1',
+        recoveryRetried: Boolean(recovered.retry),
+        recoveryRetryUnit: recovered.retry?.restartedUnit || '',
+        firstRecoveryError: recovered.retry?.firstError || ''
+      }
     });
-    return { ok: true, changed: true, enabled: false, recovered: true, tor: after.tor, monerod: afterMonerod, recovery: recovery.steps, health };
+    return {
+      ok: true,
+      changed: true,
+      enabled: false,
+      recovered: true,
+      tor: after.tor,
+      monerod: afterMonerod,
+      recovery: recovery.steps,
+      recoveryRetry: recovered.retry,
+      health
+    };
   } catch (error) {
     audit({ ip: actorIp, serverId: server.id, action: 'tor-p2p-experiment-stop', status: 'error', details: error.message });
     throw error;
@@ -215,10 +284,14 @@ async function startTorP2pExperiment(server, monerod, before, { actorIp = '' } =
   } catch (experimentError) {
     let rollbackError = null;
     let rollbackHealth = null;
+    let rollbackRecovery = null;
+    let rollbackRetry = null;
     try {
       await restoreExperimentSnapshot(server, monerod, snapshot.path);
       const restoredMonerod = (await getMonerodInstallStatus(server.id)).monerod;
-      await recoverMiningChain(server, restoredMonerod);
+      const recovered = await recoverAfterRestoreWithRetry(server, restoredMonerod);
+      rollbackRecovery = recovered.recovery;
+      rollbackRetry = recovered.retry;
       rollbackHealth = await validateMiningHealth(server, 120);
       releaseAutoRecoverySuppression(server.id);
     } catch (error) {
@@ -235,14 +308,22 @@ async function startTorP2pExperiment(server, monerod, before, { actorIp = '' } =
         snapshot: snapshot.path,
         rollbackOk: !rollbackError,
         rollbackError: rollbackError?.message || '',
-        rollbackHashHs: rollbackHealth?.hashHs || 0
+        rollbackHashHs: rollbackHealth?.hashHs || 0,
+        rollbackRecoveryRetried: Boolean(rollbackRetry),
+        rollbackRecoveryRetryUnit: rollbackRetry?.restartedUnit || '',
+        rollbackFirstRecoveryError: rollbackRetry?.firstError || '',
+        rollbackMonerodSynced: rollbackRecovery?.steps?.MONEROD_SYNCED === '1',
+        rollbackP2poolStratumReady: rollbackRecovery?.steps?.P2POOL_STRATUM_READY === '1',
+        rollbackProxyUpstreamReady: rollbackRecovery?.steps?.PROXY_UPSTREAM_READY === '1',
+        rollbackXmrigPoolLinkReady: rollbackRecovery?.steps?.XMRIG_POOL_LINK_READY === '1'
       }
     });
 
     if (rollbackError) {
       throw new Error(`Tor P2P experiment failed: ${experimentError.message}. Automatic rollback also failed: ${rollbackError.message}. Auto Recovery remains suppressed to prevent restart loops.`);
     }
-    throw new Error(`Tor P2P experiment failed: ${experimentError.message}. Automatic rollback succeeded and mining returned at ${Math.round(rollbackHealth.hashHs)} H/s.`);
+    const retryNote = rollbackRetry ? ` Recovery needed one controlled restart of ${rollbackRetry.restartedUnit}.` : '';
+    throw new Error(`Tor P2P experiment failed: ${experimentError.message}. Automatic rollback succeeded and mining returned at ${Math.round(rollbackHealth.hashHs)} H/s.${retryNote}`);
   }
 }
 

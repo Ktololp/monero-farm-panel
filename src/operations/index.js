@@ -8,7 +8,7 @@ export { getXmrigLog, getP2poolLog, getMonerodLog } from './logs.js';
 export { runCommand } from './remote-command.js';
 export { bootstrapServer } from './bootstrap.js';
 export { getXmrigInstallStatus, installXmrig } from './xmrig-install.js';
-export { getMonerodInstallStatus, installMonerod, getMonerodTorStatus, configureMonerodTor } from './monerod-setup.js';
+export { getMonerodInstallStatus, installMonerod, getMonerodTorStatus, configureMonerodTor, setMonerodTorP2p } from './monerod-setup.js';
 export { checkMonerodTorReachability } from './tor-reachability.js';
 export { installXmrigProxy } from './xmrig-proxy.js';
 export { switchXmrigToProxy } from './proxy-routing.js';

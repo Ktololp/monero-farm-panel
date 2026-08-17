@@ -20,30 +20,31 @@ function parsePairs(output = '') {
 export async function checkMonerodTorReachability(serverId, { actorIp = '' } = {}) {
   const server = serverById(serverId);
   const monerod = (await getMonerodInstallStatus(serverId)).monerod;
-  if (!monerod.running) throw new Error('monerod must be running before onion reachability check');
+  if (!monerod.running) throw new Error('monerod must be running before onion pipeline check');
 
   const tor = (await getMonerodTorStatus(serverId, monerod)).tor;
-  if (!tor.ready || !tor.onion) throw new Error('Tor onion must be fully configured before reachability check');
+  if (!tor.ready || !tor.onion) throw new Error('Tor onion must be fully configured before pipeline check');
 
   const result = await ssh.runScript(server, reachabilityScript, {
-    TOR_ONION_TARGET: tor.onion,
-    TOR_SOCKS_PORT: '9050'
-  }, { sudo: false, timeoutMs: 45000 });
+    TOR_ONION_TARGET: tor.onion
+  }, { sudo: false, timeoutMs: 15000 });
 
-  if (result.code !== 0) throw new Error(`Tor reachability check failed: ${result.stderr.trim() || result.stdout.slice(-1000)}`);
+  if (result.code !== 0) throw new Error(`Tor onion pipeline check failed: ${result.stderr.trim() || result.stdout.slice(-1000)}`);
   const values = parsePairs(result.stdout);
   const reachable = values.REACHABLE === '1';
   const localListener = values.LOCAL_LISTENER === '1';
+  const torrcOk = values.TORRC_OK === '1';
+  const externalVerified = values.EXTERNAL_VERIFIED === '1';
   const seconds = Number(values.SECONDS || 0) || 0;
   const detail = values.DETAIL || '';
 
   audit({
     ip: actorIp,
     serverId: server.id,
-    action: 'check-monerod-tor-reachability',
+    action: 'check-monerod-tor-pipeline',
     status: 'ok',
-    details: { reachable, localListener, seconds, detail }
+    details: { reachable, localListener, torrcOk, externalVerified, seconds, detail }
   });
 
-  return { ok: true, reachable, localListener, seconds, detail, onion: tor.onion };
+  return { ok: true, reachable, localListener, torrcOk, externalVerified, seconds, detail, onion: tor.onion };
 }

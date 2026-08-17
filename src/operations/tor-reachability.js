@@ -3,7 +3,8 @@ import path from 'node:path';
 import { audit } from '../database/index.js';
 import { ssh } from '../ssh/index.js';
 import { serverById } from './server.js';
-import { getMonerodInstallStatus, getMonerodTorStatus } from './monerod-setup.js';
+import { getMonerodInstallStatus } from './monerod-setup.js';
+import { getMonerodTorStatus } from './monerod-tor-p2p.js';
 
 const reachabilityScript = fs.readFileSync(path.resolve('scripts/remote-check-monerod-tor.sh'), 'utf8');
 
@@ -27,7 +28,7 @@ export async function checkMonerodTorReachability(serverId, { actorIp = '' } = {
   const result = await ssh.runScript(server, reachabilityScript, {
     TOR_ONION_TARGET: tor.onion,
     TOR_SOCKS_PORT: '9050'
-  }, { sudo: false, timeoutMs: 75000 });
+  }, { sudo: false, timeoutMs: 45000 });
 
   if (result.code !== 0) throw new Error(`Tor reachability check failed: ${result.stderr.trim() || result.stdout.slice(-1000)}`);
   const values = parsePairs(result.stdout);

@@ -19,7 +19,7 @@ test('mining recovery discovers the real P2Pool process and topology', () => {
   assert.match(script, /XMRig expects local pool port/);
 });
 
-test('recovery waits for monerod sync and never restarts a shared mining wrapper', () => {
+test('recovery waits for monerod sync and never restarts a named shared mining wrapper', () => {
   const script = read('scripts/remote-recover-mining-chain.sh');
   const op = read('src/operations/monerod-tor-p2p.js');
   assert.match(script, /monerod_runtime_info/);
@@ -37,17 +37,37 @@ test('recovery waits for monerod sync and never restarts a shared mining wrapper
   assert.match(op, /concise/);
 });
 
-test('monitoring does not fake 100 percent sync or auto-restart shared services', () => {
+test('monitoring never auto-restarts a live zero-hash miner and verifies runtime cgroup ownership', () => {
   const poller = read('src/monitoring/poller.js');
   const recovery = read('src/monitoring/recovery.js');
   assert.match(poller, /monero\.synchronized === true/);
   assert.match(poller, /targetHeight > 0/);
   assert.match(poller, /Math\.min\(99\.999/);
   assert.doesNotMatch(poller, /monero\.targetHeight \|\| monero\.height/);
+  assert.match(recovery, /xmrigApiAlive/);
+  assert.match(recovery, /Number\(live\.hash60s\) < 1/);
   assert.match(recovery, /live\.monero\?\.synchronized === false/);
-  assert.match(recovery, /sharedMiningService/);
-  assert.match(recovery, /service === monerodService \|\| service === p2poolService/);
-  assert.match(recovery, /Never automatically restart a unit/);
+  assert.match(recovery, /runtimeUnitOwnership/);
+  assert.match(recovery, /ControlGroup/);
+  assert.match(recovery, /ownership !== 'dedicated'/);
+  assert.match(recovery, /auto-recovery-suppressed/);
+  assert.doesNotMatch(recovery, /const badHash/);
+});
+
+test('Tor P2P cleanup is no-op safe and only removes proven orphaned MFP options', () => {
+  const script = read('scripts/remote-set-monerod-tor-p2p.sh');
+  const op = read('src/operations/monerod-tor-p2p.js');
+  assert.match(script, /mfp-tor-p2p-backup-/);
+  assert.match(script, /OLD_BACKUPS/);
+  assert.match(script, /ORPHAN_CLEANED/);
+  assert.match(script, /cmp -s/);
+  assert.match(script, /service restart skipped/);
+  assert.match(script, /MFP_CHANGED=0/);
+  assert.match(script, /MFP_CHANGED=1/);
+  assert.match(op, /Always run the disable script as a probe/);
+  assert.match(op, /ORPHAN_CLEANED/);
+  assert.match(op, /p2pConfigChanged/);
+  assert.match(op, /orphanedMfpOptionsCleaned/);
 });
 
 test('API errors are JSON and frontend strips fallback Express stacks', () => {

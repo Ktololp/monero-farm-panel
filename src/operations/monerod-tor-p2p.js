@@ -82,22 +82,20 @@ export async function setMonerodTorP2p(serverId, options = {}, { actorIp = '' } 
 
   const before = await getMonerodTorStatus(serverId, monerod);
 
-  // Safety mode: this endpoint is intentionally recovery-only for now. Even an
-  // older frontend that still posts {enabled:true} cannot re-enable the risky
-  // full ordinary-P2P Tor experiment. Onion inbound + tx-proxy remain intact.
-  let p2pOutput = '';
-  if (before.tor.p2pConfigured) {
-    const result = await ssh.runScript(server, torP2pScript, {
-      MONEROD_SERVICE_UNIT: serviceUnit(server.monerod_service, 'monerod'),
-      MONEROD_CONFIG_PATH: monerod.configPath,
-      TOR_SOCKS_PORT: '9050',
-      TOR_P2P_MODE: 'disable'
-    }, { sudo: true, timeoutMs: 3 * 60 * 1000 });
-    p2pOutput = result.stdout;
-    if (result.code !== 0) {
-      audit({ ip: actorIp, serverId: server.id, action: 'recover-monerod-p2p', status: 'error', details: { stage: 'remove-tor-p2p', code: result.code, requestedEnabled } });
-      throw new Error(`Could not restore normal monerod P2P: ${result.stderr.trim() || result.stdout.slice(-2500)}`);
-    }
+  // Recovery-only safety mode. Always run the disable script as a probe: it is
+  // now a no-op without changes, but it can also remove proven orphaned options
+  // left by early v1.3 full-P2P experiments even when the marker is already gone.
+  const cleanupResult = await ssh.runScript(server, torP2pScript, {
+    MONEROD_SERVICE_UNIT: serviceUnit(server.monerod_service, 'monerod'),
+    MONEROD_CONFIG_PATH: monerod.configPath,
+    TOR_SOCKS_PORT: '9050',
+    TOR_P2P_MODE: 'disable'
+  }, { sudo: true, timeoutMs: 3 * 60 * 1000 });
+  const p2pOutput = cleanupResult.stdout;
+  const cleanup = parsePairs(cleanupResult.stdout);
+  if (cleanupResult.code !== 0) {
+    audit({ ip: actorIp, serverId: server.id, action: 'recover-monerod-p2p', status: 'error', details: { stage: 'remove-tor-p2p', code: cleanupResult.code, requestedEnabled } });
+    throw new Error(`Could not restore normal monerod P2P: ${cleanupResult.stderr.trim() || cleanupResult.stdout.slice(-2500)}`);
   }
 
   const freshMonerod = (await getMonerodInstallStatus(serverId)).monerod;
@@ -106,7 +104,7 @@ export async function setMonerodTorP2p(serverId, options = {}, { actorIp = '' } 
   const after = await getMonerodTorStatus(serverId, afterMonerod);
 
   if (after.tor.p2pConfigured) {
-    throw new Error('Mining recovery restarted the service chain, but the managed full-P2P Tor block is still present in monerod config');
+    throw new Error('Mining recovery completed, but the managed full-P2P Tor block is still present in monerod config');
   }
 
   audit({
@@ -116,7 +114,8 @@ export async function setMonerodTorP2p(serverId, options = {}, { actorIp = '' } 
     status: 'ok',
     details: {
       requestedEnabled,
-      removedManagedBlock: before.tor.p2pConfigured,
+      p2pConfigChanged: cleanup.CHANGED === '1',
+      orphanedMfpOptionsCleaned: cleanup.ORPHAN_CLEANED === '1',
       rpcReady: recovery.steps.RPC_READY === '1',
       monerodSynced: recovery.steps.MONEROD_SYNCED === '1',
       p2poolRestarted: recovery.steps.P2POOL_RESTARTED === '1',
@@ -131,7 +130,8 @@ export async function setMonerodTorP2p(serverId, options = {}, { actorIp = '' } 
 
   return {
     ok: true,
-    changed: before.tor.p2pConfigured,
+    changed: cleanup.CHANGED === '1',
+    orphanedMfpOptionsCleaned: cleanup.ORPHAN_CLEANED === '1',
     enabled: false,
     recovered: true,
     tor: after.tor,

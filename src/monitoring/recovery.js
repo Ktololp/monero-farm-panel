@@ -6,8 +6,37 @@ import { setLiveState, emitServerUpdate } from './state.js';
 
 const recoveryState = new Map();
 
+function stateFor(serverId) {
+  const id = Number(serverId);
+  return recoveryState.get(id) || {
+    failures: 0,
+    lastAttempt: 0,
+    recoveringUntil: 0,
+    suppressedUntil: 0,
+    suppressionReason: ''
+  };
+}
+
 export function getRecoveryInfo(serverId) {
-  return recoveryState.get(Number(serverId)) || { failures: 0, lastAttempt: 0, recoveringUntil: 0 };
+  return stateFor(serverId);
+}
+
+export function suppressAutoRecovery(serverId, durationMs = 15 * 60 * 1000, reason = 'manual-operation') {
+  const id = Number(serverId);
+  const rs = stateFor(id);
+  rs.failures = 0;
+  rs.suppressedUntil = Math.max(Number(rs.suppressedUntil || 0), Date.now() + Math.max(1000, Number(durationMs) || 0));
+  rs.suppressionReason = String(reason || 'manual-operation');
+  recoveryState.set(id, rs);
+  return { suppressedUntil: rs.suppressedUntil, reason: rs.suppressionReason };
+}
+
+export function releaseAutoRecoverySuppression(serverId) {
+  const id = Number(serverId);
+  const rs = stateFor(id);
+  rs.suppressedUntil = 0;
+  rs.suppressionReason = '';
+  recoveryState.set(id, rs);
 }
 
 async function runtimeUnitOwnership(server, service) {
@@ -25,8 +54,19 @@ async function runtimeUnitOwnership(server, service) {
 }
 
 export async function maybeAutoRecover(server, live) {
+  const rs = stateFor(server.id);
+  if (Number(rs.suppressedUntil || 0) > Date.now()) {
+    rs.failures = 0;
+    recoveryState.set(server.id, rs);
+    return;
+  }
+  if (rs.suppressedUntil) {
+    rs.suppressedUntil = 0;
+    rs.suppressionReason = '';
+    recoveryState.set(server.id, rs);
+  }
+
   if (String(getSetting('auto_recovery_enabled')) === '0' || live.status === 'offline' || live.grace) return;
-  const rs = recoveryState.get(server.id) || { failures: 0, lastAttempt: 0, recoveringUntil: 0 };
 
   // A zero hashrate is NOT proof that XMRig itself is broken. It is commonly an
   // upstream problem (P2Pool/Proxy/monerod). If the XMRig API is alive, never

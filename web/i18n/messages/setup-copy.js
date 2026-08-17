@@ -55,7 +55,7 @@ const setupCopy = {
     unavailableShort: 'Unavailable',
 
     tor: 'Tor for monerod',
-    torHint: 'Creates a Tor v3 onion service for monerod P2P traffic and routes locally originated transaction broadcasts through Tor. RPC is not exposed through Tor and its existing bind settings are left unchanged.',
+    torHint: 'The onion service provides anonymous inbound P2P and tx-proxy protects locally originated transaction broadcasts. The separate P2P routing switch below can also force ordinary monerod network traffic through Tor. RPC is not exposed through Tor.',
     torPackage: 'Tor',
     torConfig: 'Tor config',
     monerodTorConfig: 'monerod Tor config',
@@ -64,6 +64,9 @@ const setupCopy = {
     torNotChecked: 'Not checked',
     torReachable: 'Reachable through Tor',
     torUnreachable: 'Not reachable through Tor',
+    torP2pMode: 'P2P routing',
+    torP2pThroughTor: 'All P2P through Tor',
+    torP2pNormal: 'Normal / clearnet',
     configureTor: 'Configure Tor onion',
     checkTor: 'Check onion access',
     checkingTor: 'Checking through Tor…',
@@ -73,7 +76,13 @@ const setupCopy = {
     torConfirm: 'Install/configure Tor and expose only monerod P2P through a v3 onion service? If this node has no config file, MFP will create the standard bitmonero.conf in its current data directory. Existing monerod command-line and RPC bind settings will not be changed.',
     torSuccess: 'Tor onion for monerod is configured.',
     torCheckSuccess: 'The onion P2P endpoint is reachable through the Tor network.',
-    torCheckFailed: 'The onion P2P endpoint could not be reached through Tor.'
+    torCheckFailed: 'The onion P2P endpoint could not be reached through Tor.',
+    enableTorP2p: 'Route all P2P through Tor',
+    disableTorP2p: 'Return to normal P2P',
+    enableTorP2pConfirm: 'Route ordinary monerod network communication through Tor? MFP will use proxy=127.0.0.1:9050, bind normal P2P to 127.0.0.1, disable UPnP and stop advertising the clearnet P2P listener. RPC settings are not changed.',
+    disableTorP2pConfirm: 'Remove only the MFP full-P2P Tor routing block and return ordinary monerod P2P to its previous/default behavior? The onion service configuration will remain installed.',
+    torP2pEnabled: 'All ordinary monerod P2P is now routed through Tor.',
+    torP2pDisabled: 'Full-P2P Tor routing was removed; the onion service remains configured.'
   },
   ru: {
     title: 'Установка майнера',
@@ -131,7 +140,7 @@ const setupCopy = {
     unavailableShort: 'Недоступен',
 
     tor: 'Tor для monerod',
-    torHint: 'Создаёт Tor v3 onion-сервис для P2P-трафика monerod и отправляет локально созданные транзакции через Tor. RPC через Tor не публикуется, а его существующие настройки bind не меняются.',
+    torHint: 'Onion-сервис даёт анонимный входящий P2P, а tx-proxy отправляет через Tor локально созданные транзакции. Отдельная кнопка ниже может дополнительно направить весь обычный P2P-трафик monerod через Tor. RPC через Tor не публикуется.',
     torPackage: 'Tor',
     torConfig: 'Конфиг Tor',
     monerodTorConfig: 'Tor в monerod',
@@ -140,6 +149,9 @@ const setupCopy = {
     torNotChecked: 'Не проверено',
     torReachable: 'Доступен через Tor',
     torUnreachable: 'Недоступен через Tor',
+    torP2pMode: 'Маршрутизация P2P',
+    torP2pThroughTor: 'Весь P2P через Tor',
+    torP2pNormal: 'Обычный / clearnet',
     configureTor: 'Настроить Tor onion',
     checkTor: 'Проверить onion',
     checkingTor: 'Проверяем через Tor…',
@@ -149,7 +161,13 @@ const setupCopy = {
     torConfirm: 'Установить/настроить Tor и открыть через v3 onion только P2P monerod? Если у ноды нет config-файла, MFP создаст стандартный bitmonero.conf в её текущем data-dir. Существующие параметры запуска и настройки RPC monerod изменяться не будут.',
     torSuccess: 'Tor onion для monerod настроен.',
     torCheckSuccess: 'Onion P2P endpoint реально доступен через сеть Tor.',
-    torCheckFailed: 'Не удалось подключиться к onion P2P endpoint через Tor.'
+    torCheckFailed: 'Не удалось подключиться к onion P2P endpoint через Tor.',
+    enableTorP2p: 'Включить весь P2P через Tor',
+    disableTorP2p: 'Вернуть обычный P2P',
+    enableTorP2pConfirm: 'Направить обычный сетевой P2P-трафик monerod через Tor? MFP задаст proxy=127.0.0.1:9050, привяжет обычный P2P к 127.0.0.1, отключит UPnP и перестанет рекламировать clearnet P2P-порт. Настройки RPC не изменятся.',
+    disableTorP2pConfirm: 'Удалить только управляемый MFP-блок полного P2P через Tor и вернуть обычное/default поведение P2P? Onion-сервис останется настроенным.',
+    torP2pEnabled: 'Весь обычный P2P-трафик monerod теперь направляется через Tor.',
+    torP2pDisabled: 'Полная маршрутизация P2P через Tor отключена; onion-сервис остаётся настроенным.'
   }
 };
 

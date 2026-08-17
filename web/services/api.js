@@ -17,7 +17,10 @@ function readableError(payload, status) {
   try {
     const doc = new DOMParser().parseFromString(text, 'text/html');
     const raw = (doc.querySelector('pre')?.textContent || doc.body?.textContent || '').trim();
-    return (raw.split(/\n\s*at\s/)[0] || `HTTP ${status}`).replace(/^Error:\s*/i, '');
+    const withoutStack = raw
+      .replace(/\s+at\s+(?:async\s+)?[^\n]*?(?:file:\/\/\/|node:internal\/)[\s\S]*$/i, '')
+      .trim();
+    return (withoutStack || `HTTP ${status}`).replace(/^Error:\s*/i, '');
   } catch {
     return `HTTP ${status}`;
   }

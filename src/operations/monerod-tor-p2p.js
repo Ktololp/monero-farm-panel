@@ -162,14 +162,19 @@ async function startTorP2pExperiment(server, monerod, before, { actorIp = '' } =
   if (!before.tor.ready) throw new Error('Tor onion must be configured and healthy before the full-P2P experiment');
   if (before.tor.p2pRouted) return { ok: true, changed: false, enabled: true, experimentPassed: true, tor: before.tor };
 
-  suppressAutoRecovery(server.id, 15 * 60 * 1000, 'tor-p2p-experiment');
-  const baseline = await validateMiningHealth(server, 30);
+  const suppression = suppressAutoRecovery(server.id, 15 * 60 * 1000, 'tor-p2p-experiment');
+  let baseline;
+  try {
+    baseline = await validateMiningHealth(server, 30);
+  } catch (error) {
+    releaseAutoRecoverySuppression(server.id);
+    throw new Error(`Tor experiment was not started because the baseline mining state is not healthy: ${error.message}`);
+  }
+
   const snapshot = await createExperimentSnapshot(server, monerod);
-  let enableOutput = '';
 
   try {
-    const enabled = await setP2pMode(server, monerod, true);
-    enableOutput = enabled.output;
+    await setP2pMode(server, monerod, true);
     const freshMonerod = (await getMonerodInstallStatus(server.id)).monerod;
     const recovery = await recoverMiningChain(server, freshMonerod);
     const health = await validateMiningHealth(server, 90);
@@ -199,7 +204,7 @@ async function startTorP2pExperiment(server, monerod, before, { actorIp = '' } =
       changed: true,
       enabled: true,
       experimentPassed: true,
-      autoRecoverySuppressedUntil: Date.now() + 15 * 60 * 1000,
+      autoRecoverySuppressedUntil: suppression.suppressedUntil,
       snapshot: { path: snapshot.path, sha256: snapshot.sha256 },
       baseline,
       health,
@@ -209,12 +214,11 @@ async function startTorP2pExperiment(server, monerod, before, { actorIp = '' } =
     };
   } catch (experimentError) {
     let rollbackError = null;
-    let rollbackRecovery = null;
     let rollbackHealth = null;
     try {
       await restoreExperimentSnapshot(server, monerod, snapshot.path);
       const restoredMonerod = (await getMonerodInstallStatus(server.id)).monerod;
-      rollbackRecovery = await recoverMiningChain(server, restoredMonerod);
+      await recoverMiningChain(server, restoredMonerod);
       rollbackHealth = await validateMiningHealth(server, 120);
       releaseAutoRecoverySuppression(server.id);
     } catch (error) {
@@ -244,12 +248,16 @@ async function startTorP2pExperiment(server, monerod, before, { actorIp = '' } =
 
 export async function setMonerodTorP2p(serverId, options = {}, { actorIp = '' } = {}) {
   const server = serverById(serverId);
-  const requestedEnabled = options.enabled === true;
   const monerod = (await getMonerodInstallStatus(serverId)).monerod;
   if (!monerod.running) throw new Error('monerod must be running before Tor P2P operations');
   if (!monerod.configExists || !monerod.configPath) throw new Error('monerod config must exist before Tor P2P operations');
 
   const before = await getMonerodTorStatus(serverId, monerod);
+  // Older v1.3 UI builds always post {enabled:false}. Treat that request as a
+  // safe toggle: start the guarded experiment when normal P2P is active, and
+  // restore normal P2P when an experimental managed Tor mode is already active.
+  const requestedEnabled = options.enabled === true
+    || (options.enabled === false && !before.tor.p2pConfigured && !before.tor.p2pRouted);
   if (requestedEnabled) return startTorP2pExperiment(server, monerod, before, { actorIp });
   return stopTorP2pExperiment(server, monerod, before, { actorIp, requestedEnabled });
 }

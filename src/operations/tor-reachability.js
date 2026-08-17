@@ -27,11 +27,12 @@ export async function checkMonerodTorReachability(serverId, { actorIp = '' } = {
   const result = await ssh.runScript(server, reachabilityScript, {
     TOR_ONION_TARGET: tor.onion,
     TOR_SOCKS_PORT: '9050'
-  }, { sudo: false, timeoutMs: 30000 });
+  }, { sudo: false, timeoutMs: 75000 });
 
   if (result.code !== 0) throw new Error(`Tor reachability check failed: ${result.stderr.trim() || result.stdout.slice(-1000)}`);
   const values = parsePairs(result.stdout);
   const reachable = values.REACHABLE === '1';
+  const localListener = values.LOCAL_LISTENER === '1';
   const seconds = Number(values.SECONDS || 0) || 0;
   const detail = values.DETAIL || '';
 
@@ -40,8 +41,8 @@ export async function checkMonerodTorReachability(serverId, { actorIp = '' } = {
     serverId: server.id,
     action: 'check-monerod-tor-reachability',
     status: 'ok',
-    details: { reachable, seconds, detail }
+    details: { reachable, localListener, seconds, detail }
   });
 
-  return { ok: true, reachable, seconds, detail, onion: tor.onion };
+  return { ok: true, reachable, localListener, seconds, detail, onion: tor.onion };
 }

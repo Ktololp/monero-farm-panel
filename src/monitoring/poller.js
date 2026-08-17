@@ -37,6 +37,13 @@ async function pollOne(server) {
     const hp = telemetry.hugepages || {};
     const monero = telemetry.monero || {};
     const components = telemetry.components || {};
+    const height = Number(monero.height);
+    const targetHeight = Number(monero.targetHeight);
+    const syncPercent = monero.synchronized === true
+      ? 100
+      : Number.isFinite(height) && targetHeight > 0
+        ? Math.min(99.999, Math.max(0, height / targetHeight * 100))
+        : null;
     const live = {
       serverId: server.id,
       status: summary ? (grace ? 'starting' : 'online') : (grace ? 'starting' : 'degraded'),
@@ -45,7 +52,7 @@ async function pollOne(server) {
       load1: telemetry.load?.[0] ?? null, load5: telemetry.load?.[1] ?? null, load15: telemetry.load?.[2] ?? null, cpuCount: telemetry.cpuCount ?? null,
       components: { xmrig: summary ? 'active' : (components.xmrig || 'inactive'), p2pool: components.p2pool || 'inactive', monerod: components.monerod || 'inactive', xmrigProxy: components.xmrigProxy || 'inactive' },
       p2poolStatus: components.p2pool || 'inactive', monerodStatus: components.monerod || 'inactive', xmrigStatus: summary ? 'active' : (components.xmrig || 'inactive'),
-      monero: { ...monero, syncPercent: Number(monero.targetHeight || monero.height) > 0 ? Math.min(100, Number(monero.height || 0) / Number(monero.targetHeight || monero.height) * 100) : (monero.synchronized ? 100 : null) },
+      monero: { ...monero, syncPercent },
       proxy: telemetry.proxy || { detected: false, available: false, workers: [] },
       p2poolAnalytics: telemetry.p2poolAnalytics || { detected: components.p2pool === 'active', available: false, dataApiEnabled: false, localApiEnabled: false, workers: [] },
       hugePages: { total: hp.total || 0, free: hp.free || 0, reserved: hp.reserved || 0, sizeKB: hp.sizeKB || 0, oneGTotal: hp.oneGTotal || 0, oneGFree: hp.oneGFree || 0 },

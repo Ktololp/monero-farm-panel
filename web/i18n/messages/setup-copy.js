@@ -60,12 +60,20 @@ const setupCopy = {
     torConfig: 'Tor config',
     monerodTorConfig: 'monerod Tor config',
     onion: 'Onion address',
+    torNetwork: 'Tor network check',
+    torNotChecked: 'Not checked',
+    torReachable: 'Reachable through Tor',
+    torUnreachable: 'Not reachable through Tor',
     configureTor: 'Configure Tor onion',
+    checkTor: 'Check onion access',
+    checkingTor: 'Checking through Tor…',
     torReady: 'Tor onion is ready',
     torNeedsMonerod: 'monerod must be running first',
     torWillCreateConfig: 'This node currently has no config file. During Tor setup MFP will create the standard bitmonero.conf in the daemon data directory and add only the managed Tor block. Existing command-line arguments remain unchanged.',
     torConfirm: 'Install/configure Tor and expose only monerod P2P through a v3 onion service? If this node has no config file, MFP will create the standard bitmonero.conf in its current data directory. Existing monerod command-line and RPC bind settings will not be changed.',
-    torSuccess: 'Tor onion for monerod is configured.'
+    torSuccess: 'Tor onion for monerod is configured.',
+    torCheckSuccess: 'The onion P2P endpoint is reachable through the Tor network.',
+    torCheckFailed: 'The onion P2P endpoint could not be reached through Tor.'
   },
   ru: {
     title: 'Установка майнера',
@@ -128,12 +136,20 @@ const setupCopy = {
     torConfig: 'Конфиг Tor',
     monerodTorConfig: 'Tor в monerod',
     onion: 'Onion-адрес',
+    torNetwork: 'Проверка сети Tor',
+    torNotChecked: 'Не проверено',
+    torReachable: 'Доступен через Tor',
+    torUnreachable: 'Недоступен через Tor',
     configureTor: 'Настроить Tor onion',
+    checkTor: 'Проверить onion',
+    checkingTor: 'Проверяем через Tor…',
     torReady: 'Tor onion готов',
     torNeedsMonerod: 'Сначала monerod должен реально работать',
     torWillCreateConfig: 'У этой ноды сейчас нет config-файла. При настройке Tor MFP создаст стандартный bitmonero.conf в текущем каталоге данных monerod и добавит туда только управляемый Tor-блок. Существующие аргументы запуска останутся без изменений.',
     torConfirm: 'Установить/настроить Tor и открыть через v3 onion только P2P monerod? Если у ноды нет config-файла, MFP создаст стандартный bitmonero.conf в её текущем data-dir. Существующие параметры запуска и настройки RPC monerod изменяться не будут.',
-    torSuccess: 'Tor onion для monerod настроен.'
+    torSuccess: 'Tor onion для monerod настроен.',
+    torCheckSuccess: 'Onion P2P endpoint реально доступен через сеть Tor.',
+    torCheckFailed: 'Не удалось подключиться к onion P2P endpoint через Tor.'
   }
 };
 

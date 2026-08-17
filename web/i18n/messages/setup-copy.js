@@ -55,7 +55,7 @@ const setupCopy = {
     unavailableShort: 'Unavailable',
 
     tor: 'Tor for monerod',
-    torHint: 'The onion service provides anonymous inbound P2P and tx-proxy protects locally originated transaction broadcasts. Full ordinary-P2P Tor routing is temporarily disabled until it is validated against the complete monerod → P2Pool → XMRig Proxy → XMRig mining chain. RPC is not exposed through Tor.',
+    torHint: 'The onion service provides anonymous inbound P2P and tx-proxy protects locally originated transaction broadcasts. Full ordinary P2P can now be tested in guarded Experiment Mode: MFP snapshots the working config, suppresses Auto Recovery, validates the whole mining chain and automatically rolls back on any failure. RPC is not exposed through Tor.',
     torPackage: 'Tor',
     torConfig: 'Tor config',
     monerodTorConfig: 'monerod Tor config',
@@ -65,7 +65,7 @@ const setupCopy = {
     torReachable: 'Local pipeline ready',
     torUnreachable: 'Local pipeline not ready',
     torP2pMode: 'P2P routing',
-    torP2pThroughTor: 'Managed full-P2P Tor block detected',
+    torP2pThroughTor: 'Full P2P through Tor · experiment passed',
     torP2pNormal: 'Normal / clearnet',
     configureTor: 'Configure Tor onion',
     checkTor: 'Check local onion pipeline',
@@ -77,12 +77,12 @@ const setupCopy = {
     torSuccess: 'Tor onion for monerod is configured.',
     torCheckSuccess: 'The local Tor hidden-service mapping and monerod onion listener are ready. External reachability is not proven from the same host.',
     torCheckFailed: 'The local Tor onion pipeline is not ready.',
-    enableTorP2p: 'Full P2P through Tor is temporarily disabled',
-    disableTorP2p: 'Restore normal P2P + mining',
-    enableTorP2pConfirm: 'Full ordinary-P2P routing through Tor is temporarily disabled while mining-chain compatibility is being validated.',
-    disableTorP2pConfirm: 'Remove the managed full-P2P Tor block if present, restore normal monerod P2P, then restart the local dependency chain in order: monerod RPC → P2Pool → XMRig Proxy → XMRig? The onion service and tx-proxy configuration will remain installed.',
-    torP2pEnabled: 'Full ordinary-P2P Tor routing is temporarily disabled.',
-    torP2pDisabled: 'Normal P2P was restored and the mining service chain was restarted. The onion service remains configured.'
+    enableTorP2p: 'Test full P2P through Tor',
+    disableTorP2p: 'Tor P2P Experiment / restore',
+    enableTorP2pConfirm: 'Start guarded Tor P2P Experiment Mode?',
+    disableTorP2pConfirm: 'Run Tor P2P Experiment Mode? With normal P2P, MFP first verifies live mining, snapshots bitmonero.conf, suppresses Auto Recovery, enables Tor-only P2P and validates monerod → P2Pool → XMRig Proxy → XMRig plus live hashrate. Any failure triggers an exact automatic rollback. If experimental Tor P2P is already active, this button restores normal P2P and validates mining again.',
+    torP2pEnabled: 'Tor-only P2P experiment passed and mining stayed healthy.',
+    torP2pDisabled: 'Tor P2P operation completed. The current routing mode and mining health were refreshed.'
   },
   ru: {
     title: 'Установка майнера',
@@ -140,7 +140,7 @@ const setupCopy = {
     unavailableShort: 'Недоступен',
 
     tor: 'Tor для monerod',
-    torHint: 'Onion-сервис даёт анонимный входящий P2P, а tx-proxy отправляет через Tor локально созданные транзакции. Полную маршрутизацию обычного P2P через Tor временно отключаем до проверки всей цепочки monerod → P2Pool → XMRig Proxy → XMRig. RPC через Tor не публикуется.',
+    torHint: 'Onion-сервис даёт анонимный входящий P2P, а tx-proxy отправляет через Tor локально созданные транзакции. Полный обычный P2P теперь можно проверять в безопасном Experiment Mode: MFP сохраняет рабочий config, блокирует Auto Recovery, проверяет всю майнинг-цепочку и автоматически откатывает изменения при любой ошибке. RPC через Tor не публикуется.',
     torPackage: 'Tor',
     torConfig: 'Конфиг Tor',
     monerodTorConfig: 'Tor в monerod',
@@ -150,7 +150,7 @@ const setupCopy = {
     torReachable: 'Локальная цепочка готова',
     torUnreachable: 'Локальная цепочка не готова',
     torP2pMode: 'Маршрутизация P2P',
-    torP2pThroughTor: 'Найден управляемый Tor-only P2P блок',
+    torP2pThroughTor: 'Весь P2P через Tor · эксперимент пройден',
     torP2pNormal: 'Обычный / clearnet',
     configureTor: 'Настроить Tor onion',
     checkTor: 'Проверить локальный onion',
@@ -162,12 +162,12 @@ const setupCopy = {
     torSuccess: 'Tor onion для monerod настроен.',
     torCheckSuccess: 'Локальная цепочка Tor hidden service → P2P monerod готова. Внешняя доступность с этого же сервера не доказывается.',
     torCheckFailed: 'Локальная цепочка Tor onion не готова.',
-    enableTorP2p: 'Полный P2P через Tor временно отключён',
-    disableTorP2p: 'Восстановить обычный P2P + майнинг',
-    enableTorP2pConfirm: 'Полная маршрутизация обычного P2P через Tor временно отключена до проверки совместимости со всей майнинг-цепочкой.',
-    disableTorP2pConfirm: 'Удалить управляемый блок полного P2P через Tor, если он остался, вернуть обычный P2P monerod и затем по порядку перезапустить цепочку: RPC monerod → P2Pool → XMRig Proxy → XMRig? Onion-сервис и tx-proxy останутся настроенными.',
-    torP2pEnabled: 'Полный P2P через Tor временно отключён.',
-    torP2pDisabled: 'Обычный P2P восстановлен, майнинг-цепочка перезапущена. Onion-сервис остаётся настроенным.'
+    enableTorP2p: 'Тестировать весь P2P через Tor',
+    disableTorP2p: 'Tor P2P эксперимент / откат',
+    enableTorP2pConfirm: 'Запустить безопасный Tor P2P Experiment Mode?',
+    disableTorP2pConfirm: 'Запустить Tor P2P Experiment Mode? При обычном P2P MFP сначала проверит текущий майнинг, сохранит точный снимок bitmonero.conf, заблокирует Auto Recovery, включит Tor-only P2P и проверит monerod → P2Pool → XMRig Proxy → XMRig плюс реальный ненулевой хешрейт. При любой ошибке выполнится автоматический точный откат. Если экспериментальный Tor P2P уже активен, эта же кнопка вернёт обычный P2P и снова проверит майнинг.',
+    torP2pEnabled: 'Эксперимент Tor-only P2P пройден, майнинг остался рабочим.',
+    torP2pDisabled: 'Операция Tor P2P завершена. Текущий режим маршрутизации и состояние майнинга обновлены.'
   }
 };
 

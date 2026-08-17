@@ -76,12 +76,24 @@ test('Tor setup supports a configless running monerod without rewriting its CLI 
   assert.doesNotMatch(script, /rpc-bind-ip=0\.0\.0\.0/);
 });
 
-test('setup UI bundles the Tor onion icon and treats configless monerod as valid', () => {
+test('Tor reachability probe verifies the onion P2P stream through SOCKS5', () => {
+  const script = read('scripts/remote-check-monerod-tor.sh');
+  const operation = read('src/operations/tor-reachability.js');
+  const router = read('src/api/setup-router.js');
+  assert.match(script, /--socks5-hostname/);
+  assert.match(script, /telnet:\/\//);
+  assert.match(script, /SOCKS5 request granted/);
+  assert.match(script, /MFP_REACHABLE/);
+  assert.match(operation, /checkMonerodTorReachability/);
+  assert.match(operation, /remote-check-monerod-tor\.sh/);
+  assert.match(router, /monerod\/tor\/check/);
+});
+
+test('setup UI uses inline Tor icon, network check and treats configless monerod as valid', () => {
   const router = read('src/api/setup-router.js');
   const page = read('web/pages/setup/index.js');
   const copy = read('web/i18n/messages/setup-copy.js');
   const css = read('web/styles/design-setup.css');
-  const torIcon = read('web/assets/icons/tor.svg');
   assert.match(router, /servers\/:id\/monerod\/install/);
   assert.match(router, /servers\/:id\/monerod\/tor/);
   assert.match(page, /setup-node-mode/);
@@ -89,15 +101,17 @@ test('setup UI bundles the Tor onion icon and treats configless monerod as valid
   assert.match(page, /monerod\.torConfigurable/);
   assert.match(page, /monerod\.running/);
   assert.match(page, /rpcEndpoint/);
-  assert.match(page, /import torIcon from '\.\.\/\.\.\/assets\/icons\/tor\.svg'/);
-  assert.match(page, /src="\$\{torIcon\}"/);
+  assert.match(page, /const TOR_ICON_SVG/);
+  assert.match(page, /#7d4698/i);
+  assert.match(page, /#68b030/i);
+  assert.match(page, /setup-check-tor/);
+  assert.match(page, /monerod\/tor\/check/);
   assert.match(page, /configNotUsed/);
   assert.match(page, /torWillCreateConfig/);
-  assert.doesNotMatch(page, /src="\/assets\/icons\/tor\.svg"/);
+  assert.doesNotMatch(page, /<img class="setup-title-icon"/);
   assert.match(copy, /RPC monerod/);
   assert.match(copy, /Не используется/);
+  assert.match(copy, /Проверка сети Tor/);
   assert.match(copy, /bitmonero\.conf/);
   assert.match(css, /setup-flag\.planned/);
-  assert.match(torIcon, /#7d4698/i);
-  assert.match(torIcon, /#68b030/i);
 });

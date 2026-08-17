@@ -22,7 +22,7 @@ test('mining recovery discovers the real P2Pool process and topology', () => {
 test('recovery wrapper passes diagnostics and allows slow wrapper startup', () => {
   const op = read('src/operations/monerod-tor-p2p.js');
   assert.match(op, /P2POOL_LOG_PATH/);
-  assert.match(op, /5 \* 60 \* 1000/);
+  assert.match(op, /7 \* 60 \* 1000/);
   assert.match(op, /P2POOL_ZMQ_READY/);
   assert.match(op, /concise/);
 });

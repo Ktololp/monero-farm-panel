@@ -21,7 +21,7 @@ wait_active() {
 }
 process_pid() { pgrep -xo "$1" 2>/dev/null | head -n 1; }
 wait_process() {
-  local name="$1" seconds="${2:-75}"
+  local name="$1" seconds="${2:-60}"
   for _ in $(seq 1 "$seconds"); do
     [ -n "$(process_pid "$name")" ] && return 0
     sleep 1
@@ -49,7 +49,7 @@ process_established_port() {
   fi
 }
 wait_listener_with_process() {
-  local port="$1" proc="$2" seconds="${3:-120}"
+  local port="$1" proc="$2" seconds="${3:-90}"
   local rc=1
   for _ in $(seq 1 "$seconds"); do
     if listen_port "$port"; then return 0; else rc=$?; fi
@@ -60,7 +60,7 @@ wait_listener_with_process() {
   return 1
 }
 wait_process_established() {
-  local proc="$1" port="$2" seconds="${3:-45}"
+  local proc="$1" port="$2" seconds="${3:-30}"
   local rc=1
   for _ in $(seq 1 "$seconds"); do
     if process_established_port "$proc" "$port"; then return 0; else rc=$?; fi
@@ -89,6 +89,28 @@ host=host.strip('[]').lower()
 if host in ('127.0.0.1','localhost','::1') and port.isdigit():
     print(port)
 PY
+}
+
+monerod_runtime_info() {
+  command -v python3 >/dev/null 2>&1 || return 1
+  curl -fsS --max-time 3 \
+    -H 'Content-Type: application/json' \
+    --data '{"jsonrpc":"2.0","id":"0","method":"get_info"}' \
+    "http://127.0.0.1:${MONEROD_RPC_PORT}/json_rpc" \
+  | python3 -c 'import json,sys
+try:
+ r=(json.load(sys.stdin).get("result") or {})
+except Exception:
+ raise SystemExit(1)
+vals=[
+ "1" if r.get("synchronized") is True else "0",
+ str(r.get("height") or 0),
+ str(r.get("target_height") or 0),
+ str(r.get("incoming_connections_count") or 0),
+ str(r.get("outgoing_connections_count") or 0),
+ "1" if r.get("busy_syncing") is True else "0"
+]
+print("|".join(vals))'
 }
 
 p2pool_runtime_info() {
@@ -164,21 +186,44 @@ XMRIG_LOCAL_POOL_PORT="$(local_pool_port_from_json "$XMRIG_CONFIG_PATH" || true)
 
 log "Waiting for monerod RPC on 127.0.0.1:${MONEROD_RPC_PORT}"
 RPC_OK=0
-for _ in $(seq 1 60); do
-  if curl -fsS --max-time 2 \
-    -H 'Content-Type: application/json' \
-    --data '{"jsonrpc":"2.0","id":"0","method":"get_info"}' \
-    "http://127.0.0.1:${MONEROD_RPC_PORT}/json_rpc" >/dev/null 2>&1; then
+for _ in $(seq 1 45); do
+  if monerod_runtime_info >/dev/null 2>&1; then
     RPC_OK=1
     break
   fi
   sleep 1
 done
 if [ "$RPC_OK" != "1" ]; then
-  echo "monerod RPC did not return on 127.0.0.1:${MONEROD_RPC_PORT}; downstream mining services were not restarted" >&2
+  echo "monerod RPC did not return on 127.0.0.1:${MONEROD_RPC_PORT}; downstream mining services were not touched" >&2
   exit 20
 fi
 log "monerod RPC is ready"
+
+log "Waiting for monerod to report synchronized=true before validating P2Pool"
+MONEROD_SYNCED=0
+MONEROD_HEIGHT=0
+MONEROD_TARGET=0
+MONEROD_IN=0
+MONEROD_OUT=0
+MONEROD_BUSY=0
+for i in $(seq 1 180); do
+  INFO="$(monerod_runtime_info 2>/dev/null || true)"
+  if [ -n "$INFO" ]; then
+    IFS='|' read -r MONEROD_SYNCED MONEROD_HEIGHT MONEROD_TARGET MONEROD_IN MONEROD_OUT MONEROD_BUSY <<< "$INFO"
+    if [ "$MONEROD_SYNCED" = "1" ]; then
+      break
+    fi
+    if [ "$i" = "1" ] || [ $((i % 15)) -eq 0 ]; then
+      log "monerod not synchronized yet: height=${MONEROD_HEIGHT}, target=${MONEROD_TARGET}, peers in/out=${MONEROD_IN}/${MONEROD_OUT}, busy=${MONEROD_BUSY}"
+    fi
+  fi
+  sleep 1
+done
+if [ "$MONEROD_SYNCED" != "1" ]; then
+  echo "monerod RPC is reachable but synchronized=false after 180s (height=${MONEROD_HEIGHT}, target=${MONEROD_TARGET}, peers in/out=${MONEROD_IN}/${MONEROD_OUT}). P2Pool will not provide Stratum jobs until monerod is synchronized." >&2
+  exit 30
+fi
+log "monerod is synchronized: height=${MONEROD_HEIGHT}, peers in/out=${MONEROD_IN}/${MONEROD_OUT}"
 
 P2POOL_RESTARTED=0
 P2POOL_STRATUM_READY=0
@@ -190,10 +235,10 @@ if unit_exists "$P2POOL_SERVICE_UNIT" || [ -n "$(process_pid p2pool || true)" ];
     systemctl restart "$P2POOL_SERVICE_UNIT"
     P2POOL_RESTARTED=1
   else
-    log "P2Pool uses the monerod/shared wrapper; not restarting that wrapper a second time"
+    log "P2Pool uses the monerod/shared wrapper; not restarting that wrapper"
   fi
 
-  if ! wait_process p2pool 75; then
+  if ! wait_process p2pool 60; then
     diag_p2pool
     echo "P2Pool service is present, but the real p2pool process did not start." >&2
     exit 21
@@ -226,7 +271,7 @@ if unit_exists "$P2POOL_SERVICE_UNIT" || [ -n "$(process_pid p2pool || true)" ];
         log "ss/netstat unavailable; skipping monerod ZMQ listener verification"
       else
         diag_p2pool
-        echo "monerod RPC is ready, but local ZMQ port ${P2POOL_ZMQ_PORT} required by P2Pool is not listening." >&2
+        echo "monerod is synchronized, but local ZMQ port ${P2POOL_ZMQ_PORT} required by P2Pool is not listening." >&2
         exit 27
       fi
     fi
@@ -237,7 +282,7 @@ if unit_exists "$P2POOL_SERVICE_UNIT" || [ -n "$(process_pid p2pool || true)" ];
   for port in "${STRATUM_PORTS[@]}"; do
     [ -n "$port" ] || continue
     log "Waiting for real P2Pool Stratum listener on port $port"
-    if wait_listener_with_process "$port" p2pool 120; then
+    if wait_listener_with_process "$port" p2pool 90; then
       P2POOL_STRATUM_READY=1
     else
       rc=$?
@@ -247,7 +292,7 @@ if unit_exists "$P2POOL_SERVICE_UNIT" || [ -n "$(process_pid p2pool || true)" ];
       elif [ "$rc" = "2" ]; then
         echo "Cannot verify P2Pool Stratum because neither ss nor netstat is available." >&2
       else
-        echo "The real p2pool process is running, but its configured Stratum port ${port} (${P2POOL_STRATUM}) is not listening." >&2
+        echo "The real p2pool process is running, but its configured Stratum port ${port} (${P2POOL_STRATUM}) is not listening after monerod synchronized." >&2
       fi
       exit 24
     fi
@@ -274,7 +319,7 @@ fi
 PROXY_RESTARTED=0
 PROXY_UPSTREAM_READY=0
 if unit_exists "$XMRIG_PROXY_SERVICE_UNIT"; then
-  log "Restarting $XMRIG_PROXY_SERVICE_UNIT"
+  log "Restarting dedicated $XMRIG_PROXY_SERVICE_UNIT"
   systemctl restart "$XMRIG_PROXY_SERVICE_UNIT"
   wait_active "$XMRIG_PROXY_SERVICE_UNIT" 30 || {
     systemctl --no-pager --full status "$XMRIG_PROXY_SERVICE_UNIT" | head -n 60 || true
@@ -284,7 +329,7 @@ if unit_exists "$XMRIG_PROXY_SERVICE_UNIT"; then
   PROXY_RESTARTED=1
   if [ -n "$LOCAL_UPSTREAM_PORT" ]; then
     log "Waiting for XMRig Proxy upstream TCP connection to local port $LOCAL_UPSTREAM_PORT"
-    if wait_process_established xmrig-proxy "$LOCAL_UPSTREAM_PORT" 45; then
+    if wait_process_established xmrig-proxy "$LOCAL_UPSTREAM_PORT" 30; then
       PROXY_UPSTREAM_READY=1
     else
       rc=$?
@@ -303,28 +348,44 @@ fi
 
 XMRIG_RESTARTED=0
 XMRIG_POOL_LINK_READY=0
-if unit_exists "$XMRIG_SERVICE_UNIT"; then
-  log "Restarting $XMRIG_SERVICE_UNIT"
-  systemctl restart "$XMRIG_SERVICE_UNIT"
-  wait_active "$XMRIG_SERVICE_UNIT" 30 || {
-    systemctl --no-pager --full status "$XMRIG_SERVICE_UNIT" | head -n 60 || true
-    echo "$XMRIG_SERVICE_UNIT did not become active" >&2
-    exit 23
-  }
-  XMRIG_RESTARTED=1
+XMRIG_SHARED=0
+if [ "$XMRIG_SERVICE_UNIT" = "$MONEROD_SERVICE_UNIT" ] || [ "$XMRIG_SERVICE_UNIT" = "$P2POOL_SERVICE_UNIT" ]; then
+  XMRIG_SHARED=1
+fi
+
+if unit_exists "$XMRIG_SERVICE_UNIT" || [ -n "$(process_pid xmrig || true)" ]; then
+  if [ "$XMRIG_SHARED" = "1" ]; then
+    log "XMRig uses the shared mining wrapper $XMRIG_SERVICE_UNIT; not restarting the whole chain"
+    if ! wait_process xmrig 30; then
+      echo "The shared mining wrapper is active, but the real xmrig process is not running." >&2
+      exit 23
+    fi
+  elif unit_exists "$XMRIG_SERVICE_UNIT"; then
+    log "Restarting dedicated $XMRIG_SERVICE_UNIT"
+    systemctl restart "$XMRIG_SERVICE_UNIT"
+    wait_active "$XMRIG_SERVICE_UNIT" 30 || {
+      systemctl --no-pager --full status "$XMRIG_SERVICE_UNIT" | head -n 60 || true
+      echo "$XMRIG_SERVICE_UNIT did not become active" >&2
+      exit 23
+    }
+    XMRIG_RESTARTED=1
+  fi
+
   if [ -n "$XMRIG_LOCAL_POOL_PORT" ]; then
     log "Waiting for XMRig TCP connection to its configured local pool port $XMRIG_LOCAL_POOL_PORT"
-    if wait_process_established xmrig "$XMRIG_LOCAL_POOL_PORT" 45; then
+    if wait_process_established xmrig "$XMRIG_LOCAL_POOL_PORT" 30; then
       XMRIG_POOL_LINK_READY=1
     else
       rc=$?
-      systemctl --no-pager --full status "$XMRIG_SERVICE_UNIT" | head -n 80 || true
+      if unit_exists "$XMRIG_SERVICE_UNIT"; then
+        systemctl --no-pager --full status "$XMRIG_SERVICE_UNIT" | head -n 80 || true
+      fi
       if [ "$rc" = "3" ]; then
         echo "XMRig exited while reconnecting to its configured local pool port ${XMRIG_LOCAL_POOL_PORT}." >&2
       elif [ "$rc" = "2" ]; then
         log "ss/netstat unavailable; skipping XMRig pool-link verification"
       else
-        echo "XMRig is active but did not reconnect to its configured local pool port ${XMRIG_LOCAL_POOL_PORT}." >&2
+        echo "XMRig is running but did not reconnect to its configured local pool port ${XMRIG_LOCAL_POOL_PORT}." >&2
       fi
       [ "$rc" = "2" ] || exit 26
     fi
@@ -332,6 +393,7 @@ if unit_exists "$XMRIG_SERVICE_UNIT"; then
 fi
 
 printf 'MFP_RPC_READY=1\n'
+printf 'MFP_MONEROD_SYNCED=1\n'
 printf 'MFP_P2POOL_RESTARTED=%s\n' "$P2POOL_RESTARTED"
 printf 'MFP_P2POOL_STRATUM_READY=%s\n' "$P2POOL_STRATUM_READY"
 printf 'MFP_P2POOL_ZMQ_READY=%s\n' "$P2POOL_ZMQ_READY"

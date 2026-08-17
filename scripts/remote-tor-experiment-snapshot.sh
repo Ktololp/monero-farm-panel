@@ -36,6 +36,13 @@ case "$EXPERIMENT_ACTION" in
       exit 5
     fi
     SNAPSHOT_SHA="$(sha256sum "$SNAPSHOT_PATH" | awk '{print $1}')"
+    CURRENT_SHA="$(sha256sum "$MONEROD_CONFIG_PATH" | awk '{print $1}')"
+    if [ "$SNAPSHOT_SHA" = "$CURRENT_SHA" ]; then
+      printf 'MFP_RESTORED=0\n'
+      printf 'MFP_RESTORED_SHA256=%s\n' "$CURRENT_SHA"
+      echo "Current monerod config already matches the pre-experiment checkpoint; service restart skipped."
+      exit 0
+    fi
     cp -a "$SNAPSHOT_PATH" "$MONEROD_CONFIG_PATH"
     RESTORED_SHA="$(sha256sum "$MONEROD_CONFIG_PATH" | awk '{print $1}')"
     [ "$SNAPSHOT_SHA" = "$RESTORED_SHA" ] || { echo "restored config checksum mismatch" >&2; exit 6; }

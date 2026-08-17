@@ -60,11 +60,15 @@ async function recoverMiningChain(server, monerod) {
     XMRIG_PROXY_SERVICE_UNIT: 'xmrig-proxy.service',
     XMRIG_SERVICE_UNIT: serviceUnit(server.xmrig_service, 'xmrig'),
     MONEROD_RPC_PORT: String(server.monerod_rpc_port || 18081),
+    P2POOL_LOG_PATH: server.p2pool_log_path || '/var/log/p2pool.log',
     XMRIG_CONFIG_PATH: xmrig.configPath || ''
-  }, { sudo: true, timeoutMs: 2 * 60 * 1000 });
+  }, { sudo: true, timeoutMs: 5 * 60 * 1000 });
 
   if (result.code !== 0) {
-    throw new Error(`Mining chain recovery failed: ${result.stderr.trim() || result.stdout.slice(-2500)}`);
+    const concise = result.stderr.trim().split(/\r?\n/).filter(Boolean).at(-1)
+      || result.stdout.trim().split(/\r?\n/).filter(Boolean).at(-1)
+      || 'unknown recovery error';
+    throw new Error(`Mining chain recovery failed: ${concise}`);
   }
   return { output: result.stdout, steps: parsePairs(result.stdout), monerod, xmrig };
 }
@@ -116,6 +120,7 @@ export async function setMonerodTorP2p(serverId, options = {}, { actorIp = '' } 
       rpcReady: recovery.steps.RPC_READY === '1',
       p2poolRestarted: recovery.steps.P2POOL_RESTARTED === '1',
       p2poolStratumReady: recovery.steps.P2POOL_STRATUM_READY === '1',
+      p2poolZmqReady: recovery.steps.P2POOL_ZMQ_READY === '1',
       proxyRestarted: recovery.steps.PROXY_RESTARTED === '1',
       proxyUpstreamReady: recovery.steps.PROXY_UPSTREAM_READY === '1',
       xmrigRestarted: recovery.steps.XMRIG_RESTARTED === '1',

@@ -15,7 +15,7 @@ if [ -z "$MONEROD_CONFIG_PATH" ] || [ ! -f "$MONEROD_CONFIG_PATH" ]; then
   echo "monerod config file was not found; configure the Tor onion service first" >&2
   exit 3
 fi
-if ! systemctl is-active --quiet tor >/dev/null 2>&1; then
+if [ "$TOR_P2P_MODE" = "enable" ] && ! systemctl is-active --quiet tor >/dev/null 2>&1; then
   echo "Tor service is not active" >&2
   exit 4
 fi
@@ -29,17 +29,6 @@ if [ -z "$MONEROD_PID" ]; then
   echo "monerod process not found" >&2
   exit 6
 fi
-
-arg_value() {
-  local pid="$1" key="$2" want=0 arg
-  [ -r "/proc/$pid/cmdline" ] || return 1
-  while IFS= read -r arg; do
-    if [ "$want" = "1" ]; then printf '%s\n' "$arg"; return 0; fi
-    if [ "$arg" = "$key" ]; then want=1; continue; fi
-    case "$arg" in "$key"=*) printf '%s\n' "${arg#*=}"; return 0 ;; esac
-  done < <(tr '\0' '\n' < "/proc/$pid/cmdline")
-  return 1
-}
 
 has_arg() {
   local pid="$1" key="$2" arg
@@ -74,6 +63,14 @@ awk -v begin="$BEGIN" -v end="$END" '
 ' "$MONEROD_CONFIG_PATH" >"$TMP_CFG"
 
 if [ "$TOR_P2P_MODE" = "enable" ]; then
+  # Do not silently replace a user's own network/proxy policy outside the MFP
+  # block. The operator can remove/adjust it explicitly first.
+  if grep -Eq '^[[:space:]]*(proxy|p2p-bind-ip|igd|no-igd|hide-my-port)[[:space:]]*=' "$TMP_CFG"; then
+    rm -f "$TMP_CFG"
+    echo "monerod config already contains custom proxy/P2P bind/IGD/privacy options outside the MFP block; automatic Tor P2P routing was not applied" >&2
+    exit 8
+  fi
+
   cat >>"$TMP_CFG" <<EOF
 
 $BEGIN
@@ -100,7 +97,7 @@ done
 if ! systemctl is-active --quiet "$MONEROD_SERVICE_UNIT" >/dev/null 2>&1; then
   echo "monerod did not return after changing Tor P2P mode" >&2
   systemctl --no-pager --full status "$MONEROD_SERVICE_UNIT" | head -n 60 >&2 || true
-  exit 8
+  exit 9
 fi
 
 if [ "$TOR_P2P_MODE" = "enable" ]; then

@@ -46,18 +46,33 @@ if ! systemctl is-active --quiet tor >/dev/null 2>&1; then
   exit 0
 fi
 
+# Before testing the onion path, make sure monerod actually opened the local
+# anonymous-inbound port that Tor forwards to. This separates a monerod config
+# problem from a Tor-circuit problem.
+LOCAL_LISTENER=0
+if command -v ss >/dev/null 2>&1; then
+  ss -ltn 2>/dev/null | awk -v p=":${PORT}" '$4 ~ p"$" { found=1 } END { exit !found }'
+  [ $? -eq 0 ] && LOCAL_LISTENER=1
+fi
+if [ "$LOCAL_LISTENER" = "0" ]; then
+  printf 'MFP_REACHABLE=0\n'
+  printf 'MFP_DETAIL=monerod is not listening on local anonymous P2P port %s\n' "$PORT"
+  printf 'MFP_LOCAL_LISTENER=0\n'
+  exit 0
+fi
+
 LOG="$(mktemp)"
 START="$(date +%s)"
 curl --silent --show-error --verbose \
   --socks5-hostname "127.0.0.1:${TOR_SOCKS_PORT}" \
-  --connect-timeout 20 --max-time 12 \
+  --connect-timeout 45 --max-time 60 \
   "telnet://${HOST}:${PORT}" </dev/null >/dev/null 2>"$LOG"
 RC=$?
 END="$(date +%s)"
 
-# curl's telnet handler can time out after a successful P2P TCP handshake because
-# monerod is not an HTTP service. The SOCKS5 grant is the important signal: Tor
-# resolved the onion name and established the stream to the hidden service.
+# The telnet handler may remain open after the P2P TCP handshake because
+# monerod is not an HTTP service. A granted SOCKS request proves that Tor
+# resolved the onion and established the stream to the hidden service.
 if grep -Fq 'SOCKS5 request granted' "$LOG"; then
   REACHABLE=1
   DETAIL="Tor SOCKS5 stream reached onion P2P"
@@ -68,6 +83,7 @@ fi
 rm -f "$LOG"
 
 printf 'MFP_REACHABLE=%s\n' "$REACHABLE"
+printf 'MFP_LOCAL_LISTENER=1\n'
 printf 'MFP_SECONDS=%s\n' "$((END-START))"
 printf 'MFP_DETAIL=%s\n' "$DETAIL"
 exit 0

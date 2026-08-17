@@ -1,4 +1,5 @@
 import { getSetupCopy } from '../../i18n/messages/setup-copy.js';
+import torIcon from '../../assets/icons/tor.svg';
 
 export function createSetupPage(ctx) {
   const { $, esc, api, toast, setHeader, t, getLocale } = ctx;
@@ -7,6 +8,10 @@ export function createSetupPage(ctx) {
 
   function flag(ok, yes, no) {
     return `<span class="setup-flag ${ok ? 'ok' : 'missing'}">${esc(ok ? yes : no)}</span>`;
+  }
+
+  function planned(text) {
+    return `<span class="setup-flag planned">${esc(text)}</span>`;
   }
 
   function modeLabel(status, c) {
@@ -90,6 +95,11 @@ export function createSetupPage(ctx) {
     if (!target) return;
     const detected = Boolean(status.running);
     if (detected && ['pruned', 'full'].includes(status.mode)) selectedMode = status.mode;
+    const configState = status.configExists
+      ? `<b>${esc(status.configPath || c.yes)}</b>`
+      : detected
+        ? planned(c.configNotUsed)
+        : flag(false, c.yes, c.no);
     target.innerHTML = `
       <div class="setup-choice-row">
         <label><span>${esc(c.nodeType)}</span>
@@ -106,13 +116,14 @@ export function createSetupPage(ctx) {
       <div class="setup-status-grid setup-status-grid-4">
         <div><span>${esc(c.monerodFile)}</span>${status.installed ? flag(true, status.binaryPath || c.yes, c.no) : status.detected ? flag(true, c.monerodProcessDetected, c.no) : flag(false, c.yes, c.no)}</div>
         <div><span>${esc(c.version)}</span><b>${esc(status.version || '—')}</b></div>
-        <div><span>${esc(c.config)}</span>${status.configExists ? `<b>${esc(status.configPath || c.yes)}</b>` : flag(false, c.yes, c.no)}</div>
+        <div><span>${esc(c.config)}</span>${configState}</div>
         <div><span>${esc(c.nodeType)}</span><b>${esc(modeLabel(status, c))}</b></div>
         <div><span>${esc(c.service)}</span>${flag(status.serviceInstalled, c.yes, c.no)}</div>
         <div><span>${esc(c.autostart)}</span>${flag(status.enabled, c.enabled, c.disabled)}</div>
         <div><span>${esc(c.running)}</span>${flag(status.active, c.active, c.inactive)}</div>
         <div><span>${esc(c.rpc)}</span>${flag(status.rpcAvailable, rpcLabel(status, c), rpcLabel(status, c))}</div>
       </div>
+      ${detected && !status.configExists ? `<div class="notice info setup-inline-notice">${esc(c.configlessInfo)}</div>` : ''}
       <div class="setup-actions">
         <button class="ghost setup-refresh">${esc(c.refresh)}</button>
         <button id="setup-install-monerod" class="${detected ? 'ghost' : 'primary'}" ${detected ? 'disabled' : ''}>${esc(detected ? c.monerodDetected : c.installMonerod)}</button>
@@ -147,9 +158,7 @@ export function createSetupPage(ctx) {
     const target = $('#setup-tor-status');
     if (!target) return;
     const canConfigure = Boolean(monerod.torConfigurable);
-    let blocker = '';
-    if (!monerod.running) blocker = c.torNeedsMonerod;
-    else if (!monerod.configExists || !monerod.configPath) blocker = c.torNeedsConfig;
+    const blocker = !monerod.running ? c.torNeedsMonerod : '';
 
     target.innerHTML = `
       <div class="setup-status-grid">
@@ -161,6 +170,7 @@ export function createSetupPage(ctx) {
         <div><span>${esc(c.onion)}</span><b class="setup-onion">${esc(status.onion || '—')}</b></div>
       </div>
       ${blocker ? `<div class="notice warn setup-inline-notice">${esc(blocker)}</div>` : ''}
+      ${monerod.running && !monerod.configExists ? `<div class="notice info setup-inline-notice">${esc(c.torWillCreateConfig)}</div>` : ''}
       <div class="setup-actions">
         <button class="ghost setup-refresh">${esc(c.refresh)}</button>
         <button id="setup-configure-tor" class="${status.ready ? 'ghost' : 'primary'}" ${status.ready || !canConfigure ? 'disabled' : ''}>${esc(status.ready ? c.torReady : c.configureTor)}</button>
@@ -216,7 +226,7 @@ export function createSetupPage(ctx) {
           <div id="setup-monerod-status"></div>
         </article>
         <article class="panel setup-component-card setup-tor-card">
-          <div class="setup-component-head"><div><span class="setup-kicker">PRIVATE P2P</span><h2 class="setup-title-with-icon"><img class="setup-title-icon" src="/assets/icons/tor.svg" alt="" aria-hidden="true">${esc(c.tor)}</h2></div></div>
+          <div class="setup-component-head"><div><span class="setup-kicker">PRIVATE P2P</span><h2 class="setup-title-with-icon"><img class="setup-title-icon" src="${torIcon}" alt="" aria-hidden="true">${esc(c.tor)}</h2></div></div>
           <p class="muted">${esc(c.torHint)}</p>
           <div id="setup-tor-status"></div>
         </article>
